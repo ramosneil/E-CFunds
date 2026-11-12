@@ -80,16 +80,15 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
 - Old Gemini key was hard-coded in `api/config.php` → treated as leaked, rotated
 
 ## Working rules (from Neil)
-- WORK AUTONOMOUSLY through the phases. Only stop to hand Neil what Claude can't do itself
-  (account logins, keys, approvals, installs on his PC) — list them in `docs/handoff.md`
+- ASK FIRST (Neil, session 4): when a decision is unclear, ask Neil before acting — don't decide alone.
+  Things only Neil can do (logins, keys, approvals, installs) go in `docs/handoff.md`
 - Product decisions are already made (see `docs/plan.md`); don't re-ask them. Ask only when
   something is genuinely unknown and a wrong guess would be costly
 - Never hallucinate; verify facts and numbers
 - To-do lists include a self-check step; don't advance until current step is verified
 - UI: premium quality, always design light AND dark mode
 - Screenshot every page built (light + dark, phone + desktop) to confirm the layout looks right (session 4)
-- Start in plan mode; restated in session 4 together with "ask until 95% sure" — which wins over
-  "work autonomously" is an open question to Neil (see `docs/working-rules.md` #2, #11)
+- Start in plan mode; ask questions until ~95% sure, never assume (`docs/working-rules.md` #2)
 - "ULTRA…" = maximum-quality output
 - Update this file at session end; keep it 150–200 lines max; link out to docs/
 
