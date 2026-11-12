@@ -26,7 +26,7 @@ export function AdminDashboard() {
           foot={<>{s?.organizations ?? 0} organizations · {s?.clubs ?? 0} clubs · {s?.students ?? 0} students</>} />
         <div className="grid grid-cols-2 gap-3 content-start">
           <Stat label="Pending requests" value={s?.pending_requests ?? 0} tone={s?.pending_requests ? 'warn' : undefined} />
-          <Stat label="Expenses" value={peso(s?.expenses ?? 0)} tone="bad" />
+          <Stat label="Expenses" value={peso(s?.expenses ?? 0)} tone={s?.expenses ? 'bad' : undefined} />
           <Stat label="Saved with SAS" value={peso(s?.saved_with_sas ?? 0)} />
           <Stat label="Cash on hand" value={peso(s?.cash_on_hand ?? 0)} />
         </div>

@@ -34,8 +34,8 @@ export function TreasurerHome() {
             <HeroCard label={`Total fund · ${year.data.label}`} total={r.total_fund} cash={r.cash_on_hand} saved={r.saved_with_sas}
               foot={<>Previous funds {peso(r.previous_funds)} · You can remit up to <b className="text-white money">{peso(r.available_to_remit)}</b></>} />
             <div className="grid grid-cols-2 gap-3 content-start">
-              <Stat label="Collected" value={peso(r.collections)} tone="ok" />
-              <Stat label="Spent" value={peso(r.expenses)} tone="bad" />
+              <Stat label="Collected" value={peso(r.collections)} tone={r.collections ? 'ok' : undefined} />
+              <Stat label="Spent" value={peso(r.expenses)} tone={r.expenses ? 'bad' : undefined} />
               <div className="col-span-2 bg-surface border border-line rounded-[18px] p-4">
                 <p className="micro text-muted mb-2">Dues this year</p>
                 <DuesBar paid={r.paid_members} members={r.members} />

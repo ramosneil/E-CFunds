@@ -83,8 +83,8 @@ export function EntityDetail() {
             <HeroCard label={`Total fund · ${year.data.label}`} total={r.total_fund} cash={r.cash_on_hand} saved={r.saved_with_sas}
               foot={<>Previous funds {peso(r.previous_funds)}{r.is_closed ? ' · Year closed' : ''}</>} />
             <div className="grid grid-cols-2 gap-3 content-start">
-              <Stat label="Collections" value={peso(r.collections)} tone="ok" />
-              <Stat label="Expenses" value={peso(r.expenses)} tone="bad" />
+              <Stat label="Collections" value={peso(r.collections)} tone={r.collections ? 'ok' : undefined} />
+              <Stat label="Expenses" value={peso(r.expenses)} tone={r.expenses ? 'bad' : undefined} />
               <Stat label="Remitted" value={peso(r.remittances)} />
               <Stat label="Released" value={peso(r.releases)} />
             </div>
