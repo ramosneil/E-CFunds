@@ -37,4 +37,8 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   Admin dashboard/approvals, Treasurer home/new request, Student home/org report on phone; Admin
   desktop; every screen in light AND dark). Link in design-system.md.
 - Self-check `scripts/phase2-design-check.js`: 34/34 contrast pairs ≥ 4.5:1, 13/13 sample-number checks.
-- NEXT: Neil approves Phase 2 → Phase 3 (Supabase schema + RLS + migrations + role tests).
+- Neil APPROVED Phase 2.
+- Phase 3 DONE: created Supabase project `e-cfunds` (Singapore, Free). 6 migrations: core schema,
+  helpers + RLS, ledger + money workflows, audit log, storage buckets, invoker wrappers (advisor fix).
+  Local suite 84/84; live security advisor clean; live schema fingerprint = tested schema. `docs/database.md`.
+- NEXT: Phase 4 — migrate entities + logos, accredited list + history, admin (needs the old folder).

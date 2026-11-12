@@ -1,6 +1,6 @@
 # E-CFunds design system (Phase 2, v1, 2026-11-12)
 
-Status: **DRAFT, waiting for Neil's approval** (Phase 2 gate).
+Status: **APPROVED by Neil (session 3)**.
 Mockups (light + dark, phone + desktop): https://claude.ai/artifact/DQn6L6aa9LUd4QXeP7vsGF (private, Neil's account)
 Self-check: `node scripts/phase2-design-check.js` (34/34 contrast pairs ≥ 4.5:1, 13/13 money checks).
 

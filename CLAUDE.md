@@ -7,12 +7,18 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
 - Phase 0 (repo setup) — DONE
 - Phase 1 (business rules) — DONE, CONFIRMED by Neil: `docs/business-rules.md` +
   `scripts/phase1-rules-check.sql` (passes). Full dues payment only; students see counts only
-- Phase 2 (design) — DRAFT DONE: `docs/design-system.md` + mockups (link inside) +
-  `scripts/phase2-design-check.js` (passes). GATE: waiting for Neil to approve the mockups
-- NEXT after approval: Phase 3 — Supabase schema + RLS + migrations + per-role SQL tests
+- Phase 2 (design) — DONE, APPROVED: `docs/design-system.md` (mockup link inside)
+- Phase 3 (database) — DONE: Supabase project `e-cfunds` (ref nvmlawpojydnouzqilaf, Singapore, Free),
+  6 migrations live, `bash scripts/phase3-db-test.sh` = 84/84, security advisor clean. See `docs/database.md`
+- NEXT: Phase 4 — data migration (entities + logos, accredited list + history, admin) from the old
+  system → needs `C:\xampp\htdocs\mini system` connected
 - Gemini key: old key removed from old code; Neil has a NEW key (adds it himself in Phase 6)
 - Full plan & phases: `docs/plan.md` · Handoff checklist: `docs/handoff.md`
 - What each session made: `docs/sessions.md` · Neil's working rules: `docs/working-rules.md`
+
+## Database rules (Phase 3)
+- Change schema ONLY via a new file in `supabase/migrations/`; run `scripts/phase3-db-test.sh`, then apply
+  with the Supabase connector and re-run advisors. Never edit an applied migration
 
 ## Plugins installed (session 3)
 - supabase, Vercel, Design, frontend-design (skills: supabase:*, vercel:*, design:*)
@@ -20,7 +26,7 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
 ## Cloud environment ("E-CFunds", personal)
 - Setup script: `npm ci` / `npm install` once `package.json` exists
 - Network: package registries + MCP connectors (Supabase, Vercel) only; no secrets/variables.
-  Phase 3: add the project's `<ref>.supabase.co` host (no wildcards allowed)
+  Phase 5 (app tests): add host `nvmlawpojydnouzqilaf.supabase.co` (no wildcards allowed)
 - Local Postgres 16 is pre-installed but stopped: `pg_ctlcluster 16 main start`, then
   `su postgres -c "psql -v ON_ERROR_STOP=1 -f $PWD/scripts/phase1-rules-check.sql"`
 
@@ -79,4 +85,6 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
 - `docs/working-rules.md` — Neil's full working rules
 - `scripts/phase1-rules-check.sql` — prototype ledger + asserts (run on any throwaway Postgres)
 - `docs/design-system.md` — (Phase 2) colors, type, components, light/dark, mockup link
+- `docs/database.md` — (Phase 3) tables, roles, API functions, test/advisor results
+- `scripts/phase3-db-test.sh` — migrations + 84 role/money checks on local Postgres
 - `scripts/phase2-design-check.js` — contrast + sample-number self-check (`node …`)

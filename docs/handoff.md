@@ -3,13 +3,9 @@
 Claude works through the phases on its own. This list is what it can't do itself.
 Update it every session: tick done items, add new ones.
 
-## Phase 2 gate (next)
-- [ ] Open the mockups (https://claude.ai/artifact/DQn6L6aa9LUd4QXeP7vsGF) and approve them or comment
-      what to change (you can comment directly on an artboard)
-
-## Phase 3 (Supabase)
-- [ ] Approve Claude creating a FREE Supabase project (it will ask once, through the Supabase connector)
-- [ ] Optional: install the Supabase plugin from the plugin card (extra Supabase skills)
+## Phase 4 (next): data migration
+- [ ] Connect the folder `C:\xampp\htdocs\mini system` in the next session (logos, accredited list, admin)
+- [ ] Tell Claude which email the SAS admin account should use (it becomes the first admin)
 
 ## Phase 6 (AI chatbot)
 - [ ] Add your NEW Gemini key as a Supabase secret named `GEMINI_API_KEY`
@@ -26,6 +22,8 @@ Update it every session: tick done items, add new ones.
 - [x] Confirmed `docs/business-rules.md`; full dues only; students see counts only (session 3)
 - [x] Approved the "E-CFunds" cloud environment (session 3)
 - [x] Installed plugins: supabase, Vercel, Design, frontend-design (session 3)
+- [x] Approved Phase 2 mockups (session 3)
+- [x] Free Supabase project `e-cfunds` created (session 3)
 - [x] Connected `C:\xampp\htdocs\mini system` (session 2)
 - [x] Answered Phase 1 money-model questions (session 2)
 - [x] Created private repo `ramosneil/E-CFunds`
