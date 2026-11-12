@@ -7,6 +7,7 @@ import { date } from '../../lib/format';
 import type { Json, Row } from '../../lib/database.types';
 import { Alert, Button, Card, Field, Input, PageHeader, Select, Sheet, Spinner, StatusChip } from '../../components/ui';
 import { Segmented } from '../../components/common';
+import { ExportMenu, exportsLib } from '../../components/ExportMenu';
 
 type Entry = Row<'accredited_entries'>;
 
@@ -34,7 +35,13 @@ export function Accredited() {
   return (
     <>
       <PageHeader title="Accredited list" sub="Expired is worked out from the expiry date, never typed in."
-        action={<Button onClick={() => setEdit('new')}><Plus className="size-5" />Add</Button>} />
+        action={<div className="flex items-center gap-2">
+          <ExportMenu options={[
+            { label: 'Accredited list', kind: 'pdf', run: async () => (await exportsLib()).accredited('pdf') },
+            { label: 'Accredited list', kind: 'csv', run: async () => (await exportsLib()).accredited('csv') },
+          ]} />
+          <Button onClick={() => setEdit('new')}><Plus className="size-5" />Add</Button>
+        </div>} />
       <div className="max-w-xs mb-5"><Segmented value={tab} onChange={setTab} options={[['list', 'List'], ['history', 'History']]} /></div>
       {tab === 'history' ? <HistoryList /> : list.isLoading ? <Spinner /> : (
         <Card className="p-0 overflow-hidden">

@@ -7,6 +7,7 @@ import { supabase, errorText } from '../../lib/supabase';
 import { date, kindLabel, peso } from '../../lib/format';
 import { Alert, Button, Card, DuesBar, EntityLogo, Field, HeroCard, Input, Sheet, Spinner, Stat } from '../../components/ui';
 import { IfApproved, NoYear } from '../../components/common';
+import { ExportMenu, exportsLib } from '../../components/ExportMenu';
 
 export function useLedger(entityId: number | undefined, yearId: number | undefined) {
   return useQuery({
@@ -72,10 +73,15 @@ export function EntityDetail() {
       <Link to="/orgs" className="inline-flex items-center gap-1 text-primary font-semibold mb-4"><ArrowLeft className="size-4" />Orgs & clubs</Link>
       <div className="flex items-center gap-4 mb-5">
         <EntityLogo path={e.logo_path} name={e.name} size={64} />
-        <div>
+        <div className="min-w-0 flex-1">
           <h1 className="font-display text-[26px] font-extrabold leading-tight">{e.short_name}</h1>
-          <p className="text-muted">{e.name}</p>
+          <p className="text-muted truncate">{e.name}</p>
         </div>
+        {year.data && <ExportMenu options={[
+          { label: 'Financial report', kind: 'pdf', run: async () => (await exportsLib()).orgReport('pdf', e, year.data!) },
+          { label: 'Ledger', kind: 'csv', run: async () => (await exportsLib()).orgReport('csv', e, year.data!) },
+          { label: 'Members & dues', kind: 'csv', run: async () => (await exportsLib()).membersCsv(e, year.data!) },
+        ]} />}
       </div>
       {!year.data ? <NoYear admin /> : !r ? <Spinner /> : (
         <>

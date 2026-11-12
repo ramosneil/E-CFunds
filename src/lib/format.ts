@@ -28,3 +28,9 @@ export const kindLabel: Record<string, string> = {
 export function normStudentNo(s: string): string {
   return s.replace(/\s+/g, '').toUpperCase();
 }
+
+/** Calendar date (YYYY-MM-DD) in Manila time — the school's day, whatever the device's timezone. */
+const manila = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit' });
+export function manilaDate(d: Date | string = new Date()): string {
+  return manila.format(typeof d === 'string' ? new Date(d) : d);
+}

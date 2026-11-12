@@ -25,7 +25,9 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
   Student ID sign-in (migrations 9–10 + Edge Function `student-login`, lockout 5/15 min, IDs cleaned) + My account.
   Messaging (migration 11 + Realtime): org conversations, broadcasts with per-treasurer reads, unread badges,
   admin phone nav = Dashboard/Approvals/Orgs/Messages/More. Live-tested admin↔JOES, test messages deleted.
-  NEXT: PDF/CSV exports; code-split. PR: phase-5-app → main (open on GitHub by Neil). School year dates: SAS sets them in the app
+  Exports: org financial report (PDF w/ charts + ledger CSV), school summary (PDF+CSV), members CSV, accredited
+  (PDF+CSV); OMSC letterhead (seal cropped from Storage logos/brand/omsc-seal-source.jpg), Inter font embedded
+  (₱), jsPDF lazy-loaded. Chart colours validated (dataviz). NEXT: DB timezone (asked Neil); code-split. PR: phase-5-app → main (open on GitHub by Neil). School year dates: SAS sets them in the app
 - Local repo on Neil's PC: `C:\xampp\htdocs\E-CFunds`; old system stays a plain folder (never commit from it)
 - Gemini key: old key removed from old code; Neil has a NEW key (adds it himself in Phase 6)
 - Full plan & phases: `docs/plan.md` · Handoff checklist: `docs/handoff.md`

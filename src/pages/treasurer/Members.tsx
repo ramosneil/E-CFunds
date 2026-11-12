@@ -7,6 +7,7 @@ import { supabase, errorText } from '../../lib/supabase';
 import { date, normStudentNo, peso } from '../../lib/format';
 import { Alert, Button, Card, Chip, DuesBar, Empty, Field, Input, PageHeader, Sheet, Spinner } from '../../components/ui';
 import { NoYear, Segmented } from '../../components/common';
+import { ExportMenu, exportsLib } from '../../components/ExportMenu';
 
 export function Members() {
   const { profile } = useAuth();
@@ -66,7 +67,10 @@ export function Members() {
   return (
     <>
       <PageHeader title="Members" sub={entity ? `${entity.short_name} · dues ${peso(entity.dues_amount)} ${entity.dues_period === 'semester' ? 'per semester' : 'per school year'}` : undefined}
-        action={<Button aria-label="Add member" onClick={() => setAdding(true)}><UserPlus className="size-5" /><span className="hidden sm:inline">Add member</span></Button>} />
+        action={<div className="flex items-center gap-2">
+          {entity && <ExportMenu label="CSV" options={[{ label: 'Members & dues', kind: 'csv', run: async () => (await exportsLib()).membersCsv(entity, year.data!) }]} />}
+          <Button aria-label="Add member" onClick={() => setAdding(true)}><UserPlus className="size-5" /><span className="hidden sm:inline">Add member</span></Button>
+        </div>} />
       <Card className="mb-4"><DuesBar paid={paid} members={all.length} /></Card>
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1">

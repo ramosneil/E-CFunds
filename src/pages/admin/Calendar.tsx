@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { CalendarPlus, Pencil } from 'lucide-react';
 import { useSchoolYears, useSemesters } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
-import { date } from '../../lib/format';
+import { date, manilaDate } from '../../lib/format';
 import { Alert, Button, Card, Chip, Empty, Field, Input, PageHeader, SectionTitle, Sheet, Spinner } from '../../components/ui';
 import type { Row } from '../../lib/database.types';
 
@@ -143,7 +143,7 @@ function NewYearSheet({ open, onClose, hasCurrent }: { open: boolean; onClose: (
       }
       const y = await supabase.from('school_years').insert({ label: label.trim(), starts_on: s1, ends_on: e2, is_current: current }).select().single();
       if (y.error) throw y.error;
-      const today = new Date().toISOString().slice(0, 10);
+      const today = manilaDate();
       const sem = await supabase.from('semesters').insert([
         { school_year_id: y.data.id, term: 1, starts_on: s1, ends_on: e1, is_current: current && today <= e1 },
         { school_year_id: y.data.id, term: 2, starts_on: s2, ends_on: e2, is_current: current && today > e1 },

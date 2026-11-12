@@ -87,3 +87,12 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   (127.0.0.1:3001): message + badge arrive in ~2 s without reload, Seen receipts, broadcast "Read by 1 of 1",
   treasurer can delete only own messages, admin deletes conversation/broadcast; student has no Messages and is
   redirected. All TEST messages deleted (0 messages, 0 reads; audit log keeps the history).
+- Exports (plan mode; Neil: all 4, real PDF files, OMSC letterhead, graphs). jsPDF 4.2.1 + autotable 5.0.9 lazy
+  chunk (main bundle +1.8 KB). Inter 4.1 TTF in public/fonts (OFL; verified ₱/− glyphs). Seal source uploaded to
+  Storage by scripts/upload-brand-logo.mjs (not committed). Charts drawn as vectors; palettes validated: cash/saved
+  #E0A82E/#3355CC, in/out #0E8A7A/#D9480F (CVD ΔE 13.5). Every export generated via the real buttons and inspected:
+  numbers match the DB; fixed header overlap, CSV negative numbers, UTC "today" → Manila date.
+- Found: database timezone is UTC, so ledger `occurred_on` (default current_date) is the previous day between
+  00:00–08:00 Manila. Asked Neil before changing the database.
+- Mistake: my first export test imported the app's modules a 2nd time in Neil's admin tab; two Supabase clients
+  raced on the refresh token and signed the tab out. Neil signed in again; later tests only clicked real buttons.

@@ -4,6 +4,7 @@ import { useCurrentYear, useEntities, useEntityReport, useRequests, useSchoolSum
 import { peso } from '../../lib/format';
 import { Card, DuesBar, EntityLogo, HeroCard, PageHeader, SectionTitle, Spinner, Stat, Chip } from '../../components/ui';
 import { NoYear, RequestRow } from '../../components/common';
+import { ExportMenu, exportsLib } from '../../components/ExportMenu';
 
 export function AdminDashboard() {
   const year = useCurrentYear();
@@ -20,7 +21,11 @@ export function AdminDashboard() {
   const byId = new Map(entities.data?.map((e) => [e.id, e]));
   return (
     <>
-      <PageHeader title="Dashboard" sub={`All organizations and clubs · ${year.data.label}`} />
+      <PageHeader title="Dashboard" sub={`All organizations and clubs · ${year.data.label}`}
+        action={<ExportMenu options={[
+          { label: 'School summary', kind: 'pdf', run: async () => (await exportsLib()).schoolSummary('pdf', year.data!) },
+          { label: 'School summary', kind: 'csv', run: async () => (await exportsLib()).schoolSummary('csv', year.data!) },
+        ]} />} />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
         <HeroCard label="Total funds, all orgs & clubs" total={s?.total_fund ?? 0} cash={s?.cash_on_hand ?? 0} saved={s?.saved_with_sas ?? 0}
           foot={<>{s?.organizations ?? 0} organizations · {s?.clubs ?? 0} clubs · {s?.students ?? 0} students</>} />
