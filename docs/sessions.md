@@ -41,4 +41,7 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - Phase 3 DONE: created Supabase project `e-cfunds` (Singapore, Free). 6 migrations: core schema,
   helpers + RLS, ledger + money workflows, audit log, storage buckets, invoker wrappers (advisor fix).
   Local suite 84/84; live security advisor clean; live schema fingerprint = tested schema. `docs/database.md`.
-- NEXT: Phase 4 — migrate entities + logos, accredited list + history, admin (needs the old folder).
+- Bootstrap admin migration (89/89 tests, advisor clean): Neil's Gmail becomes the first admin on first
+  verified sign-in. School year dates left for SAS to set in the app.
+- Old folder NOT reachable from the cloud session (no Remote Control folder shared).
+- NEXT: Phase 4 — migrate entities + logos, accredited list + history (needs the old folder shared).

@@ -4,7 +4,7 @@ Supabase project **e-cfunds** · ref `nvmlawpojydnouzqilaf` · region Singapore 
 Migrations: `supabase/migrations/` (applied to the live project; filenames = live versions).
 Self-check: `bash scripts/phase3-db-test.sh` → applies every migration to a throwaway local Postgres
 (with `supabase/tests/local/00_supabase_shim.sql` standing in for Supabase auth) and runs
-`supabase/tests/rls_and_workflows.test.sql` — **84 checks, all pass**. Live project: security advisor 0 findings;
+`supabase/tests/rls_and_workflows.test.sql` — **89 checks, all pass**. Live project: security advisor 0 findings;
 schema fingerprint (functions, policies, columns, triggers) identical to the tested local DB.
 
 ## Tables (all in `public`, RLS on every one)
@@ -42,6 +42,9 @@ prevents two approvals racing past a limit.
 ## Design notes
 - Balances are never stored: `private.d_cash/d_saved` implement business-rules §2; reports sum the ledger.
 - A wrong remittance/release is corrected with two `admin_adjust` rows (reversal only for single-pocket kinds).
-- Sign-up: a trigger on `auth.users` creates a pending profile; nobody can request `admin`. First admin is set by the Phase 4 seed.
+- Sign-up: a trigger on `auth.users` creates a pending profile; nobody can request `admin`.
+- First admin (migration `bootstrap_admin`): an email on the private list `private.bootstrap_admins` becomes admin the
+  moment it is VERIFIED; the entry is then deleted (one-time). Neil's Claude-account Gmail was added on 2026-11-12
+  (data only, not in git). Later admins are approved in the app by an existing admin.
 - Storage buckets: `receipts` (private; `receipts/<entity_id>/…`, treasurer own folder, admin all, no delete) and `logos` (public read, admin writes).
 - TypeScript types: regenerate in Phase 5 with the Supabase connector (`generate_typescript_types`).

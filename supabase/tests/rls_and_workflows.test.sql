@@ -281,4 +281,20 @@ select tests.fails('select * from public.get_entity_report(2)', 'disabled: loses
 select tests.ok((select count(*) = 0 from public.school_years), 'disabled: sees nothing');
 reset role;
 
+-- Bootstrap admin: only a VERIFIED email on the private list is promoted, once
+insert into private.bootstrap_admins (email) values ('boss@test');
+insert into auth.users (id, email) values ('a0000000-0000-0000-0000-000000000008', 'Boss@test');
+select tests.ok((select status = 'pending' from public.profiles where id = 'a0000000-0000-0000-0000-000000000008'),
+  'bootstrap admin: unverified sign-up stays pending');
+update auth.users set email_confirmed_at = now() where id = 'a0000000-0000-0000-0000-000000000008';
+select tests.ok((select status = 'approved' and role = 'admin' from public.profiles where id = 'a0000000-0000-0000-0000-000000000008'),
+  'bootstrap admin: becomes admin once the email is verified');
+select tests.ok((select count(*) = 0 from private.bootstrap_admins), 'bootstrap admin: list entry is used up');
+insert into auth.users (id, email, email_confirmed_at) values ('a0000000-0000-0000-0000-000000000009', 'boss@test.other', now());
+select tests.ok((select status = 'pending' from public.profiles where id = 'a0000000-0000-0000-0000-000000000009'),
+  'bootstrap admin: any other verified email stays pending');
+set role authenticated;
+select tests.fails('select * from private.bootstrap_admins', 'bootstrap admin: signed-in users cannot read the list');
+reset role;
+
 select format('%s checks passed', count(*)) as result from tests.results;

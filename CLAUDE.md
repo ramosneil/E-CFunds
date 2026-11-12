@@ -9,9 +9,11 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
   `scripts/phase1-rules-check.sql` (passes). Full dues payment only; students see counts only
 - Phase 2 (design) — DONE, APPROVED: `docs/design-system.md` (mockup link inside)
 - Phase 3 (database) — DONE: Supabase project `e-cfunds` (ref nvmlawpojydnouzqilaf, Singapore, Free),
-  6 migrations live, `bash scripts/phase3-db-test.sh` = 84/84, security advisor clean. See `docs/database.md`
-- NEXT: Phase 4 — data migration (entities + logos, accredited list + history, admin) from the old
-  system → needs `C:\xampp\htdocs\mini system` connected
+  7 migrations live, `bash scripts/phase3-db-test.sh` = 89/89, security advisor clean. See `docs/database.md`
+- First admin: Neil's Gmail is on `private.bootstrap_admins` → becomes admin on first verified sign-in
+- NEXT: Phase 4 — migrate entities + logos, accredited list + history from the old system → needs
+  `C:\xampp\htdocs\mini system` shared (Remote Control) or a session run on Neil's PC.
+  School year dates: left for SAS to set in the app (Neil, session 3)
 - Gemini key: old key removed from old code; Neil has a NEW key (adds it himself in Phase 6)
 - Full plan & phases: `docs/plan.md` · Handoff checklist: `docs/handoff.md`
 - What each session made: `docs/sessions.md` · Neil's working rules: `docs/working-rules.md`
@@ -86,5 +88,5 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
 - `scripts/phase1-rules-check.sql` — prototype ledger + asserts (run on any throwaway Postgres)
 - `docs/design-system.md` — (Phase 2) colors, type, components, light/dark, mockup link
 - `docs/database.md` — (Phase 3) tables, roles, API functions, test/advisor results
-- `scripts/phase3-db-test.sh` — migrations + 84 role/money checks on local Postgres
+- `scripts/phase3-db-test.sh` — migrations + 89 role/money checks on local Postgres
 - `scripts/phase2-design-check.js` — contrast + sample-number self-check (`node …`)
