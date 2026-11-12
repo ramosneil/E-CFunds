@@ -60,8 +60,12 @@ function ApprovalCard({ r, entity, cash, saved }: { r: Row<'fund_requests'>; ent
   }
   async function openReceipt() {
     if (!r.attachment_path) return;
+    // Open the tab during the click itself (phones block tabs opened after an await), then point it at the file.
+    const tab = window.open('', '_blank');
+    if (tab) tab.opener = null;
     const { data, error } = await supabase.storage.from('receipts').createSignedUrl(r.attachment_path, 300);
-    if (error) setErr(errorText(error)); else window.open(data.signedUrl, '_blank', 'noopener');
+    if (error) { tab?.close(); setErr(errorText(error)); return; }
+    if (tab) tab.location.href = data.signedUrl; else window.location.assign(data.signedUrl);
   }
 
   return (
