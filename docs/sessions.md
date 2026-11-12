@@ -82,3 +82,8 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   Migration 10 cleans Student IDs everywhere after Neil's "TEST -0001" request missed the roster's TEST-0001.
   Real test: TEST-0001 signed in by Student ID (1 ok attempt logged); student sees own dues/reports only —
   direct API check: 0 ledger/requests/messages/audit rows, 1 own membership/student/profile.
+- Messaging (plan mode; Neil chose instant updates, per-treasurer broadcast reads, Messages tab + admin More menu).
+  Migration 11 (dry-run 9/9 live; 10 checks added to the suite). Live test admin (localhost:3000) ↔ JOES treasurer
+  (127.0.0.1:3001): message + badge arrive in ~2 s without reload, Seen receipts, broadcast "Read by 1 of 1",
+  treasurer can delete only own messages, admin deletes conversation/broadcast; student has no Messages and is
+  redirected. All TEST messages deleted (0 messages, 0 reads; audit log keeps the history).

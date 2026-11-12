@@ -246,6 +246,28 @@ select tests.ok((select count(*) = 2 from public.accredited_history where before
   'accredited: history keeps full before/after rows');
 select tests.ok((select effective_status = 'expired' from public.accredited_list), 'accredited: expired is derived from the date');
 
+-- Broadcast reads (migration 11): one row per treasurer per broadcast, written only by mark_broadcasts_read()
+select tests.fails($$insert into public.broadcast_reads (message_id, profile_id) select id, auth.uid() from public.messages limit 1$$,
+  'broadcast reads: nobody writes them directly');
+select tests.fails($$select public.mark_broadcasts_read()$$, 'broadcast reads: admin has no broadcasts to mark');
+reset role;
+select tests.login('a0000000-0000-0000-0000-000000000002'); set role authenticated;
+select tests.ok(public.mark_broadcasts_read() = 1, 'broadcast reads: treasurer marks the broadcast read');
+select tests.ok(public.mark_broadcasts_read() = 0, 'broadcast reads: marking again changes nothing');
+select tests.ok((select count(*) = 0 from public.messages where entity_id is not null and entity_id <> (select private.my_entity_id())),
+  'messages: treasurer sees only its own org conversation + broadcasts');
+reset role;
+select tests.login('a0000000-0000-0000-0000-000000000003'); set role authenticated;
+select tests.ok((select count(*) = 0 from public.broadcast_reads), 'broadcast reads: other treasurers cannot see them');
+reset role;
+select tests.login('a0000000-0000-0000-0000-000000000004'); set role authenticated;
+select tests.ok((select count(*) = 0 from public.messages), 'messages: students see none');
+reset role;
+select tests.login('a0000000-0000-0000-0000-000000000001'); set role authenticated;
+select tests.ok((select count(*) = 1 from public.broadcast_reads), 'broadcast reads: admin sees who has read');
+delete from public.messages where entity_id is null;
+select tests.ok((select count(*) = 0 from public.broadcast_reads), 'broadcast reads: deleting a broadcast removes its reads');
+
 -- Turnover: cash must be zero
 select tests.fails($$select public.close_school_year(2, 2)$$, 'turnover: refused while cash is on hand');
 reset role;

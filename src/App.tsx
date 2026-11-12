@@ -18,6 +18,7 @@ import { Requests } from './pages/treasurer/Requests';
 import { StudentHome } from './pages/student/Home';
 import { Reports } from './pages/student/Reports';
 import { Account } from './pages/Account';
+import { Messages } from './pages/Messages';
 
 export function App() {
   return (
@@ -77,12 +78,15 @@ function Gate() {
           <Route path="orgs/:id" element={<EntityDetail />} />
           <Route path="accredited" element={<Accredited />} />
           <Route path="calendar" element={<Calendar />} />
+          <Route path="messages" element={<Messages />} />
+          <Route path="messages/:key" element={<Messages />} />
         </>}
         {role === 'treasurer' && <>
           <Route index element={<TreasurerHome />} />
           <Route path="members" element={<Members />} />
           <Route path="requests" element={<Requests />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="messages" element={<Messages />} />
         </>}
         {role === 'student' && <>
           <Route index element={<StudentHome />} />

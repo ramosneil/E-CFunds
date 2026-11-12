@@ -43,6 +43,9 @@ their email on the server; returns session tokens only. Lockout: 5 failed tries 
 RLS on with no policies on purpose → advisor INFO "RLS enabled, no policy" is expected). Student IDs are cleaned everywhere
 (`private.norm_student_no`: spaces removed, upper-case) by triggers on `students` and `profiles`. CORS: localhost:3000 and
 127.0.0.1:3000 + secret `ALLOWED_ORIGINS` (add the live address in Phase 8).
+Messaging (migration 11): `messages` (entity_id null = broadcast; `read_at` = read by the other side) + `broadcast_reads`
+(one row per treasurer per broadcast, written only by `mark_broadcasts_read()`; admin reads all, treasurer own). Realtime:
+`messages` is in the `supabase_realtime` publication (each user only receives rows their RLS allows).
 Each public function is a thin SECURITY INVOKER wrapper; the real body is SECURITY DEFINER in the unexposed
 `private` schema and checks the caller's role itself. Limits are re-checked at approval; per-entity row lock
 prevents two approvals racing past a limit.

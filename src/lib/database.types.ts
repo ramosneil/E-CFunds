@@ -34,6 +34,10 @@ export type Database = {
         };
         Insert: never; Update: never; Relationships: [];
       };
+      broadcast_reads: {
+        Row: { message_id: number; profile_id: string; read_at: string };
+        Insert: never; Update: never; Relationships: [];
+      };
       entities: {
         Row: {
           category: E['entity_category']; created_at: string; dues_amount: number; dues_period: E['dues_period'];
@@ -142,6 +146,7 @@ export type Database = {
       get_entity_report: { Args: { p_school_year_id: number; p_semester_id?: number }; Returns: EntityReport[] };
       get_school_summary: { Args: { p_school_year_id: number }; Returns: SchoolSummary[] };
       mark_thread_read: { Args: { p_entity_id: number }; Returns: number };
+      mark_broadcasts_read: { Args: Record<string, never>; Returns: number };
       record_payment: { Args: { p_membership_id: number }; Returns: number };
       reverse_entry: { Args: { p_entry_id: number; p_reason: string }; Returns: number };
       review_account: {
