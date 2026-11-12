@@ -23,7 +23,24 @@ export function SignIn() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     setBusy(true); setErr('');
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    const id = email.trim();
+    if (!id.includes('@')) {
+      // Student ID: the server function finds the student's email privately and returns a session.
+      const { data, error } = await supabase.functions.invoke<{ access_token: string; refresh_token: string }>('student-login', {
+        body: { student_no: id, password },
+      });
+      if (error || !data) {
+        let msg = 'Sign-in is unavailable right now. Try again soon.';
+        const ctx = (error as { context?: Response } | null)?.context;
+        if (ctx && typeof ctx.json === 'function') { try { msg = (await ctx.json()).error ?? msg; } catch { /* keep default */ } }
+        setBusy(false); setErr(msg); return;
+      }
+      const s = await supabase.auth.setSession(data);
+      setBusy(false);
+      if (s.error) setErr(errorText(s.error));
+      return;
+    }
+    const { error } = await supabase.auth.signInWithPassword({ email: id, password });
     setBusy(false);
     if (error) setErr(/email not confirmed/i.test(error.message)
       ? 'Please confirm your email first. Check your inbox for the link we sent.'
@@ -33,9 +50,11 @@ export function SignIn() {
   return (
     <AuthLayout title="Welcome back" sub="Sign in to see your club funds.">
       <GoogleButton onClick={() => googleSignIn(setErr)} />
-      <Divider label="or with email" />
+      <Divider label="or with email or Student ID" />
       <form onSubmit={submit} className="space-y-4">
-        <Field label="Email"><Input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
+        <Field label="Email or Student ID" hint="Students: your Student ID works once SAS has approved your account.">
+          <Input autoComplete="username" autoCapitalize="none" spellCheck={false} required value={email} onChange={(e) => setEmail(e.target.value)} />
+        </Field>
         <Field label="Password"><Input type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
         {err && <Alert>{err}</Alert>}
         <Button type="submit" busy={busy} className="w-full h-[54px]">Sign in</Button>

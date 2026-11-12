@@ -310,4 +310,22 @@ set role authenticated;
 select tests.fails('select * from private.bootstrap_admins', 'bootstrap admin: signed-in users cannot read the list');
 reset role;
 
+-- Student ID sign-in helpers: server function only (service_role), lockout after 5 failures in 15 minutes
+select tests.ok(not has_function_privilege('anon', 'public.student_login_lookup(text)', 'execute')
+            and not has_function_privilege('authenticated', 'public.student_login_lookup(text)', 'execute')
+            and not has_function_privilege('authenticated', 'public.student_login_record(text, boolean)', 'execute'),
+  'student login: browser roles cannot look up emails or write attempts');
+select tests.ok(has_function_privilege('service_role', 'public.student_login_lookup(text)', 'execute'),
+  'student login: the server function (service_role) can');
+select tests.ok((select email = 'stu1@test' and locked_until is null from public.student_login_lookup(' 2024-0317 ')),
+  'student login: an approved student ID resolves to its email (trimmed), not locked');
+select tests.ok((select email is null from public.student_login_lookup('2024-0318')),
+  'student login: a pending student ID resolves to nothing');
+select public.student_login_record('2024-0317', false) from generate_series(1, 4);
+select tests.ok((select locked_until is null from public.student_login_lookup('2024-0317')), 'student login: 4 failures, not locked');
+select public.student_login_record('2024-0317', false);
+select tests.ok((select locked_until > now() from public.student_login_lookup('2024-0317')), 'student login: 5th failure locks the ID');
+update private.login_attempts set at = at - interval '16 minutes' where student_no = '2024-0317';
+select tests.ok((select locked_until is null from public.student_login_lookup('2024-0317')), 'student login: lock ends after 15 minutes');
+
 select format('%s checks passed', count(*)) as result from tests.results;

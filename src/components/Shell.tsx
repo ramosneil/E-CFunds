@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react';
 import { NavLink, Outlet } from 'react-router';
-import { BadgeCheck, Building2, CalendarRange, CheckCheck, Home, LogOut, Receipt, Users, BarChart3 } from 'lucide-react';
+import { BadgeCheck, Building2, CalendarRange, CheckCheck, Home, LogOut, Receipt, Users, BarChart3, UserRound } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { useCurrentYear, useEntities } from '../lib/data';
 import { Brand } from '../pages/auth/AuthLayout';
@@ -49,13 +49,14 @@ export function Shell() {
           ))}
         </nav>
         <div className="mt-auto">
-          <div className="rounded-[16px] bg-surface2 p-3 flex items-center gap-3">
+          <NavLink to="/account" title="My account"
+            className={({ isActive }) => `rounded-[16px] p-3 flex items-center gap-3 transition ${isActive ? 'bg-primary-soft' : 'bg-surface2 hover:brightness-95'}`}>
             {org ? <EntityLogo path={org.logo_path} name={org.name} size={36} /> : <span className="size-9 rounded-full bg-primary text-on-primary grid place-items-center font-bold">{(profile?.full_name || session?.user.email || '?')[0].toUpperCase()}</span>}
             <div className="min-w-0">
               <p className="font-semibold text-[14px] truncate">{profile?.full_name || session?.user.email}</p>
-              <p className="text-[12px] text-muted truncate">{roleLabel}</p>
+              <p className="text-[12px] text-muted truncate">{roleLabel} · My account</p>
             </div>
-          </div>
+          </NavLink>
           <div className="flex items-center justify-between mt-2">
             <button onClick={signOut} className="flex items-center gap-2 h-11 px-3 rounded-[14px] text-muted hover:text-ink hover:bg-surface2 font-semibold cursor-pointer"><LogOut className="size-5" />Sign out</button>
             <ThemeToggle />
@@ -68,6 +69,7 @@ export function Shell() {
           <Brand />
           <div className="flex items-center">
             <ThemeToggle />
+            <NavLink to="/account" aria-label="My account" className="size-11 grid place-items-center rounded-full text-muted hover:bg-surface2"><UserRound className="size-5" /></NavLink>
             <button onClick={signOut} aria-label="Sign out" className="size-11 grid place-items-center rounded-full text-muted hover:bg-surface2 cursor-pointer"><LogOut className="size-5" /></button>
           </div>
         </header>

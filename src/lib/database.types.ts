@@ -152,6 +152,9 @@ export type Database = {
         Returns: undefined;
       };
       review_request: { Args: { p_approve: boolean; p_remarks?: string; p_request_id: number }; Returns: number };
+      // Server-function only (service_role); the browser cannot call these two.
+      student_login_lookup: { Args: { p_student_no: string }; Returns: { email: string | null; locked_until: string | null }[] };
+      student_login_record: { Args: { p_student_no: string; p_ok: boolean }; Returns: undefined };
       set_my_request: {
         Args: { p_role: E['app_role']; p_entity_id?: number; p_student_no?: string; p_full_name?: string };
         Returns: undefined;

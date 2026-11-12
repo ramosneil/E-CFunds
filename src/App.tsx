@@ -17,6 +17,7 @@ import { Members } from './pages/treasurer/Members';
 import { Requests } from './pages/treasurer/Requests';
 import { StudentHome } from './pages/student/Home';
 import { Reports } from './pages/student/Reports';
+import { Account } from './pages/Account';
 
 export function App() {
   return (
@@ -87,6 +88,7 @@ function Gate() {
           <Route index element={<StudentHome />} />
           <Route path="reports" element={<Reports />} />
         </>}
+        <Route path="account" element={<Account />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
