@@ -4,7 +4,7 @@ import { Search, UserPlus, Users } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { useCurrentYear, useEntities, useSemesters } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
-import { date, peso } from '../../lib/format';
+import { date, normStudentNo, peso } from '../../lib/format';
 import { Alert, Button, Card, Chip, DuesBar, Empty, Field, Input, PageHeader, Sheet, Spinner } from '../../components/ui';
 import { NoYear, Segmented } from '../../components/common';
 
@@ -116,8 +116,8 @@ function AddMember({ onClose, entityId, yearId, dues, perSemester }: { onClose: 
   const [err, setErr] = useState('');
 
   async function lookup() {
-    if (no.trim().length < 3) return;
-    const { data, error } = await supabase.from('students').select('id, full_name').eq('student_no', no.trim()).maybeSingle();
+    if (normStudentNo(no).length < 3) return;
+    const { data, error } = await supabase.from('students').select('id, full_name').eq('student_no', normStudentNo(no)).maybeSingle();
     if (error) setErr(errorText(error)); else setFound(data);
   }
 
@@ -128,7 +128,7 @@ function AddMember({ onClose, entityId, yearId, dues, perSemester }: { onClose: 
       let studentId = found?.id;
       if (!studentId) {
         const s = await supabase.from('students').insert({
-          student_no: no.trim(), full_name: name.trim(), course: course.trim() || null, year_level: level ? Number(level) : null,
+          student_no: normStudentNo(no), full_name: name.trim(), course: course.trim() || null, year_level: level ? Number(level) : null,
         }).select('id').single();
         if (s.error) throw s.error;
         studentId = s.data.id;

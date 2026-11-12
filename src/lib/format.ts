@@ -23,3 +23,8 @@ export const kindLabel: Record<string, string> = {
   remittance: 'Remittance', release: 'Release', expense: 'Expense', collection: 'Collection',
   opening: 'Opening balance', adjustment: 'Adjustment', reversal: 'Reversal',
 };
+
+/** Same cleaning as the database (migration 10): spaces removed, letters upper-cased. */
+export function normStudentNo(s: string): string {
+  return s.replace(/\s+/g, '').toUpperCase();
+}

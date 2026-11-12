@@ -328,4 +328,13 @@ select tests.ok((select locked_until > now() from public.student_login_lookup('2
 update private.login_attempts set at = at - interval '16 minutes' where student_no = '2024-0317';
 select tests.ok((select locked_until is null from public.student_login_lookup('2024-0317')), 'student login: lock ends after 15 minutes');
 
+-- Student IDs are cleaned everywhere (migration 10): spaces removed, letters upper-cased
+insert into public.students (student_no, full_name) values (' norm 0009 ', 'Norm Test');
+select tests.ok((select student_no = 'NORM0009' from public.students where full_name = 'Norm Test'), 'student IDs: roster IDs are cleaned');
+insert into auth.users (id, email, raw_user_meta_data)
+values ('a0000000-0000-0000-0000-000000000010', 'norm@test', '{"requested_role":"student","student_no":"norm 0009"}');
+select tests.ok((select requested_student_no = 'NORM0009' from public.profiles where email = 'norm@test'), 'student IDs: sign-up requests are cleaned');
+select tests.ok((select locked_until is null from public.student_login_lookup(' 2024 -0317')) and
+                (select email = 'stu1@test' from public.student_login_lookup('2024-0317 ')), 'student IDs: sign-in lookup cleans the typed ID');
+
 select format('%s checks passed', count(*)) as result from tests.results;
