@@ -1,0 +1,34 @@
+# Session log — what was made, session by session
+
+Newest last. Each session adds one entry at the end: what was done, decisions, what's next.
+
+## Session 1 — planning + repo (2026-11-12)
+- Read the old PHP/MySQL system (`C:\xampp\htdocs\mini system`) and proposed the new stack:
+  React + TS + Vite + Tailwind · Supabase · Vercel · PWA + Capacitor Android APK (all confirmed by Neil).
+- Created private repo `ramosneil/E-CFunds`; Neil installed the Claude GitHub App on it.
+- Phase 0 pushed: README, CLAUDE.md, .gitignore, `docs/plan.md` (decisions, data model, phases).
+- Removed the hard-coded Gemini key from the old code (treated as leaked). Neil made a NEW key
+  (goes into Supabase secrets in Phase 6, never in git or chat).
+- Neil's rule change: Claude works through the phases on its own and only hands over what it
+  can't do → `docs/handoff.md`.
+
+## Session 2 — Phase 1 business rules (2026-11-12)
+- Read every money formula in the old pages; loaded `mini_system_db.sql` into a throwaway
+  Postgres. Found 6 different "remaining funds" formulas + 13 old bugs (business-rules §6).
+- Neil answered the money-model questions (business-rules §8): remitted money stays the org's
+  (saved for next officers), releases are budget-based with no fixed cap, all cash remitted before
+  turnover, term = 1 school year, treasurer files expenses + SAS approves, each org sets its dues,
+  SSG is school-wide, START FRESH (no old students/funds migrated).
+- Wrote `docs/business-rules.md` + `scripts/phase1-rules-check.sql` (all checks pass).
+- Updated the Claude Project doc `claude/e-cfunds-migration-plan.md`.
+
+## Session 3 — Phase 1 gate + cloud environment (2026-11-12)
+- Created cloud environment **"E-CFunds"** (personal, linked to the repo): package registries +
+  connectors allowed, no extra hosts, no secrets. Setup script runs `npm ci`/`npm install` once
+  `package.json` exists. Postgres 16 is pre-installed: `pg_ctlcluster 16 main start`.
+  Phase 3: add the project's `<ref>.supabase.co` host once the Supabase project exists.
+- Neil CONFIRMED `docs/business-rules.md` → Phase 1 DONE. Answers: full dues payment only
+  (no partial); students see counts + own status only (not who else paid).
+- Wrote Neil's working rules out in full: `docs/working-rules.md`.
+- `/init` declined by Neil (CLAUDE.md is hand-maintained).
+- NEXT: Phase 2 — design system + mockups, light AND dark, Admin / Treasurer / Student.

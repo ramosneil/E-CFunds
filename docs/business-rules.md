@@ -1,6 +1,6 @@
 # E-CFunds — Business Rules (Phase 1)
 
-Status: **DRAFT v1, 2026-11-12. Waiting for Neil's confirmation** (Phase 1 gate).
+Status: **CONFIRMED v1, 2026-11-12** (Neil approved in session 3; Phase 1 gate passed).
 Source: the old PHP system (`C:\xampp\htdocs\mini system`), read line by line, plus Neil's answers on 2026-11-12.
 Self-check: `scripts/phase1-rules-check.sql` (all checks pass; see §9).
 
@@ -178,6 +178,8 @@ counts of orgs and clubs, students, paid and unpaid dues, and pending requests.
 | Dues period | Each org decides (per year or per semester) |
 | SSG | School-wide; doesn't count toward the 1-org limit |
 | Data migration | Start fresh; real data later |
+| Partial dues payments? (session 3) | **No.** Full amount only; a membership is Paid or Unpaid |
+| Can students see who else paid? (session 3) | **No.** Students see paid/unpaid counts and their own status only |
 
 ## 9. Self-check (Phase 1 gate)
 `scripts/phase1-rules-check.sql` builds a prototype ledger and the §2 views on synthetic data, then asserts:
@@ -193,6 +195,5 @@ counts of orgs and clubs, students, paid and unpaid dues, and pending requests.
 
 Where the new numbers differ from the old ones, the old formula was a bug or contradicted §8 (see §6).
 
-## 10. Still to confirm with Neil (doesn't block Phase 2)
-- Partial payments of dues: the old system allowed full payment only. Keep it that way?
-- Can a student see other students' paid/unpaid status? Default: **no**, only counts and their own status.
+## 10. Open questions
+None. Both §10 questions were answered in session 3 and moved to §8.

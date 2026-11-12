@@ -3,13 +3,21 @@
 Fund monitoring app for OMSC Office of Student Affairs (SAS) clubs & organizations.
 Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud PWA + Android app.
 
-## Status (updated 2026-11-12, end of session 2)
+## Status (updated 2026-11-12, session 3)
 - Phase 0 (repo setup) — DONE
-- Phase 1 (business rules) — DRAFT DONE: `docs/business-rules.md` + `scripts/phase1-rules-check.sql`
-  (passes). GATE: waiting for Neil to confirm the doc (§10 has 2 small open questions)
+- Phase 1 (business rules) — DONE, CONFIRMED by Neil: `docs/business-rules.md` +
+  `scripts/phase1-rules-check.sql` (passes). Full dues payment only; students see counts only
 - NEXT: Phase 2 — design system + mockups (light AND dark) for Admin, Treasurer, Student
 - Gemini key: old key removed from old code; Neil has a NEW key (adds it himself in Phase 6)
 - Full plan & phases: `docs/plan.md` · Handoff checklist: `docs/handoff.md`
+- What each session made: `docs/sessions.md` · Neil's working rules: `docs/working-rules.md`
+
+## Cloud environment ("E-CFunds", personal)
+- Setup script: `npm ci` / `npm install` once `package.json` exists
+- Network: package registries + MCP connectors (Supabase, Vercel) only; no secrets/variables.
+  Phase 3: add the project's `<ref>.supabase.co` host (no wildcards allowed)
+- Local Postgres 16 is pre-installed but stopped: `pg_ctlcluster 16 main start`, then
+  `su postgres -c "psql -v ON_ERROR_STOP=1 -f $PWD/scripts/phase1-rules-check.sql"`
 
 ## Old system source (needed for Phases 1 & 4)
 - On Neil's PC: `C:\xampp\htdocs\mini system` (connect this folder in the session)
@@ -61,6 +69,8 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
 
 ## Docs map
 - `docs/plan.md` — decisions, data model draft, phases with check gates
-- `docs/business-rules.md` — (Phase 1) money formulas, workflows, decisions log
+- `docs/business-rules.md` — (Phase 1, confirmed) money formulas, workflows, decisions log
+- `docs/sessions.md` — session-by-session log of what was made
+- `docs/working-rules.md` — Neil's full working rules
 - `scripts/phase1-rules-check.sql` — prototype ledger + asserts (run on any throwaway Postgres)
 - `docs/design-system.md` — (Phase 2) colors, type, components, light/dark

@@ -3,9 +3,8 @@
 Claude works through the phases on its own. This list is what it can't do itself.
 Update it every session: tick done items, add new ones.
 
-## Phase 1 gate (now)
-- [ ] Read `docs/business-rules.md` and confirm it (or tell Claude what's wrong)
-- [ ] Answer §10: partial dues payments allowed? Can students see others' paid/unpaid status?
+## Phase 2 gate (next)
+- [ ] Review the design system + mockups (light and dark) and approve them
 
 ## Phase 3 (Supabase)
 - [ ] Approve Claude creating a FREE Supabase project (it will ask once, through the Supabase connector)
@@ -23,6 +22,8 @@ Update it every session: tick done items, add new ones.
 - [ ] Approve linking the GitHub repo to Vercel (Claude does the rest via the Vercel connector)
 
 ## Done
+- [x] Confirmed `docs/business-rules.md`; full dues only; students see counts only (session 3)
+- [x] Approved the "E-CFunds" cloud environment (session 3)
 - [x] Connected `C:\xampp\htdocs\mini system` (session 2)
 - [x] Answered Phase 1 money-model questions (session 2)
 - [x] Created private repo `ramosneil/E-CFunds`

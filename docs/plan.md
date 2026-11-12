@@ -56,7 +56,7 @@ Source system: `C:\xampp\htdocs\mini system` (PHP + MySQL/XAMPP).
 8. **Deploy to Vercel + end-to-end QA** per role, Lighthouse, accessibility, light/dark check.
 
 ## 5. Open items
-- Balance formulas: DONE in `docs/business-rules.md` (awaiting Neil's confirmation).
+- Balance formulas: DONE and CONFIRMED in `docs/business-rules.md` (session 3).
 - Working mode: Claude works autonomously; things only Neil can do are tracked in `docs/handoff.md`.
 - Gemini: new key created by Neil; added as Supabase secret in Phase 6.
-- Status 2026-11-12: Phase 0 done. Phase 1 drafted + self-check passes; gate = Neil confirms. Next: Phase 2.
+- Status 2026-11-12 (session 3): Phases 0–1 done. Next: Phase 2. Session history: `docs/sessions.md`.
