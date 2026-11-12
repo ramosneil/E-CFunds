@@ -6,7 +6,10 @@ Update it every session: tick done items, add new ones.
 ## Phase 4: data migration — DONE 2026-11-12 (nothing left for Neil)
 
 ## Phase 5 (app) — now
-- [ ] Become the first admin: with the dev server running (`npm run dev` in `E-CFunds`), open
+- [ ] BEFORE REAL USE: clean up JOES test data (Neil chose "leave it for now", session 4): ₱15 saved from
+      TEST entries (pay ₱20 → remit ₱20 → release ₱5 → expense ₱5), roster student TEST-0001 "TEST Student",
+      test treasurer account. Ask Neil, then admin_adjust −₱15 saved "TEST cleanup" + deactivate TEST-0001.
+- [x] Become the first admin: with the dev server running (`npm run dev` in `E-CFunds`), open
       http://localhost:3000 → "Create an account" with your Claude-account Gmail → open the confirmation
       email on this PC → you land back signed in as SAS Admin. Then tell Claude "I'm in".
       If the email link opens a page that won't load: Supabase → Authentication → URL Configuration →

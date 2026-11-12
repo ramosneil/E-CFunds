@@ -68,3 +68,12 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   release; Treasurer home/members/requests; Student home/reports. tsc strict + vite build pass (172 kB gzip).
 - Screenshots (new rule #11): sign-in + register, light/dark × 1440 px/375 px, no console errors.
   Inner screens wait for Neil's first admin sign-in.
+- Neil became first admin (email confirmed; localhost links only work on this PC). School year 2026-2027 opened
+  with placeholder dates (Aug 1–Dec 31, Jan 1–May 31); added "Edit dates". Test JOES treasurer approved.
+- Money flow tested end to end on JOES (Neil chose real JOES; entries labelled TEST): pay ₱20 → remit ₱20 →
+  release ₱5 → expense ₱5 with receipt, each approved by SAS; screens = ledger math = DB (cash 0, saved 15).
+  Two-role testing: admin on localhost:3000, treasurer on 127.0.0.1:3000 (dev server bound to 127.0.0.1).
+- Fixes from screenshot passes: phone overflow (grid-cols-1), org/club sort, no-wrap buttons/years, no colour on
+  ₱0.00, Add member aria-label, receipt tab opened during the click (phones block async popups).
+- Rule changes: screenshot every page (#11); ASK FIRST replaces "work autonomously". Installed skill
+  design-taste-frontend (reviewed; global). Plugins ui-ux-pro-max + superpowers installed by Neil.
