@@ -19,6 +19,9 @@ Update it every session: tick done items, add new ones.
       it needs a paid plan; check the switch in the dashboard — if it's free to turn on, turn it on.
 - [ ] BEFORE REAL USE also remove the test student account (TEST-0001, 3rd email) with the JOES test data above.
 
+- If the app shows "Loading…" forever and Supabase answers 521/522: Supabase dashboard → e-cfunds → Project Settings
+      → General → Restart project (happened once, 2026-11-13 01:03 Manila; data intact after restart).
+
 ## Phase 6 (AI chatbot)
 - [ ] Add your NEW Gemini key as a Supabase secret named `GEMINI_API_KEY`
       (Supabase dashboard → Project Settings → Edge Functions → Secrets). Never paste it in chat.

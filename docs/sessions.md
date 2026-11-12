@@ -98,3 +98,10 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   raced on the refresh token and signed the tab out. Neil signed in again; later tests only clicked real buttons.
 - Neil approved Manila dates → migration 12 (ledger default + accredited Expired use Manila's day). Live dry-run at
   01:00 Manila: an entry expiring on UTC-today flipped accredited → expired as intended; applied; advisor unchanged.
+- Faster first load (plan mode): React.lazy for every screen, Suspense inside the Shell, idle warm-up of the role's
+  screens, Rolldown codeSplitting groups (react 66 KB, supabase 54 KB, app-libs 27 KB, app code ~9 KB gz).
+  Production sign-in page: 175 → 159.4 KB JS gz. Click-through: 9 admin screens 62–137 ms, 3 student screens
+  62–69 ms, no blank moments; student browser loaded only student/Home, Reports, Account.
+- Supabase database went unreachable 17:03 UTC (522/521, "Database pool connection lost"; status page clean,
+  postgres log just a checkpoint). Neil restarted the project; verified all data intact (10 orgs, 3 accounts,
+  JOES 0/15, 12 migrations, 12 files). Cause unknown — free-plan instance.
