@@ -1,11 +1,11 @@
-import { useState, type ComponentType } from 'react';
+import { Suspense, useState, type ComponentType } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router';
 import { BadgeCheck, Building2, CalendarRange, CheckCheck, Ellipsis, Home, LogOut, MessagesSquare, Receipt, Users, BarChart3, UserRound } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { useCurrentYear, useEntities } from '../lib/data';
 import { useMessagesRealtime, useUnread } from '../lib/messages';
 import { Brand } from '../pages/auth/AuthLayout';
-import { EntityLogo, Sheet, ThemeToggle } from './ui';
+import { EntityLogo, Loading, Sheet, ThemeToggle } from './ui';
 
 // phone: false = desktop sidebar only (on phones these live in the admin "More" menu).
 type Item = { to: string; label: string; icon: ComponentType<{ className?: string }>; phone?: false; badge?: 'messages' };
@@ -95,7 +95,7 @@ export function Shell() {
           {year.data ? <>School year <b className="text-ink ml-1">{year.data.label}</b></> : 'No school year open'}
         </div>
         <main className={`flex-1 w-full max-w-6xl mx-auto px-5 sm:px-8 pt-5 lg:pt-0 lg:pb-12 ${chat ? 'pb-[92px]' : 'pb-28'}`}>
-          <Outlet />
+          <Suspense fallback={<Loading />}><Outlet /></Suspense>
         </main>
       </div>
 

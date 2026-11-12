@@ -80,6 +80,13 @@ export function Spinner({ label = 'Loading' }: { label?: string }) {
   );
 }
 
+/** Shows nothing for quick loads; a spinner only if a screen takes longer than ~300 ms. */
+export function Loading() {
+  const [show, setShow] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setShow(true), 300); return () => clearTimeout(t); }, []);
+  return show ? <Spinner /> : null;
+}
+
 export function Empty({ icon, title, children }: { icon?: ReactNode; title: string; children?: ReactNode }) {
   return (
     <div className="text-center py-10 px-4">

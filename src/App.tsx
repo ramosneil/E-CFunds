@@ -1,24 +1,47 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, type ComponentType, type ReactNode } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router';
 import { useAuth } from './lib/auth';
 import { supabase } from './lib/supabase';
-import { Spinner } from './components/ui';
+import { Loading, Spinner } from './components/ui';
 import { Shell } from './components/Shell';
-import { Forgot, Register, ResetPassword, SignIn } from './pages/auth/SignIn';
-import { Pending } from './pages/auth/Pending';
-import { AdminDashboard } from './pages/admin/Dashboard';
-import { Approvals } from './pages/admin/Approvals';
-import { Orgs } from './pages/admin/Orgs';
-import { Accredited } from './pages/admin/Accredited';
-import { Calendar } from './pages/admin/Calendar';
-import { EntityDetail } from './pages/admin/EntityDetail';
-import { TreasurerHome } from './pages/treasurer/Home';
-import { Members } from './pages/treasurer/Members';
-import { Requests } from './pages/treasurer/Requests';
-import { StudentHome } from './pages/student/Home';
-import { Reports } from './pages/student/Reports';
-import { Account } from './pages/Account';
-import { Messages } from './pages/Messages';
+
+// Every screen loads on demand, so a visitor only downloads the screens their role can open.
+// `load` is kept so the same files can be warmed in the background (see warmUp).
+function page<K extends string>(load: () => Promise<Record<K, ComponentType>>, name: K) {
+  const C = lazy(() => load().then((m) => ({ default: m[name] })));
+  return Object.assign(C, { load });
+}
+const auth = () => import('./pages/auth/SignIn');
+const SignIn = page(auth, 'SignIn'), Register = page(auth, 'Register'), Forgot = page(auth, 'Forgot'), ResetPassword = page(auth, 'ResetPassword');
+const Pending = page(() => import('./pages/auth/Pending'), 'Pending');
+const AdminDashboard = page(() => import('./pages/admin/Dashboard'), 'AdminDashboard');
+const Approvals = page(() => import('./pages/admin/Approvals'), 'Approvals');
+const Orgs = page(() => import('./pages/admin/Orgs'), 'Orgs');
+const Accredited = page(() => import('./pages/admin/Accredited'), 'Accredited');
+const Calendar = page(() => import('./pages/admin/Calendar'), 'Calendar');
+const EntityDetail = page(() => import('./pages/admin/EntityDetail'), 'EntityDetail');
+const TreasurerHome = page(() => import('./pages/treasurer/Home'), 'TreasurerHome');
+const Members = page(() => import('./pages/treasurer/Members'), 'Members');
+const Requests = page(() => import('./pages/treasurer/Requests'), 'Requests');
+const StudentHome = page(() => import('./pages/student/Home'), 'StudentHome');
+const Reports = page(() => import('./pages/student/Reports'), 'Reports');
+const Account = page(() => import('./pages/Account'), 'Account');
+const Messages = page(() => import('./pages/Messages'), 'Messages');
+
+const ROLE_PAGES = {
+  admin: [AdminDashboard, Approvals, Orgs, EntityDetail, Messages, Accredited, Calendar, Account],
+  treasurer: [TreasurerHome, Members, Requests, Messages, Reports, Account],
+  student: [StudentHome, Reports, Account],
+} as const;
+
+/** After the first screen has painted, fetch the rest of this role's screens while the browser is idle. */
+function warmUp(role: keyof typeof ROLE_PAGES) {
+  const run = () => ROLE_PAGES[role].forEach((p) => { void p.load().catch(() => { /* offline: loads on tap instead */ }); });
+  const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
+  if (w.requestIdleCallback) w.requestIdleCallback(run, { timeout: 4000 }); else setTimeout(run, 1500);
+}
+
+const Lazy = ({ children }: { children: ReactNode }) => <Suspense fallback={<Loading />}>{children}</Suspense>;
 
 export function App() {
   return (
@@ -41,35 +64,39 @@ function RecoveryRedirect() {
 
 function Gate() {
   const { session, ready, profile, profileLoading } = useAuth();
-  const [slow, setSlow] = useState(false);
-  useEffect(() => { const t = setTimeout(() => setSlow(true), 300); return () => clearTimeout(t); }, []);
+  const role = profile?.status === 'approved' ? profile.role : null;
+  useEffect(() => { if (role) warmUp(role); }, [role]);
 
-  if (!ready || profileLoading) return slow ? <Spinner /> : null;
+  if (!ready || profileLoading) return <Loading />;
 
   if (!session) {
     return (
-      <Routes>
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot" element={<Forgot />} />
-        <Route path="/reset" element={<ResetPassword />} />
-        <Route path="*" element={<SignIn />} />
-      </Routes>
+      <Lazy>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot" element={<Forgot />} />
+          <Route path="/reset" element={<ResetPassword />} />
+          <Route path="*" element={<SignIn />} />
+        </Routes>
+      </Lazy>
     );
   }
 
-  if (!profile || profile.status !== 'approved' || !profile.role) {
+  if (!profile || !role) {
     return (
-      <Routes>
-        <Route path="/reset" element={<ResetPassword />} />
-        <Route path="*" element={profile ? <Pending /> : <Spinner label="Setting up your account" />} />
-      </Routes>
+      <Lazy>
+        <Routes>
+          <Route path="/reset" element={<ResetPassword />} />
+          <Route path="*" element={profile ? <Pending /> : <Spinner label="Setting up your account" />} />
+        </Routes>
+      </Lazy>
     );
   }
 
-  const role = profile.role;
   return (
     <Routes>
-      <Route path="/reset" element={<ResetPassword />} />
+      <Route path="/reset" element={<Lazy><ResetPassword /></Lazy>} />
+      {/* The Shell (sidebar, top and bottom bars) stays on screen; only the content area waits. */}
       <Route element={<Shell />}>
         {role === 'admin' && <>
           <Route index element={<AdminDashboard />} />
