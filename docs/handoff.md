@@ -3,13 +3,11 @@
 Claude works through the phases on its own. This list is what it can't do itself.
 Update it every session: tick done items, add new ones.
 
-## Phase 1 gate (now)
-- [ ] Read `docs/business-rules.md` and confirm it (or tell Claude what's wrong)
-- [ ] Answer §10: partial dues payments allowed? Can students see others' paid/unpaid status?
-
-## Phase 3 (Supabase)
-- [ ] Approve Claude creating a FREE Supabase project (it will ask once, through the Supabase connector)
-- [ ] Optional: install the Supabase plugin from the plugin card (extra Supabase skills)
+## Phase 4 (next): data migration
+- [ ] Share the folder `C:\xampp\htdocs\mini system` with Claude (steps in the session-3 chat):
+      Claude desktop app → Settings → Claude Code → Remote Control → add the folder, keep the app open.
+      If that option isn't there: start the next session from the Claude desktop app on your PC
+      with that folder (like session 2), then say "continue E-CFunds".
 
 ## Phase 6 (AI chatbot)
 - [ ] Add your NEW Gemini key as a Supabase secret named `GEMINI_API_KEY`
@@ -23,6 +21,13 @@ Update it every session: tick done items, add new ones.
 - [ ] Approve linking the GitHub repo to Vercel (Claude does the rest via the Vercel connector)
 
 ## Done
+- [x] Confirmed `docs/business-rules.md`; full dues only; students see counts only (session 3)
+- [x] Approved the "E-CFunds" cloud environment (session 3)
+- [x] Installed plugins: supabase, Vercel, Design, frontend-design (session 3)
+- [x] Approved Phase 2 mockups (session 3)
+- [x] Free Supabase project `e-cfunds` created (session 3)
+- [x] First admin = your Claude-account Gmail (auto-approved on first verified sign-in) (session 3)
+- [x] School year dates: SAS sets them in the app (session 3)
 - [x] Connected `C:\xampp\htdocs\mini system` (session 2)
 - [x] Answered Phase 1 money-model questions (session 2)
 - [x] Created private repo `ramosneil/E-CFunds`

@@ -39,7 +39,7 @@ Source system: `C:\xampp\htdocs\mini system` (PHP + MySQL/XAMPP).
 - `students` (student_no, full_name, course, year_level, email)
 - `memberships` (student × entity × semester, amount_due, paid/unpaid, paid_at, recorded_by) — trigger enforces 1 org + 1 club
 - `ledger_entries` (entity, school_year, semester, date, kind: opening|collection|remittance|release|expense|adjustment|reversal, amount, description, attachment, created_by) — append-only; see `docs/business-rules.md` §2
-- `remit_requests`, `release_requests`, `expense_requests` (pending→approved/rejected; approval writes ledger rows via RPC in one transaction)
+- `fund_requests` (one table, kind = remittance|release|expense; pending→approved/rejected/cancelled; approval writes ledger rows via RPC in one transaction)
 - `messages`, `accredited_entries`, `audit_log` (trigger-based, every table)
 - Views: `entity_balances`, `school_summary`, `student_dues`
 - RLS: admin = all; treasurer = own entity; student = summary views + own dues only
@@ -56,7 +56,7 @@ Source system: `C:\xampp\htdocs\mini system` (PHP + MySQL/XAMPP).
 8. **Deploy to Vercel + end-to-end QA** per role, Lighthouse, accessibility, light/dark check.
 
 ## 5. Open items
-- Balance formulas: DONE in `docs/business-rules.md` (awaiting Neil's confirmation).
+- Balance formulas: DONE and CONFIRMED in `docs/business-rules.md` (session 3).
 - Working mode: Claude works autonomously; things only Neil can do are tracked in `docs/handoff.md`.
 - Gemini: new key created by Neil; added as Supabase secret in Phase 6.
-- Status 2026-11-12: Phase 0 done. Phase 1 drafted + self-check passes; gate = Neil confirms. Next: Phase 2.
+- Status 2026-11-12 (session 3): Phases 0–3 done (see `docs/database.md`). Next: Phase 4. Session history: `docs/sessions.md`.
