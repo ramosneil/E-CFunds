@@ -41,7 +41,7 @@ export function useEntities() {
   return useQuery({
     queryKey: ['entities'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('entities').select('*').order('category', { ascending: false }).order('id');
+      const { data, error } = await supabase.from('entities').select('*').order('category').order('id');
       if (error) throw error;
       return data;
     },

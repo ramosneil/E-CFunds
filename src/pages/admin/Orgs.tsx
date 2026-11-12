@@ -23,7 +23,7 @@ export function Orgs() {
       {groups.map(([title, list]) => (
         <section key={title} className="mb-6">
           <h2 className="micro text-muted mb-3">{title} · {list.length}</h2>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {list.map((e) => (
               <Card key={e.id} className={`p-4 ${e.is_active ? '' : 'opacity-60'}`}>
                 <div className="flex items-center gap-3">

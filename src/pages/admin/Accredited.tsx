@@ -17,7 +17,7 @@ export function Accredited() {
   const list = useQuery({
     queryKey: ['accredited'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('accredited_list').select('*').order('category', { ascending: false }).order('name');
+      const { data, error } = await supabase.from('accredited_list').select('*').order('category').order('name');
       if (error) throw error;
       return data;
     },
@@ -49,7 +49,7 @@ export function Accredited() {
                     <td className="px-4 py-3 font-semibold">{a.name}{a.remarks && <span className="block text-[13px] text-muted font-normal">{a.remarks}</span>}</td>
                     <td className="px-4 py-3 capitalize">{a.category}</td>
                     <td className="px-4 py-3">{a.adviser ?? '—'}</td>
-                    <td className="px-4 py-3">{a.academic_year ?? '—'}</td>
+                    <td className="px-4 py-3 whitespace-nowrap">{a.academic_year ?? '—'}</td>
                     <td className="px-4 py-3 whitespace-nowrap">{date(a.accredited_on)}</td>
                     <td className="px-4 py-3 whitespace-nowrap">{date(a.expires_on)}</td>
                     <td className="px-4 py-3"><StatusChip status={a.effective_status ?? 'pending'} /></td>

@@ -79,7 +79,7 @@ export function EntityDetail() {
       </div>
       {!year.data ? <NoYear admin /> : !r ? <Spinner /> : (
         <>
-          <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
             <HeroCard label={`Total fund · ${year.data.label}`} total={r.total_fund} cash={r.cash_on_hand} saved={r.saved_with_sas}
               foot={<>Previous funds {peso(r.previous_funds)}{r.is_closed ? ' · Year closed' : ''}</>} />
             <div className="grid grid-cols-2 gap-3 content-start">
@@ -89,7 +89,7 @@ export function EntityDetail() {
               <Stat label="Released" value={peso(r.releases)} />
             </div>
           </div>
-          <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr] mt-4 items-start">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr] mt-4 items-start">
             <Card>
               <h2 className="font-display text-[17px] font-bold mb-1">Ledger</h2>
               {ledger.isLoading ? <Spinner /> : <LedgerList entries={ledger.data ?? []} />}

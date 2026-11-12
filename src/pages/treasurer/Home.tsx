@@ -30,7 +30,7 @@ export function TreasurerHome() {
       </div>
       {!year.data ? <NoYear /> : !r ? <Spinner /> : (
         <>
-          <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
             <HeroCard label={`Total fund · ${year.data.label}`} total={r.total_fund} cash={r.cash_on_hand} saved={r.saved_with_sas}
               foot={<>Previous funds {peso(r.previous_funds)} · You can remit up to <b className="text-white money">{peso(r.available_to_remit)}</b></>} />
             <div className="grid grid-cols-2 gap-3 content-start">
@@ -50,7 +50,7 @@ export function TreasurerHome() {
             <Action to="/requests?new=expense" icon={<Receipt className="size-5" />} label="File expense" />
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-2 mt-4 items-start">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 mt-4 items-start">
             <Card>
               <SectionTitle action={<Link to="/requests" className="text-primary text-[14px] font-semibold flex items-center">All<ChevronRight className="size-4" /></Link>}>Requests</SectionTitle>
               {requests.data?.length ? <div className="divide-y divide-line">{requests.data.slice(0, 5).map((q) => <RequestRow key={q.id} r={q} />)}</div>

@@ -21,7 +21,7 @@ export function AdminDashboard() {
   return (
     <>
       <PageHeader title="Dashboard" sub={`All organizations and clubs · ${year.data.label}`} />
-      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
         <HeroCard label="Total funds, all orgs & clubs" total={s?.total_fund ?? 0} cash={s?.cash_on_hand ?? 0} saved={s?.saved_with_sas ?? 0}
           foot={<>{s?.organizations ?? 0} organizations · {s?.clubs ?? 0} clubs · {s?.students ?? 0} students</>} />
         <div className="grid grid-cols-2 gap-3 content-start">
@@ -32,7 +32,7 @@ export function AdminDashboard() {
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.6fr_1fr] mt-4 items-start">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.6fr_1fr] mt-4 items-start">
         <Card className="p-0 overflow-hidden">
           <div className="px-5 pt-5"><SectionTitle>Funds by org & club</SectionTitle></div>
           {report.isLoading ? <Spinner /> : (

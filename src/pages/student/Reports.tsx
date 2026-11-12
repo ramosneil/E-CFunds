@@ -19,7 +19,7 @@ export function Reports() {
       <PageHeader title="Reports" sub={`Every org and club · ${year.data.label}`} />
       <div className="max-w-sm mb-5"><Segmented value={cat} onChange={setCat} options={[['all', 'All'], ['organization', 'Orgs'], ['club', 'Clubs']]} /></div>
       {report.isLoading ? <Spinner /> : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {rows.map((r) => (
             <Card key={r.entity_id}>
               <div className="flex items-center gap-3">

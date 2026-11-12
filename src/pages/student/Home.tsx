@@ -34,7 +34,7 @@ export function StudentHome() {
   return (
     <>
       <PageHeader title={`Hi${first ? `, ${first}` : ''}`} sub={`School year ${year.data.label}`} />
-      <div className="grid gap-4 lg:grid-cols-2 items-start">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 items-start">
         <Card>
           <SectionTitle>My dues</SectionTitle>
           {dues.isLoading ? <Spinner /> : !dues.data?.length ? (

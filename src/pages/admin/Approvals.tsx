@@ -29,7 +29,7 @@ function RequestQueue() {
   if (pending.isLoading) return <Spinner />;
   const done = (recent.data ?? []).filter((r) => r.status !== 'pending').slice(0, 10);
   return (
-    <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr] items-start">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.5fr_1fr] items-start">
       <div className="space-y-4">
         {pending.data?.length ? pending.data.map((r) => {
           const rep = report.data?.find((x) => x.entity_id === r.entity_id);
@@ -108,7 +108,7 @@ function AccountQueue() {
   const others = (profiles.data ?? []).filter((p) => p.status !== 'pending');
   const name = (id: number | null) => entities.data?.find((e) => e.id === id)?.short_name ?? '—';
   return (
-    <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr] items-start">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.3fr_1fr] items-start">
       <div className="space-y-4">
         {pending.length ? pending.map((p) => <AccountCard key={p.id} p={p} />)
           : <Card><Empty icon={<UserCheck className="size-6" />} title="No accounts waiting">People who sign up appear here for approval.</Empty></Card>}
