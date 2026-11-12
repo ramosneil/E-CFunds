@@ -31,4 +31,10 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   (no partial); students see counts + own status only (not who else paid).
 - Wrote Neil's working rules out in full: `docs/working-rules.md`.
 - `/init` declined by Neil (CLAUDE.md is hand-maintained).
-- NEXT: Phase 2 — design system + mockups, light AND dark, Admin / Treasurer / Student.
+- Opened PR ramosneil/E-CFunds#1 (session-3 docs). Neil installed plugins: supabase, Vercel,
+  Design, frontend-design.
+- Phase 2 drafted: `docs/design-system.md` + design canvas (15 artboards: design system board;
+  Admin dashboard/approvals, Treasurer home/new request, Student home/org report on phone; Admin
+  desktop; every screen in light AND dark). Link in design-system.md.
+- Self-check `scripts/phase2-design-check.js`: 34/34 contrast pairs ≥ 4.5:1, 13/13 sample-number checks.
+- NEXT: Neil approves Phase 2 → Phase 3 (Supabase schema + RLS + migrations + role tests).

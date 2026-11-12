@@ -7,10 +7,15 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
 - Phase 0 (repo setup) — DONE
 - Phase 1 (business rules) — DONE, CONFIRMED by Neil: `docs/business-rules.md` +
   `scripts/phase1-rules-check.sql` (passes). Full dues payment only; students see counts only
-- NEXT: Phase 2 — design system + mockups (light AND dark) for Admin, Treasurer, Student
+- Phase 2 (design) — DRAFT DONE: `docs/design-system.md` + mockups (link inside) +
+  `scripts/phase2-design-check.js` (passes). GATE: waiting for Neil to approve the mockups
+- NEXT after approval: Phase 3 — Supabase schema + RLS + migrations + per-role SQL tests
 - Gemini key: old key removed from old code; Neil has a NEW key (adds it himself in Phase 6)
 - Full plan & phases: `docs/plan.md` · Handoff checklist: `docs/handoff.md`
 - What each session made: `docs/sessions.md` · Neil's working rules: `docs/working-rules.md`
+
+## Plugins installed (session 3)
+- supabase, Vercel, Design, frontend-design (skills: supabase:*, vercel:*, design:*)
 
 ## Cloud environment ("E-CFunds", personal)
 - Setup script: `npm ci` / `npm install` once `package.json` exists
@@ -73,4 +78,5 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
 - `docs/sessions.md` — session-by-session log of what was made
 - `docs/working-rules.md` — Neil's full working rules
 - `scripts/phase1-rules-check.sql` — prototype ledger + asserts (run on any throwaway Postgres)
-- `docs/design-system.md` — (Phase 2) colors, type, components, light/dark
+- `docs/design-system.md` — (Phase 2) colors, type, components, light/dark, mockup link
+- `scripts/phase2-design-check.js` — contrast + sample-number self-check (`node …`)

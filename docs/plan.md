@@ -59,4 +59,4 @@ Source system: `C:\xampp\htdocs\mini system` (PHP + MySQL/XAMPP).
 - Balance formulas: DONE and CONFIRMED in `docs/business-rules.md` (session 3).
 - Working mode: Claude works autonomously; things only Neil can do are tracked in `docs/handoff.md`.
 - Gemini: new key created by Neil; added as Supabase secret in Phase 6.
-- Status 2026-11-12 (session 3): Phases 0–1 done. Next: Phase 2. Session history: `docs/sessions.md`.
+- Status 2026-11-12 (session 3): Phases 0–1 done. Phase 2 drafted, waiting for Neil's approval. Session history: `docs/sessions.md`.
