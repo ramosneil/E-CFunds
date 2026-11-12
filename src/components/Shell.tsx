@@ -6,6 +6,7 @@ import { useCurrentYear, useEntities } from '../lib/data';
 import { useMessagesRealtime, useUnread } from '../lib/messages';
 import { Brand } from '../pages/auth/AuthLayout';
 import { EntityLogo, Loading, Sheet, ThemeToggle } from './ui';
+import { ChatButton } from './ChatButton';
 
 // phone: false = desktop sidebar only (on phones these live in the admin "More" menu).
 type Item = { to: string; label: string; icon: ComponentType<{ className?: string }>; phone?: false; badge?: 'messages' };
@@ -117,6 +118,7 @@ export function Shell() {
           </button>
         )}
       </nav>
+      <ChatButton />
       <Sheet open={more} onClose={() => setMore(false)} title="More">
         <nav className="space-y-1" aria-label="More">
           {[...moreItems, { to: '/account', label: 'My account', icon: UserRound } as Item].map((it) => (

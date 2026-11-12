@@ -350,6 +350,21 @@ select tests.ok((select locked_until > now() from public.student_login_lookup('2
 update private.login_attempts set at = at - interval '16 minutes' where student_no = '2024-0317';
 select tests.ok((select locked_until is null from public.student_login_lookup('2024-0317')), 'student login: lock ends after 15 minutes');
 
+-- Chat quota + keep-alive (migration 13)
+select tests.ok(has_function_privilege('anon', 'public.keep_alive()', 'execute')
+            and not has_function_privilege('anon', 'public.use_chat_quota()', 'execute'),
+  'keep-alive: anonymous ping allowed; chat quota needs a login');
+select tests.ok(public.keep_alive() = 'ok', 'keep-alive: returns ok');
+select tests.login('a0000000-0000-0000-0000-000000000004'); set role authenticated;   -- approved student
+select tests.ok(public.use_chat_quota() = 29, 'chat quota: first question leaves 29');
+select public.use_chat_quota() from generate_series(1, 29);
+select tests.fails($$select public.use_chat_quota()$$, 'chat quota: the 31st question of the day is refused');
+select tests.fails($$select * from private.chat_usage$$, 'chat quota: usage table is not readable');
+reset role;
+select tests.login('a0000000-0000-0000-0000-000000000001'); set role authenticated;   -- admin
+select tests.ok(public.use_chat_quota() is null, 'chat quota: admin is unlimited');
+reset role;
+
 -- Manila dates (migration 12): "today" is the Manila calendar day even when UTC is still on the previous day
 select tests.ok(pg_get_expr(d.adbin, d.adrelid) ilike '%Asia/Manila%', 'dates: ledger default date is the Manila day')
   from pg_attrdef d join pg_attribute a on a.attrelid = d.adrelid and a.attnum = d.adnum

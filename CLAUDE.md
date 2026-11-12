@@ -29,7 +29,11 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
   (PDF+CSV); OMSC letterhead (seal cropped from Storage logos/brand/omsc-seal-source.jpg), Inter font embedded
   (₱), jsPDF lazy-loaded. Chart colours validated (dataviz). Migration 12: "today" = Manila day (ledger default + Expired). Faster load: lazy screens + idle warm-up,
   react/supabase/app-libs chunks; sign-in JS 175 → 159 KB gz; students download student screens only.
-  NEXT (Phase 5 leftovers): treasurer export test; then Phase 6 (AI chatbot, keep-alive ping). PR: phase-5-app → main (open on GitHub by Neil). School year dates: SAS sets them in the app
+- Phase 6 — BUILT (session 4): Edge Function `chat` (verify_jwt on; reads with the caller's own token → RLS-scoped;
+  Gemini default, swappable via AI_PROVIDER; 30 questions/day, admin unlimited — migration 13), "Ask E-CFunds"
+  button for every role; keep-alive = `public.keep_alive()` (anon) + `.github/workflows/keep-alive.yml` every 3 days.
+  WAITING ON NEIL: secret GEMINI_API_KEY; GitHub variable SUPABASE_PUBLISHABLE_KEY (see docs/handoff.md).
+  Leftover: treasurer export test. PR: phase-5-app → main (open on GitHub by Neil). School year dates: SAS sets them in the app
 - Local repo on Neil's PC: `C:\xampp\htdocs\E-CFunds`; old system stays a plain folder (never commit from it)
 - Gemini key: old key removed from old code; Neil has a NEW key (adds it himself in Phase 6)
 - Full plan & phases: `docs/plan.md` · Handoff checklist: `docs/handoff.md`

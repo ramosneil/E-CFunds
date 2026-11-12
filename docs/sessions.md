@@ -105,3 +105,8 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - Supabase database went unreachable 17:03 UTC (522/521, "Database pool connection lost"; status page clean,
   postgres log just a checkpoint). Neil restarted the project; verified all data intact (10 orgs, 3 accounts,
   JOES 0/15, 12 migrations, 12 files). Cause unknown — free-plan instance.
+- Phase 6 (plan mode; Neil: everyone scoped, user's language, 30/day admin unlimited, GitHub Actions keep-alive).
+  Migration 13 (chat quota + anon keep_alive; dry-run 8/8, applied; advisor: expected INFO for private.chat_usage).
+  Edge Function `chat` v1 (verify_jwt on; caller-token reads; Gemini with model fallback; strict data-only prompt
+  with injection rule). App: lazy ChatPanel + floating button (hidden on Messages). Without the key the app shows
+  "not switched on yet" end to end. keep-alive.yml simulated locally: HTTP 200 "ok". Waiting for Neil's key.
