@@ -3,10 +3,17 @@
 Fund monitoring app for OMSC Office of Student Affairs (SAS) clubs & organizations.
 Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud PWA + Android app.
 
-## Status
-- Phase 0 (repo setup) — done 2026-11-12
-- Next: Phase 1 — extract business rules/formulas from old PHP → `docs/business-rules.md`
-- Full plan & phases: `docs/plan.md`
+## Status (updated 2026-11-12, end of session 1)
+- Phase 0 (repo setup) — DONE, pushed to `ramosneil/E-CFunds` (private)
+- Gemini key: old key removed from old code; Neil has a NEW key (adds it himself in Phase 6)
+- NEXT: Phase 1 — extract business rules/formulas from old PHP → `docs/business-rules.md`
+- Full plan & phases: `docs/plan.md` · Handoff checklist: `docs/handoff.md`
+
+## Old system source (needed for Phases 1 & 4)
+- On Neil's PC: `C:\xampp\htdocs\mini system` (connect this folder in the session)
+- Key files: `pages/{dashboard,treasurer,organization,students,transaction,financial}.php`,
+  `database/framework/schema/schema.sql`, `mini_system_db.sql` (full dump, has student data —
+  never commit it)
 
 ## Stack (decided)
 - Frontend: React + TypeScript + Vite + Tailwind, mobile-first, light/dark mode
@@ -35,7 +42,11 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
 - Old Gemini key was hard-coded in `api/config.php` → treated as leaked, rotated
 
 ## Working rules (from Neil)
-- Start every session in plan mode; ask until 95% sure; no assumptions, no guessing
+- WORK AUTONOMOUSLY through the phases. Only stop to hand Neil what Claude can't do itself
+  (account logins, keys, approvals, installs on his PC) — list them in `docs/handoff.md`
+- Product decisions are already made (see `docs/plan.md`); don't re-ask them. Ask only when
+  something is genuinely unknown and a wrong guess would be costly
+- Never hallucinate; verify facts and numbers
 - To-do lists include a self-check step; don't advance until current step is verified
 - UI: premium quality, always design light AND dark mode
 - "ULTRA…" = maximum-quality output
