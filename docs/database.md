@@ -34,7 +34,9 @@ Reports: `get_entity_report(school_year, semester?)`, `get_school_summary(school
 Dues: `record_payment`, `undo_payment(reason)`, `set_entity_dues`.
 Requests: `file_request(entity, kind, amount, description, attachment?)`, `cancel_request`, `review_request(id, approve, remarks?)`.
 Admin money: `admin_release`, `admin_adjust(entity, pocket, ±1, amount, reason)`, `reverse_entry(id, reason)`, `close_school_year`.
-Accounts: `review_account(profile, approve, role?, entity?, student?, remarks?)`, `disable_account`. Messages: `mark_thread_read`.
+Accounts: `review_account(profile, approve, role?, entity?, student?, remarks?)`, `disable_account`,
+`set_my_request(role, entity?, student_no?, full_name?)` (pending user states/fixes its own request; migration 8, Phase 5;
+dry-run checked on the live project 9/9 and rolled back — local suite not run on Neil's PC, no Postgres there). Messages: `mark_thread_read`.
 Each public function is a thin SECURITY INVOKER wrapper; the real body is SECURITY DEFINER in the unexposed
 `private` schema and checks the caller's role itself. Limits are re-checked at approval; per-entity row lock
 prevents two approvals racing past a limit.

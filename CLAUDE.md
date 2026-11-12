@@ -15,7 +15,14 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
   dues ₱10–35 all `school_year`, logos in Storage `logos/<id>/logo.png`, accredited list (10) + history
   (10 inserts + 3 old edits). Load: `supabase/seed/phase4_old_system_data.sql` (run once, self-checks);
   logos: `node scripts/phase4-upload-logos.mjs` (reads `.env` SUPABASE_URL + SUPABASE_SECRET_KEY, gitignored)
-- NEXT: Phase 5 — app build. School year dates: left for SAS to set in the app (Neil, session 3)
+- Phase 5 (app) — IN PROGRESS (session 4): Vite 8 + React 19 + TS + Tailwind 4 + supabase-js + React Query +
+  React Router 8 in `src/`. Auth (email/password, Google button, reset), pending-request screen, Admin
+  (dashboard, approvals, orgs & logos, accredited + history, school year), Treasurer (home, members/dues,
+  requests with "If approved" preview + receipts), Student (my dues, reports). `npm run dev` → localhost:3000.
+  tsc strict + build pass; sign-in/register screenshotted light/dark × phone/desktop.
+  Migration 8 `set_my_request` (pending user states role/org/student ID; needed for Google sign-ups).
+  NEXT: Neil signs up as first admin → screenshot inner screens; Student-ID login (Edge Function);
+  messaging; PDF/CSV exports; code-split. School year dates: SAS sets them in the app
 - Local repo on Neil's PC: `C:\xampp\htdocs\E-CFunds`; old system stays a plain folder (never commit from it)
 - Gemini key: old key removed from old code; Neil has a NEW key (adds it himself in Phase 6)
 - Full plan & phases: `docs/plan.md` · Handoff checklist: `docs/handoff.md`
@@ -80,6 +87,9 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
 - Never hallucinate; verify facts and numbers
 - To-do lists include a self-check step; don't advance until current step is verified
 - UI: premium quality, always design light AND dark mode
+- Screenshot every page built (light + dark, phone + desktop) to confirm the layout looks right (session 4)
+- Start in plan mode; restated in session 4 together with "ask until 95% sure" — which wins over
+  "work autonomously" is an open question to Neil (see `docs/working-rules.md` #2, #11)
 - "ULTRA…" = maximum-quality output
 - Update this file at session end; keep it 150–200 lines max; link out to docs/
 

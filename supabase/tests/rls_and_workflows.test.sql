@@ -92,6 +92,16 @@ select tests.ok((select count(*) = 0 from public.students), 'pending: sees no ro
 select tests.fails('select * from public.get_entity_report(2)', 'pending: cannot read reports');
 select tests.fails($$update public.profiles set status = 'approved', role = 'admin' where id = auth.uid()$$,
   'pending: cannot approve itself');
+select public.set_my_request('treasurer', (select id from public.entities where short_name = 'JOES'), null, 'Pat Pending');
+select tests.ok((select requested_role = 'treasurer' and requested_entity_id is not null and requested_student_no is null
+                   and full_name = 'Pat Pending' and status = 'pending' from public.profiles where id = auth.uid()),
+  'pending: can change what it asks for (role, org, name) but stays pending');
+select tests.fails($$select public.set_my_request('admin')$$, 'pending: cannot ask to be admin');
+select tests.fails($$select public.set_my_request('treasurer', 999999)$$, 'pending: treasurer must pick a real org/club');
+select tests.fails($$select public.set_my_request('student', null, ' x ')$$, 'pending: student must give a student ID');
+select public.set_my_request('student', null, '2024-0318');
+select tests.ok((select requested_role = 'student' and requested_entity_id is null and requested_student_no = '2024-0318'
+                 from public.profiles where id = auth.uid()), 'pending: switching to student clears the org');
 reset role;
 
 -- =========================== Admin approves accounts ===========================
@@ -105,6 +115,9 @@ select tests.fails($$select public.review_account('a0000000-0000-0000-0000-00000
   'admin: a second active treasurer for the same org is refused');
 select tests.fails($$select public.review_account('a0000000-0000-0000-0000-000000000001', true, 'student', null, 1)$$,
   'admin: cannot review own account');
+reset role;
+select tests.login('a0000000-0000-0000-0000-000000000004'); set role authenticated;
+select tests.fails($$select public.set_my_request('treasurer', 2)$$, 'approved user: cannot change its request any more');
 reset role;
 
 -- =========================== Treasurer (JOES) ===========================

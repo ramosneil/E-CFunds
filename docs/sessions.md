@@ -57,3 +57,14 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - Decisions: dues period `school_year` for all (Neil let Claude decide; matches old one-payment-per-student);
   JOES keeps its name although its logo reads "Office Administration Executive Society".
 - A temporary anon upload policy was refused by the safety check → used the secret-key script instead.
+
+## Session 4 (cont.) — Phase 5 app build, slice 1 (2026-11-12)
+- Scaffolded the app (pinned: vite 8.3.8, react 19.3.1, tailwind 4.3.5, supabase-js 2.119.0, react-router 8.5.1,
+  @tanstack/react-query 5.107.1, lucide-react 1.72.0, typescript 5.9.3). Tokens from design-system.md, light + dark.
+- Found a Phase 3 gap: pending users could not set what they ask for after sign-in (Google sign-ups carry no
+  metadata; org list needs a login). Added migration `20261112134412_pending_set_my_request` + 6 checks in the
+  test suite; dry-run on live 9/9 then rolled back; applied; advisor clean. Local suite not run (no Postgres on this PC).
+- Screens: auth + pending request; Admin dashboard/approvals/orgs/accredited/calendar/org detail with ledger +
+  release; Treasurer home/members/requests; Student home/reports. tsc strict + vite build pass (172 kB gzip).
+- Screenshots (new rule #11): sign-in + register, light/dark × 1440 px/375 px, no console errors.
+  Inner screens wait for Neil's first admin sign-in.

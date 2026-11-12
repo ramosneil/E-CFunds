@@ -5,6 +5,13 @@ Update it every session: tick done items, add new ones.
 
 ## Phase 4: data migration — DONE 2026-11-12 (nothing left for Neil)
 
+## Phase 5 (app) — now
+- [ ] Become the first admin: with the dev server running (`npm run dev` in `E-CFunds`), open
+      http://localhost:3000 → "Create an account" with your Claude-account Gmail → open the confirmation
+      email on this PC → you land back signed in as SAS Admin. Then tell Claude "I'm in".
+      If the email link opens a page that won't load: Supabase → Authentication → URL Configuration →
+      Site URL `http://localhost:3000`, and add `http://localhost:3000/**` under Redirect URLs.
+
 ## Phase 6 (AI chatbot)
 - [ ] Add your NEW Gemini key as a Supabase secret named `GEMINI_API_KEY`
       (Supabase dashboard → Project Settings → Edge Functions → Secrets). Never paste it in chat.
