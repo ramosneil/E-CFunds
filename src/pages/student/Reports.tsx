@@ -35,8 +35,8 @@ export function Reports() {
               <div className="mt-3"><PocketBar cash={r.cash_on_hand} saved={r.saved_with_sas} /></div>
               <dl className="mt-4 grid grid-cols-3 gap-2 text-[13px]">
                 <div><dt className="text-muted">Previous</dt><dd className="money font-semibold">{peso(r.previous_funds)}</dd></div>
-                <div><dt className="text-muted">Collected</dt><dd className="money font-semibold text-ok">{peso(r.collections)}</dd></div>
-                <div><dt className="text-muted">Spent</dt><dd className="money font-semibold text-bad">{peso(r.expenses)}</dd></div>
+                <div><dt className="text-muted">Collected</dt><dd className={`money font-semibold ${r.collections ? 'text-ok' : ''}`}>{peso(r.collections)}</dd></div>
+                <div><dt className="text-muted">Spent</dt><dd className={`money font-semibold ${r.expenses ? 'text-bad' : ''}`}>{peso(r.expenses)}</dd></div>
               </dl>
               <div className="mt-4"><DuesBar paid={r.paid_members} members={r.members} /></div>
             </Card>

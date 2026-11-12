@@ -66,7 +66,7 @@ export function Members() {
   return (
     <>
       <PageHeader title="Members" sub={entity ? `${entity.short_name} · dues ${peso(entity.dues_amount)} ${entity.dues_period === 'semester' ? 'per semester' : 'per school year'}` : undefined}
-        action={<Button onClick={() => setAdding(true)}><UserPlus className="size-5" /><span className="hidden sm:inline">Add member</span></Button>} />
+        action={<Button aria-label="Add member" onClick={() => setAdding(true)}><UserPlus className="size-5" /><span className="hidden sm:inline">Add member</span></Button>} />
       <Card className="mb-4"><DuesBar paid={paid} members={all.length} /></Card>
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1">
