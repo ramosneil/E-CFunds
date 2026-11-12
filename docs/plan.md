@@ -57,5 +57,6 @@ Source system: `C:\xampp\htdocs\mini system` (PHP + MySQL/XAMPP).
 
 ## 5. Open items
 - Exact balance formulas (verified in Phase 1, not assumed).
-- Install Claude GitHub App on the repo so Claude can push.
-- Neil to rotate the Gemini key.
+- Working mode: Claude works autonomously; things only Neil can do are tracked in `docs/handoff.md`.
+- Gemini: new key created by Neil; added as Supabase secret in Phase 6.
+- Status 2026-11-12: Phase 0 done and pushed. Next: Phase 1.
