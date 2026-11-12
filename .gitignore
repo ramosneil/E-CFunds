@@ -1,0 +1,40 @@
+# Dependencies & builds
+node_modules/
+dist/
+build/
+.vite/
+coverage/
+
+# Env & secrets — never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+**/secrets.php
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# Capacitor / Android
+android/app/build/
+android/.gradle/
+android/local.properties
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# Data dumps (contain student personal data)
+*.sql.gz
+migration/raw/
+
+# Logs, OS, editor
+*.log
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.vercel/
