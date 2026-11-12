@@ -77,3 +77,8 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   ₱0.00, Add member aria-label, receipt tab opened during the click (phones block async popups).
 - Rule changes: screenshot every page (#11); ASK FIRST replaces "work autonomously". Installed skill
   design-taste-frontend (reviewed; global). Plugins ui-ux-pro-max + superpowers installed by Neil.
+- Student ID sign-in (planned in plan mode, Neil chose: ID as sign-in shortcut, My account to set a password,
+  5 tries → 15-min lock). Migration 9 + Edge Function `student-login` (curl: 400/401 generic/429 on 6th/CORS).
+  Migration 10 cleans Student IDs everywhere after Neil's "TEST -0001" request missed the roster's TEST-0001.
+  Real test: TEST-0001 signed in by Student ID (1 ok attempt logged); student sees own dues/reports only —
+  direct API check: 0 ledger/requests/messages/audit rows, 1 own membership/student/profile.

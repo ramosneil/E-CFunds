@@ -37,6 +37,12 @@ Admin money: `admin_release`, `admin_adjust(entity, pocket, ±1, amount, reason)
 Accounts: `review_account(profile, approve, role?, entity?, student?, remarks?)`, `disable_account`,
 `set_my_request(role, entity?, student_no?, full_name?)` (pending user states/fixes its own request; migration 8, Phase 5;
 dry-run checked on the live project 9/9 and rolled back — local suite not run on Neil's PC, no Postgres there). Messages: `mark_thread_read`.
+Student ID sign-in (migrations 9–10): Edge Function `supabase/functions/student-login` (verify_jwt off; the password is the
+check) calls `student_login_lookup` / `student_login_record` — **service_role only** — to turn an approved student's ID into
+their email on the server; returns session tokens only. Lockout: 5 failed tries per ID in 15 min (`private.login_attempts`,
+RLS on with no policies on purpose → advisor INFO "RLS enabled, no policy" is expected). Student IDs are cleaned everywhere
+(`private.norm_student_no`: spaces removed, upper-case) by triggers on `students` and `profiles`. CORS: localhost:3000 and
+127.0.0.1:3000 + secret `ALLOWED_ORIGINS` (add the live address in Phase 8).
 Each public function is a thin SECURITY INVOKER wrapper; the real body is SECURITY DEFINER in the unexposed
 `private` schema and checks the caller's role itself. Limits are re-checked at approval; per-entity row lock
 prevents two approvals racing past a limit.

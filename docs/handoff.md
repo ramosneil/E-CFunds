@@ -15,6 +15,10 @@ Update it every session: tick done items, add new ones.
       If the email link opens a page that won't load: Supabase → Authentication → URL Configuration →
       Site URL `http://localhost:3000`, and add `http://localhost:3000/**` under Redirect URLs.
 
+- [ ] Decide: Supabase advisor warns "Leaked password protection disabled" (Authentication → Passwords). Claude believes
+      it needs a paid plan; check the switch in the dashboard — if it's free to turn on, turn it on.
+- [ ] BEFORE REAL USE also remove the test student account (TEST-0001, 3rd email) with the JOES test data above.
+
 ## Phase 6 (AI chatbot)
 - [ ] Add your NEW Gemini key as a Supabase secret named `GEMINI_API_KEY`
       (Supabase dashboard → Project Settings → Edge Functions → Secrets). Never paste it in chat.
@@ -24,6 +28,8 @@ Update it every session: tick done items, add new ones.
       (Claude will give you the exact URLs)
 
 ## Phase 8 (Deploy)
+- [ ] Add the live app address to the `student-login` function: Supabase → Edge Functions → Secrets →
+      `ALLOWED_ORIGINS` = `https://<the vercel address>` (Claude will give the exact value)
 - [ ] Approve linking the GitHub repo to Vercel (Claude does the rest via the Vercel connector)
 
 ## Done
