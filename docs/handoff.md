@@ -3,8 +3,9 @@
 Claude works through the phases on its own. This list is what it can't do itself.
 Update it every session: tick done items, add new ones.
 
-## Before / during Phase 1
-- [ ] Connect the folder `C:\xampp\htdocs\mini system` to the new session (Claude reads the old code from it)
+## Phase 1 gate (now)
+- [ ] Read `docs/business-rules.md` and confirm it (or tell Claude what's wrong)
+- [ ] Answer §10: partial dues payments allowed? Can students see others' paid/unpaid status?
 
 ## Phase 3 (Supabase)
 - [ ] Approve Claude creating a FREE Supabase project (it will ask once, through the Supabase connector)
@@ -22,6 +23,8 @@ Update it every session: tick done items, add new ones.
 - [ ] Approve linking the GitHub repo to Vercel (Claude does the rest via the Vercel connector)
 
 ## Done
+- [x] Connected `C:\xampp\htdocs\mini system` (session 2)
+- [x] Answered Phase 1 money-model questions (session 2)
 - [x] Created private repo `ramosneil/E-CFunds`
 - [x] Gave Claude's GitHub App access to the repo
 - [x] Created a new Gemini key
