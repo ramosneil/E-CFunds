@@ -350,6 +350,12 @@ select tests.ok((select locked_until > now() from public.student_login_lookup('2
 update private.login_attempts set at = at - interval '16 minutes' where student_no = '2024-0317';
 select tests.ok((select locked_until is null from public.student_login_lookup('2024-0317')), 'student login: lock ends after 15 minutes');
 
+-- Manila dates (migration 12): "today" is the Manila calendar day even when UTC is still on the previous day
+select tests.ok(pg_get_expr(d.adbin, d.adrelid) ilike '%Asia/Manila%', 'dates: ledger default date is the Manila day')
+  from pg_attrdef d join pg_attribute a on a.attrelid = d.adrelid and a.attnum = d.adnum
+ where d.adrelid = 'public.ledger_entries'::regclass and a.attname = 'occurred_on';
+select tests.ok(pg_get_viewdef('public.accredited_list'::regclass) ilike '%Asia/Manila%', 'dates: Expired uses the Manila day');
+
 -- Student IDs are cleaned everywhere (migration 10): spaces removed, letters upper-cased
 insert into public.students (student_no, full_name) values (' norm 0009 ', 'Norm Test');
 select tests.ok((select student_no = 'NORM0009' from public.students where full_name = 'Norm Test'), 'student IDs: roster IDs are cleaned');

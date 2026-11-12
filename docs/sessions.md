@@ -96,3 +96,5 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   00:00–08:00 Manila. Asked Neil before changing the database.
 - Mistake: my first export test imported the app's modules a 2nd time in Neil's admin tab; two Supabase clients
   raced on the refresh token and signed the tab out. Neil signed in again; later tests only clicked real buttons.
+- Neil approved Manila dates → migration 12 (ledger default + accredited Expired use Manila's day). Live dry-run at
+  01:00 Manila: an entry expiring on UTC-today flipped accredited → expired as intended; applied; advisor unchanged.

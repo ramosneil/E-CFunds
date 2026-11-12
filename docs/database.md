@@ -59,3 +59,5 @@ prevents two approvals racing past a limit.
   (data only, not in git). Later admins are approved in the app by an existing admin.
 - Storage buckets: `receipts` (private; `receipts/<entity_id>/…`, treasurer own folder, admin all, no delete) and `logos` (public read, admin writes).
 - TypeScript types: regenerate in Phase 5 with the Supabase connector (`generate_typescript_types`).
+- Dates (migration 12): the database runs on UTC; "today" is computed as Manila's day,
+  `(now() at time zone 'Asia/Manila')::date`, in the ledger's default date and the accredited Expired check.

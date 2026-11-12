@@ -27,7 +27,7 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
   admin phone nav = Dashboard/Approvals/Orgs/Messages/More. Live-tested admin↔JOES, test messages deleted.
   Exports: org financial report (PDF w/ charts + ledger CSV), school summary (PDF+CSV), members CSV, accredited
   (PDF+CSV); OMSC letterhead (seal cropped from Storage logos/brand/omsc-seal-source.jpg), Inter font embedded
-  (₱), jsPDF lazy-loaded. Chart colours validated (dataviz). NEXT: DB timezone (asked Neil); code-split. PR: phase-5-app → main (open on GitHub by Neil). School year dates: SAS sets them in the app
+  (₱), jsPDF lazy-loaded. Chart colours validated (dataviz). Migration 12: "today" = Manila day (ledger default + Expired). NEXT: code-split. PR: phase-5-app → main (open on GitHub by Neil). School year dates: SAS sets them in the app
 - Local repo on Neil's PC: `C:\xampp\htdocs\E-CFunds`; old system stays a plain folder (never commit from it)
 - Gemini key: old key removed from old code; Neil has a NEW key (adds it himself in Phase 6)
 - Full plan & phases: `docs/plan.md` · Handoff checklist: `docs/handoff.md`
