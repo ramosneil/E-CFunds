@@ -3,11 +3,7 @@
 Claude works through the phases on its own. This list is what it can't do itself.
 Update it every session: tick done items, add new ones.
 
-## Phase 4 (next): data migration
-- [ ] Share the folder `C:\xampp\htdocs\mini system` with Claude (steps in the session-3 chat):
-      Claude desktop app → Settings → Claude Code → Remote Control → add the folder, keep the app open.
-      If that option isn't there: start the next session from the Claude desktop app on your PC
-      with that folder (like session 2), then say "continue E-CFunds".
+## Phase 4: data migration — DONE 2026-11-12 (nothing left for Neil)
 
 ## Phase 6 (AI chatbot)
 - [ ] Add your NEW Gemini key as a Supabase secret named `GEMINI_API_KEY`
@@ -21,6 +17,11 @@ Update it every session: tick done items, add new ones.
 - [ ] Approve linking the GitHub repo to Vercel (Claude does the rest via the Vercel connector)
 
 ## Done
+- [x] Name stays "Junior Operation Executive Society (JOES)"; its logo (old `OAES.png`) reads "Office Administration
+      Executive Society" — swap the logo in the app if a JOES one turns up (session 4)
+- [x] Dues period: Neil let Claude decide → `school_year` for all 10 (matches old system: one payment per student);
+      each treasurer can switch their org to `semester` in the app (session 4)
+- [x] Put the Supabase secret key in `E-CFunds/.env` (gitignored); Claude uploaded the 10 logos, 10/10 verified (session 4)
 - [x] Confirmed `docs/business-rules.md`; full dues only; students see counts only (session 3)
 - [x] Approved the "E-CFunds" cloud environment (session 3)
 - [x] Installed plugins: supabase, Vercel, Design, frontend-design (session 3)

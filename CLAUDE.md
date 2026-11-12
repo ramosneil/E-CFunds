@@ -3,7 +3,7 @@
 Fund monitoring app for OMSC Office of Student Affairs (SAS) clubs & organizations.
 Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud PWA + Android app.
 
-## Status (updated 2026-11-12, session 3)
+## Status (updated 2026-11-12, session 4)
 - Phase 0 (repo setup) — DONE
 - Phase 1 (business rules) — DONE, CONFIRMED by Neil: `docs/business-rules.md` +
   `scripts/phase1-rules-check.sql` (passes). Full dues payment only; students see counts only
@@ -11,9 +11,12 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
 - Phase 3 (database) — DONE: Supabase project `e-cfunds` (ref nvmlawpojydnouzqilaf, Singapore, Free),
   7 migrations live, `bash scripts/phase3-db-test.sh` = 89/89, security advisor clean. See `docs/database.md`
 - First admin: Neil's Gmail is on `private.bootstrap_admins` → becomes admin on first verified sign-in
-- NEXT: Phase 4 — migrate entities + logos, accredited list + history from the old system → needs
-  `C:\xampp\htdocs\mini system` shared (Remote Control) or a session run on Neil's PC.
-  School year dates: left for SAS to set in the app (Neil, session 3)
+- Phase 4 (data) — DONE (session 4, run on Neil's PC): 10 orgs/clubs (ids 1–10 = old ids; SSG school-wide),
+  dues ₱10–35 all `school_year`, logos in Storage `logos/<id>/logo.png`, accredited list (10) + history
+  (10 inserts + 3 old edits). Load: `supabase/seed/phase4_old_system_data.sql` (run once, self-checks);
+  logos: `node scripts/phase4-upload-logos.mjs` (reads `.env` SUPABASE_URL + SUPABASE_SECRET_KEY, gitignored)
+- NEXT: Phase 5 — app build. School year dates: left for SAS to set in the app (Neil, session 3)
+- Local repo on Neil's PC: `C:\xampp\htdocs\E-CFunds`; old system stays a plain folder (never commit from it)
 - Gemini key: old key removed from old code; Neil has a NEW key (adds it himself in Phase 6)
 - Full plan & phases: `docs/plan.md` · Handoff checklist: `docs/handoff.md`
 - What each session made: `docs/sessions.md` · Neil's working rules: `docs/working-rules.md`

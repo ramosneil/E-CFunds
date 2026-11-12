@@ -45,3 +45,15 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   verified sign-in. School year dates left for SAS to set in the app.
 - Old folder NOT reachable from the cloud session (no Remote Control folder shared).
 - NEXT: Phase 4 — migrate entities + logos, accredited list + history (needs the old folder shared).
+
+## Session 4 — Phase 4 data migration (2026-11-12, on Neil's PC)
+- Cloned the repo to `C:\xampp\htdocs\E-CFunds`; the old system folder stays a plain copy (no git, never committed from).
+- Loaded into the live project: 10 orgs/clubs (SSG school-wide), dues from the old roster rows
+  (one amount per org, 50 rows each: SSG 15, JOES 20, PADC 35, YMO 35, LSC 10, JFMS 20, clubs 20),
+  accredited list (10, all now derived "expired") + history (trigger inserts + 3 old edits, marked migrated).
+  Script: `supabase/seed/phase4_old_system_data.sql` — runs in one transaction with built-in checks.
+- Logos: Neil added the Supabase secret key to `.env` (gitignored); `scripts/phase4-upload-logos.mjs`
+  uploaded 10/10 and verified byte sizes over the public URL. Security advisor clean.
+- Decisions: dues period `school_year` for all (Neil let Claude decide; matches old one-payment-per-student);
+  JOES keeps its name although its logo reads "Office Administration Executive Society".
+- A temporary anon upload policy was refused by the safety check → used the secret-key script instead.
