@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { CalendarPlus } from 'lucide-react';
+import { CalendarPlus, Pencil } from 'lucide-react';
 import { useSchoolYears, useSemesters } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
 import { date } from '../../lib/format';
@@ -13,7 +13,7 @@ export function Calendar() {
   return (
     <>
       <PageHeader title="School year" sub="Dues, requests and reports belong to the current school year."
-        action={<Button onClick={() => setAdding(true)}><CalendarPlus className="size-5" />New school year</Button>} />
+        action={<Button onClick={() => setAdding(true)}><CalendarPlus className="size-5" /><span className="sm:hidden">New</span><span className="hidden sm:inline">New school year</span></Button>} />
       {years.isLoading ? <Spinner /> : years.data?.length ? (
         <div className="space-y-4">{years.data.map((y) => <YearCard key={y.id} y={y} />)}</div>
       ) : (
@@ -29,6 +29,7 @@ function YearCard({ y }: { y: Row<'school_years'> }) {
   const qc = useQueryClient();
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
 
   async function makeCurrent(kind: 'year' | 'sem', id: number) {
     setBusy(kind + id); setErr('');
@@ -47,8 +48,11 @@ function YearCard({ y }: { y: Row<'school_years'> }) {
         : <Button variant="soft" className="h-10" busy={busy === 'year' + y.id} onClick={() => makeCurrent('year', y.id)}>Make current</Button>}>
         {y.label}
       </SectionTitle>
-      <p className="text-muted text-[14px] -mt-2 mb-4">{date(y.starts_on)} – {date(y.ends_on)}</p>
-      <div className="grid sm:grid-cols-2 gap-3">
+      <div className="flex items-center justify-between gap-3 -mt-2 mb-4">
+        <p className="text-muted text-[14px]">{date(y.starts_on)} – {date(y.ends_on)}</p>
+        <button onClick={() => setEditing(true)} className="flex items-center gap-1.5 text-primary font-semibold text-[14px] cursor-pointer"><Pencil className="size-4" />Edit dates</button>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {sems.data?.map((s) => (
           <div key={s.id} className="rounded-[16px] bg-surface2 p-4 flex items-center justify-between gap-3">
             <div>
@@ -61,7 +65,55 @@ function YearCard({ y }: { y: Row<'school_years'> }) {
         ))}
       </div>
       {err && <div className="mt-3"><Alert>{err}</Alert></div>}
+      {editing && sems.data && <EditDatesSheet y={y} sems={sems.data} onClose={() => setEditing(false)} />}
     </Card>
+  );
+}
+
+function EditDatesSheet({ y, sems, onClose }: { y: Row<'school_years'>; sems: Row<'semesters'>[]; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [label, setLabel] = useState(y.label);
+  const [d, setD] = useState(() => Object.fromEntries(sems.map((s) => [s.id, { start: s.starts_on, end: s.ends_on }])));
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const ordered = [...sems].sort((a, b) => a.term - b.term);
+
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    const seq = ordered.flatMap((s) => [d[s.id].start, d[s.id].end]);
+    if (seq.some((v, i) => !v || (i > 0 && v <= seq[i - 1]))) { setErr('Dates must run in order: each semester starts after the previous one ends.'); return; }
+    setBusy(true); setErr('');
+    try {
+      for (const s of ordered) {
+        const r = await supabase.from('semesters').update({ starts_on: d[s.id].start, ends_on: d[s.id].end }).eq('id', s.id);
+        if (r.error) throw r.error;
+      }
+      const r = await supabase.from('school_years').update({ label: label.trim(), starts_on: seq[0], ends_on: seq[seq.length - 1] }).eq('id', y.id);
+      if (r.error) throw r.error;
+      void qc.invalidateQueries();
+      onClose();
+    } catch (x) { setErr(errorText(x)); } finally { setBusy(false); }
+  }
+
+  return (
+    <Sheet open onClose={onClose} title={`Edit ${y.label}`}>
+      <form onSubmit={submit} className="space-y-4">
+        <Field label="Label"><Input required value={label} onChange={(e) => setLabel(e.target.value)} placeholder="2026-2027" /></Field>
+        {ordered.map((s) => (
+          <div key={s.id} className="grid grid-cols-2 gap-3">
+            <Field label={`${s.term === 1 ? '1st' : s.term === 2 ? '2nd' : 'Summer'} sem starts`}>
+              <Input type="date" required value={d[s.id].start} onChange={(e) => setD({ ...d, [s.id]: { ...d[s.id], start: e.target.value } })} />
+            </Field>
+            <Field label="Ends">
+              <Input type="date" required value={d[s.id].end} onChange={(e) => setD({ ...d, [s.id]: { ...d[s.id], end: e.target.value } })} />
+            </Field>
+          </div>
+        ))}
+        <p className="text-[13px] text-muted">The school year runs from the first semester's start to the last semester's end.</p>
+        {err && <Alert>{err}</Alert>}
+        <Button type="submit" busy={busy} className="w-full h-[54px]">Save dates</Button>
+      </form>
+    </Sheet>
   );
 }
 

@@ -18,7 +18,7 @@ export function Button({ variant = 'primary', busy, className, children, ...p }:
   }[variant];
   return (
     <button {...p} disabled={p.disabled || busy}
-      className={cx('inline-flex items-center justify-center gap-2 h-12 px-5 rounded-[14px] font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer', v, className)}>
+      className={cx('inline-flex items-center justify-center gap-2 h-12 px-5 whitespace-nowrap rounded-[14px] font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer', v, className)}>
       {busy && <Loader2 className="size-4 animate-spin" aria-hidden />}{children}
     </button>
   );
