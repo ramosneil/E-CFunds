@@ -105,7 +105,7 @@ export type Database = {
           created_at: string; email: string | null; entity_id: number | null; full_name: string | null; id: string;
           requested_entity_id: number | null; requested_role: E['app_role'] | null; requested_student_no: string | null;
           review_remarks: string | null; reviewed_at: string | null; reviewed_by: string | null; role: E['app_role'] | null;
-          status: E['account_status']; student_id: number | null;
+          status: E['account_status']; student_id: number | null; terms_accepted_at: string | null;
         };
         Insert: never; Update: never; Relationships: [];
       };
@@ -153,6 +153,7 @@ export type Database = {
           paid_amount: number; to_collect: string[];
         };
       };
+      accept_terms: { Args: Record<string, never>; Returns: string };
       admin_adjust: { Args: { p_amount: number; p_direction: number; p_entity_id: number; p_pocket: E['pocket']; p_reason: string }; Returns: number };
       admin_release: { Args: { p_amount: number; p_description: string; p_entity_id: number }; Returns: number };
       cancel_request: { Args: { p_request_id: number }; Returns: undefined };

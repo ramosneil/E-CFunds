@@ -4,6 +4,7 @@ import { useAuth } from '../../lib/auth';
 import { useEntities } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
 import { Alert, Button, Field, Input, Select } from '../../components/ui';
+import { TermsCheckbox } from '../../components/Terms';
 import { AuthLayout } from './AuthLayout';
 
 export function Pending() {
@@ -72,11 +73,18 @@ function RequestForm({ initial, onDone, onCancel }: {
   const [name, setName] = useState(initial.full_name ?? '');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
-  const { signOut } = useAuth();
+  const { signOut, profile } = useAuth();
+  const needsTerms = !profile?.terms_accepted_at;   // Google sign-ups accept here; email sign-ups already did
+  const [agree, setAgree] = useState(false);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
+    if (needsTerms && !agree) { setErr('Please agree to the Terms and Privacy Notice.'); return; }
     setBusy(true); setErr('');
+    if (needsTerms) {
+      const t = await supabase.rpc('accept_terms');
+      if (t.error) { setBusy(false); setErr(errorText(t.error)); return; }
+    }
     const { error } = await supabase.rpc('set_my_request', {
       p_role: role,
       p_entity_id: role === 'treasurer' ? Number(entityId) || undefined : undefined,
@@ -116,8 +124,9 @@ function RequestForm({ initial, onDone, onCancel }: {
         ) : (
           <Field label="Student ID" hint="Must match the ID on your org's roster."><Input required value={studentNo} onChange={(e) => setStudentNo(e.target.value)} placeholder="e.g. 2024-0317" /></Field>
         )}
+        {needsTerms && <TermsCheckbox checked={agree} onChange={setAgree} />}
         {err && <Alert>{err}</Alert>}
-        <Button type="submit" busy={busy} className="w-full h-[54px]">Send to SAS</Button>
+        <Button type="submit" busy={busy} disabled={needsTerms && !agree} className="w-full h-[54px]">Send to SAS</Button>
         {onCancel ? <Button type="button" variant="ghost" className="w-full" onClick={onCancel}>Cancel</Button>
           : <button type="button" onClick={signOut} className="block mx-auto text-primary font-semibold cursor-pointer">Sign out</button>}
       </form>

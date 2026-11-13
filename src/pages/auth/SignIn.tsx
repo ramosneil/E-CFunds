@@ -7,6 +7,10 @@ import { AuthLayout, Divider, GoogleButton } from './AuthLayout';
 import { isNative, webOrigin } from '../../lib/native';
 import { NATIVE_AUTH_ERROR, nativeGoogleSignIn } from '../../lib/nativeAuth';
 import { AndroidAppLink } from '../../components/AndroidAppLink';
+import { PasswordInput, PasswordStrength } from '../../components/PasswordInput';
+import { TermsCheckbox, TermsNote } from '../../components/Terms';
+import { meetsRules } from '../../lib/password';
+import { toast } from '../../lib/toast';
 
 const redirect = () => webOrigin() + '/';
 const googleError = (m: string) => /provider is not enabled/i.test(m)
@@ -56,8 +60,11 @@ export function SignIn() {
       if (s.error) setErr(errorText(s.error));
       return;
     }
-    const { error } = await supabase.auth.signInWithPassword({ email: id, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email: id, password });
     setBusy(false);
+    if (!error && (data as { weakPassword?: unknown } | null)?.weakPassword) {
+      toast({ title: 'Please update your password', body: 'It is weaker than the new rule. Change it in My account.', tone: 'warn', href: '/account', sticky: true, silent: true });
+    }
     if (error) setErr(/email not confirmed/i.test(error.message)
       ? 'Please confirm your email first. Check your inbox for the link we sent.'
       : /invalid login/i.test(error.message) ? 'Wrong email or password.' : errorText(error));
@@ -71,9 +78,10 @@ export function SignIn() {
         <Field label="Email or Student ID" hint="Students: your Student ID works once SAS has approved your account.">
           <Input autoComplete="username" autoCapitalize="none" spellCheck={false} required value={email} onChange={(e) => setEmail(e.target.value)} />
         </Field>
-        <Field label="Password"><Input type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
+        <Field label="Password"><PasswordInput autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
         {err && <Alert>{err}</Alert>}
         <Button type="submit" busy={busy} className="w-full h-[54px]">Sign in</Button>
+        <TermsNote action="signing in" />
       </form>
       <div className="mt-5 flex justify-between text-[14px]">
         <Link to="/forgot" className="text-primary font-semibold">Forgot password?</Link>
@@ -91,15 +99,17 @@ export function Register() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [sent, setSent] = useState(false);
+  const [agree, setAgree] = useState(false);
   useNativeAuthErrors(setErr);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (password.length < 8) { setErr('Use at least 8 characters for your password.'); return; }
+    if (!meetsRules(password)) { setErr('Choose a stronger password: it needs every item in the checklist.'); return; }
+    if (!agree) { setErr('Please agree to the Terms and Privacy Notice to create an account.'); return; }
     setBusy(true); setErr('');
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(), password,
-      options: { data: { full_name: name.trim() }, emailRedirectTo: redirect() },
+      options: { data: { full_name: name.trim(), terms_accepted: true }, emailRedirectTo: redirect() },
     });
     setBusy(false);
     if (error) { setErr(errorText(error)); return; }
@@ -119,13 +129,18 @@ export function Register() {
   return (
     <AuthLayout title="Create your account" sub="Students and treasurers sign up here. SAS approves every account.">
       <GoogleButton onClick={() => googleSignIn(setErr)} />
+      <p className="text-[12.5px] text-muted text-center mt-2">With Google you'll agree to the Terms on the next screen.</p>
       <Divider label="or with email" />
       <form onSubmit={submit} className="space-y-4">
         <Field label="Full name"><Input autoComplete="name" required value={name} onChange={(e) => setName(e.target.value)} /></Field>
         <Field label="Email"><Input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
-        <Field label="Password" hint="At least 8 characters."><Input type="password" autoComplete="new-password" required value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
+        <div>
+          <Field label="Password"><PasswordInput autoComplete="new-password" required value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
+          <PasswordStrength value={password} />
+        </div>
+        <TermsCheckbox checked={agree} onChange={setAgree} />
         {err && <Alert>{err}</Alert>}
-        <Button type="submit" busy={busy} className="w-full h-[54px]">Create account</Button>
+        <Button type="submit" busy={busy} disabled={!agree || !meetsRules(password)} className="w-full h-[54px]">Create account</Button>
       </form>
       <p className="mt-5 text-center text-[14px] text-muted">Already have one? <Link to="/" className="text-primary font-semibold">Sign in</Link></p>
     </AuthLayout>
@@ -165,7 +180,7 @@ export function ResetPassword() {
   const [done, setDone] = useState(false);
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (password.length < 8) { setErr('Use at least 8 characters.'); return; }
+    if (!meetsRules(password)) { setErr('Choose a stronger password: it needs every item in the checklist.'); return; }
     setBusy(true); setErr('');
     const { error } = await supabase.auth.updateUser({ password });
     setBusy(false);
@@ -175,9 +190,12 @@ export function ResetPassword() {
     <AuthLayout title="Set a new password">
       {done ? <><Alert tone="ok">Password changed.</Alert><Link to="/" className="block text-center mt-6 text-primary font-semibold">Continue</Link></> : (
         <form onSubmit={submit} className="space-y-4">
-          <Field label="New password" hint="At least 8 characters."><Input type="password" autoComplete="new-password" required value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
+          <div>
+            <Field label="New password"><PasswordInput autoComplete="new-password" required value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
+            <PasswordStrength value={password} />
+          </div>
           {err && <Alert>{err}</Alert>}
-          <Button type="submit" busy={busy} className="w-full h-[54px]">Save password</Button>
+          <Button type="submit" busy={busy} disabled={!meetsRules(password)} className="w-full h-[54px]">Save password</Button>
         </form>
       )}
     </AuthLayout>

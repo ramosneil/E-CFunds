@@ -93,7 +93,7 @@ export function Privacy() {
   );
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+export function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="mt-10">
       <h2 className="font-display text-[20px] font-extrabold">{title}</h2>
@@ -102,7 +102,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function List({ items }: { items: ReactNode[] }) {
+export function List({ items }: { items: ReactNode[] }) {
   return (
     <ul className="space-y-2">
       {items.map((it, i) => (

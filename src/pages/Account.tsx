@@ -4,11 +4,13 @@ import { Link } from 'react-router';
 import { CheckCircle2, Download, IdCard, KeyRound, Smartphone } from 'lucide-react';
 import { install } from '../lib/install';
 import { AndroidAppLink } from '../components/AndroidAppLink';
+import { PasswordInput, PasswordStrength } from '../components/PasswordInput';
+import { meetsRules } from '../lib/password';
 import { isNative } from '../lib/native';
 import { useAuth } from '../lib/auth';
 import { useEntities } from '../lib/data';
 import { supabase, errorText } from '../lib/supabase';
-import { Alert, Button, Card, Field, Input, PageHeader, SectionTitle } from '../components/ui';
+import { Alert, Button, Card, Field, PageHeader, SectionTitle } from '../components/ui';
 
 /** My account: who I am, plus set/change password (lets Google users use Student ID sign-in too). */
 export function Account() {
@@ -69,7 +71,7 @@ function PasswordCard({ hasPassword }: { hasPassword: boolean }) {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (pw.length < 8) { setMsg({ tone: 'bad', text: 'Use at least 8 characters.' }); return; }
+    if (!meetsRules(pw)) { setMsg({ tone: 'bad', text: 'Choose a stronger password: it needs every item in the checklist.' }); return; }
     if (pw !== pw2) { setMsg({ tone: 'bad', text: 'The two passwords do not match.' }); return; }
     setBusy(true); setMsg(null);
     const { error } = await supabase.auth.updateUser({ password: pw });
@@ -84,8 +86,11 @@ function PasswordCard({ hasPassword }: { hasPassword: boolean }) {
       <SectionTitle>{hasPassword ? 'Change password' : 'Set a password'}</SectionTitle>
       {!hasPassword && <p className="text-[14px] text-muted -mt-1 mb-4">You signed in with Google. A password lets you also sign in with your email or Student ID.</p>}
       <form onSubmit={submit} className="space-y-4">
-        <Field label="New password" hint="At least 8 characters."><Input type="password" autoComplete="new-password" required value={pw} onChange={(e) => setPw(e.target.value)} /></Field>
-        <Field label="Type it again"><Input type="password" autoComplete="new-password" required value={pw2} onChange={(e) => setPw2(e.target.value)} /></Field>
+        <div>
+          <Field label="New password"><PasswordInput autoComplete="new-password" required value={pw} onChange={(e) => setPw(e.target.value)} /></Field>
+          <PasswordStrength value={pw} />
+        </div>
+        <Field label="Type it again" error={pw2 && pw2 !== pw ? 'The two passwords do not match.' : null}><PasswordInput autoComplete="new-password" required value={pw2} onChange={(e) => setPw2(e.target.value)} /></Field>
         {msg && <Alert tone={msg.tone}>{msg.text}</Alert>}
         <Button type="submit" busy={busy} className="w-full"><KeyRound className="size-5" />{hasPassword ? 'Change password' : 'Set password'}</Button>
       </form>

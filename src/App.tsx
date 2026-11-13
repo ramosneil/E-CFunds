@@ -29,6 +29,7 @@ const Reports = page(() => import('./pages/student/Reports'), 'Reports');
 const Account = page(() => import('./pages/Account'), 'Account');
 const Messages = page(() => import('./pages/Messages'), 'Messages');
 const Privacy = page(() => import('./pages/Privacy'), 'Privacy');
+const Terms = page(() => import('./pages/Terms'), 'Terms');
 
 const ROLE_PAGES = {
   admin: [AdminDashboard, Approvals, Orgs, EntityDetail, Messages, Accredited, Calendar, Account],
@@ -53,6 +54,7 @@ export function App() {
       <Routes>
         {/* Public for everyone, signed in or not (Google's consent screen links here). */}
         <Route path="/privacy" element={<Lazy><Privacy /></Lazy>} />
+        <Route path="/terms" element={<Lazy><Terms /></Lazy>} />
         <Route path="*" element={<Gate />} />
       </Routes>
     </BrowserRouter>
