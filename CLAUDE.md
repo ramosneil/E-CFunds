@@ -34,7 +34,7 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
   button for every role; keep-alive = `public.keep_alive()` (anon) + `.github/workflows/keep-alive.yml` every 3 days.
   LIVE: GEMINI_API_KEY added; model auto-picked (gemini-3.5-flash-lite). Admin + student tested (numbers, Taglish,
   privacy/injection refusals). Waiting: GitHub variable SUPABASE_PUBLISHABLE_KEY + merge for the keep-alive.
-  Leftover: treasurer export + treasurer chat test (needs a treasurer session). PR: phase-5-app → main (open on GitHub by Neil). School year dates: SAS sets them in the app
+  Treasurer chat + exports tested too (chat v5: reply language decided server-side from the latest question). PR: phase-5-app → main (open on GitHub by Neil). School year dates: SAS sets them in the app
 - Local repo on Neil's PC: `C:\xampp\htdocs\E-CFunds`; old system stays a plain folder (never commit from it)
 - Gemini key: old key removed from old code; Neil has a NEW key (adds it himself in Phase 6)
 - Full plan & phases: `docs/plan.md` · Handoff checklist: `docs/handoff.md`
