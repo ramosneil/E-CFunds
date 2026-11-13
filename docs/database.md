@@ -34,7 +34,18 @@ Reports: `get_entity_report(school_year, semester?)`, `get_school_summary(school
 Dues: `record_payment`, `undo_payment(reason)`, `set_entity_dues`.
 Requests: `file_request(entity, kind, amount, description, attachment?)`, `cancel_request`, `review_request(id, approve, remarks?)`.
 Admin money: `admin_release`, `admin_adjust(entity, pocket, ±1, amount, reason)`, `reverse_entry(id, reason)`, `close_school_year`.
-Accounts: `review_account(profile, approve, role?, entity?, student?, remarks?)`, `disable_account`. Messages: `mark_thread_read`.
+Accounts: `review_account(profile, approve, role?, entity?, student?, remarks?)`, `disable_account`,
+`set_my_request(role, entity?, student_no?, full_name?)` (pending user states/fixes its own request; migration 8, Phase 5;
+dry-run checked on the live project 9/9 and rolled back — local suite not run on Neil's PC, no Postgres there). Messages: `mark_thread_read`.
+Student ID sign-in (migrations 9–10): Edge Function `supabase/functions/student-login` (verify_jwt off; the password is the
+check) calls `student_login_lookup` / `student_login_record` — **service_role only** — to turn an approved student's ID into
+their email on the server; returns session tokens only. Lockout: 5 failed tries per ID in 15 min (`private.login_attempts`,
+RLS on with no policies on purpose → advisor INFO "RLS enabled, no policy" is expected). Student IDs are cleaned everywhere
+(`private.norm_student_no`: spaces removed, upper-case) by triggers on `students` and `profiles`. CORS: localhost:3000 and
+127.0.0.1:3000 + secret `ALLOWED_ORIGINS` (add the live address in Phase 8).
+Messaging (migration 11): `messages` (entity_id null = broadcast; `read_at` = read by the other side) + `broadcast_reads`
+(one row per treasurer per broadcast, written only by `mark_broadcasts_read()`; admin reads all, treasurer own). Realtime:
+`messages` is in the `supabase_realtime` publication (each user only receives rows their RLS allows).
 Each public function is a thin SECURITY INVOKER wrapper; the real body is SECURITY DEFINER in the unexposed
 `private` schema and checks the caller's role itself. Limits are re-checked at approval; per-entity row lock
 prevents two approvals racing past a limit.
@@ -48,3 +59,5 @@ prevents two approvals racing past a limit.
   (data only, not in git). Later admins are approved in the app by an existing admin.
 - Storage buckets: `receipts` (private; `receipts/<entity_id>/…`, treasurer own folder, admin all, no delete) and `logos` (public read, admin writes).
 - TypeScript types: regenerate in Phase 5 with the Supabase connector (`generate_typescript_types`).
+- Dates (migration 12): the database runs on UTC; "today" is computed as Manila's day,
+  `(now() at time zone 'Asia/Manila')::date`, in the ledger's default date and the accredited Expired check.

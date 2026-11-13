@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+/* Tokens from docs/design-system.md §2 (approved). Light is default; dark follows the OS unless
+   the user picked a theme (data-theme on <html>). */
+:root {
+  --bg: #F4F6FB; --surface: #FFFFFF; --surface2: #E6EAF3; --border: #DDE2EE;
+  --text: #0D1530; --muted: #566080;
+  --primary: #1D3FAF; --primary-soft: #E6ECFB; --on-primary: #FFFFFF;
+  --gold: #E0A82E; --on-gold: #1A1300; --gold-text: #875F0B; --gold-soft: #FBF2DC;
+  --ok: #13774A; --ok-soft: #E2F4EA; --warn: #9A5B00; --warn-soft: #FDF0DA; --bad: #B42318; --bad-soft: #FDE8E6;
+  --hero: #13297A; --hero-muted: #C9D4F7; --pocket-cash: #F0C14B; --pocket-saved: #8AA4FF;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #080D1C; --surface: #111934; --surface2: #18223F; --border: #25304F;
+    --text: #EDF0FA; --muted: #9BA6C6;
+    --primary: #8AA4FF; --primary-soft: #1B2A5A; --on-primary: #0A1233;
+    --gold: #F0C14B; --gold-text: #F0C14B; --gold-soft: #3A2F12;
+    --ok: #4CD38A; --ok-soft: #0F3324; --warn: #F2B045; --warn-soft: #3A2A0C; --bad: #FF8A80; --bad-soft: #3E1614;
+    --hero: #1A2C78; --hero-muted: #B9C6F5;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #080D1C; --surface: #111934; --surface2: #18223F; --border: #25304F;
+  --text: #EDF0FA; --muted: #9BA6C6;
+  --primary: #8AA4FF; --primary-soft: #1B2A5A; --on-primary: #0A1233;
+  --gold: #F0C14B; --gold-text: #F0C14B; --gold-soft: #3A2F12;
+  --ok: #4CD38A; --ok-soft: #0F3324; --warn: #F2B045; --warn-soft: #3A2A0C; --bad: #FF8A80; --bad-soft: #3E1614;
+  --hero: #1A2C78; --hero-muted: #B9C6F5;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg); --color-surface: var(--surface); --color-surface2: var(--surface2); --color-line: var(--border);
+  --color-ink: var(--text); --color-muted: var(--muted);
+  --color-primary: var(--primary); --color-primary-soft: var(--primary-soft); --color-on-primary: var(--on-primary);
+  --color-gold: var(--gold); --color-on-gold: var(--on-gold); --color-gold-text: var(--gold-text); --color-gold-soft: var(--gold-soft);
+  --color-ok: var(--ok); --color-ok-soft: var(--ok-soft); --color-warn: var(--warn); --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad); --color-bad-soft: var(--bad-soft);
+  --color-hero: var(--hero); --color-hero-muted: var(--hero-muted);
+  --color-pocket-cash: var(--pocket-cash); --color-pocket-saved: var(--pocket-saved);
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+html, body { background: var(--bg); color: var(--text); }
+body { font-family: var(--font-sans); font-size: 15px; line-height: 22px; -webkit-font-smoothing: antialiased; }
+.money { font-variant-numeric: tabular-nums; }
+.micro { font-size: 12px; line-height: 16px; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+input, select, textarea { font: inherit; color: inherit; }

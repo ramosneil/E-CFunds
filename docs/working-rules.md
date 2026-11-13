@@ -1,9 +1,10 @@
-# Neil's working rules (given in sessions 1 and 2; apply to every session)
+# Neil's working rules (given in sessions 1, 2 and 4; apply to every session)
 
 1. Keep all essentials in `CLAUDE.md` + `docs/` (that's the stand-in for `/compact`, which only
    Neil can type).
-2. Start each phase with a plan. Ask questions until ~95% sure of exactly what's needed; never assume.
-   - Later rule (session 1, overrides the asking part): **work autonomously through the phases**.
+2. Always start in plan mode (session 4 wording). Ask questions until ~95% sure of exactly what's
+   needed and exactly what to do; never assume.
+   - Session-1 rule "work autonomously through the phases" — REPLACED in session 4 by "ask first" (see below).
      Product decisions in `docs/plan.md` are made, so don't re-ask them. Ask only when something is
      genuinely unknown and a wrong guess would be costly. Hand Neil only what Claude can't do
      (logins, keys, approvals, installs on his PC) via `docs/handoff.md`.
@@ -18,3 +19,9 @@
 8. Act as the best UI/UX designer. Premium quality.
 9. If an app has light/dark mode, always design BOTH for every screen.
 10. Think deeply (ultrathink) on hard problems.
+11. **Check layouts with screenshots** (added session 4): take a screenshot of every page/screen built
+    to confirm the layout looks right — light AND dark, phone AND desktop — before calling it done.
+
+> **Decided by Neil (session 4): ASK FIRST.** When a decision is unclear, ask Neil before acting; don't
+> decide alone and log it. This replaces the session-1 "work autonomously" rule wherever they conflict.
+> Settled decisions in `docs/plan.md` / `docs/business-rules.md` still don't need re-asking.

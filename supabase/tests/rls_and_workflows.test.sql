@@ -92,6 +92,16 @@ select tests.ok((select count(*) = 0 from public.students), 'pending: sees no ro
 select tests.fails('select * from public.get_entity_report(2)', 'pending: cannot read reports');
 select tests.fails($$update public.profiles set status = 'approved', role = 'admin' where id = auth.uid()$$,
   'pending: cannot approve itself');
+select public.set_my_request('treasurer', (select id from public.entities where short_name = 'JOES'), null, 'Pat Pending');
+select tests.ok((select requested_role = 'treasurer' and requested_entity_id is not null and requested_student_no is null
+                   and full_name = 'Pat Pending' and status = 'pending' from public.profiles where id = auth.uid()),
+  'pending: can change what it asks for (role, org, name) but stays pending');
+select tests.fails($$select public.set_my_request('admin')$$, 'pending: cannot ask to be admin');
+select tests.fails($$select public.set_my_request('treasurer', 999999)$$, 'pending: treasurer must pick a real org/club');
+select tests.fails($$select public.set_my_request('student', null, ' x ')$$, 'pending: student must give a student ID');
+select public.set_my_request('student', null, '2024-0318');
+select tests.ok((select requested_role = 'student' and requested_entity_id is null and requested_student_no = '2024-0318'
+                 from public.profiles where id = auth.uid()), 'pending: switching to student clears the org');
 reset role;
 
 -- =========================== Admin approves accounts ===========================
@@ -105,6 +115,9 @@ select tests.fails($$select public.review_account('a0000000-0000-0000-0000-00000
   'admin: a second active treasurer for the same org is refused');
 select tests.fails($$select public.review_account('a0000000-0000-0000-0000-000000000001', true, 'student', null, 1)$$,
   'admin: cannot review own account');
+reset role;
+select tests.login('a0000000-0000-0000-0000-000000000004'); set role authenticated;
+select tests.fails($$select public.set_my_request('treasurer', 2)$$, 'approved user: cannot change its request any more');
 reset role;
 
 -- =========================== Treasurer (JOES) ===========================
@@ -233,6 +246,28 @@ select tests.ok((select count(*) = 2 from public.accredited_history where before
   'accredited: history keeps full before/after rows');
 select tests.ok((select effective_status = 'expired' from public.accredited_list), 'accredited: expired is derived from the date');
 
+-- Broadcast reads (migration 11): one row per treasurer per broadcast, written only by mark_broadcasts_read()
+select tests.fails($$insert into public.broadcast_reads (message_id, profile_id) select id, auth.uid() from public.messages limit 1$$,
+  'broadcast reads: nobody writes them directly');
+select tests.fails($$select public.mark_broadcasts_read()$$, 'broadcast reads: admin has no broadcasts to mark');
+reset role;
+select tests.login('a0000000-0000-0000-0000-000000000002'); set role authenticated;
+select tests.ok(public.mark_broadcasts_read() = 1, 'broadcast reads: treasurer marks the broadcast read');
+select tests.ok(public.mark_broadcasts_read() = 0, 'broadcast reads: marking again changes nothing');
+select tests.ok((select count(*) = 0 from public.messages where entity_id is not null and entity_id <> (select private.my_entity_id())),
+  'messages: treasurer sees only its own org conversation + broadcasts');
+reset role;
+select tests.login('a0000000-0000-0000-0000-000000000003'); set role authenticated;
+select tests.ok((select count(*) = 0 from public.broadcast_reads), 'broadcast reads: other treasurers cannot see them');
+reset role;
+select tests.login('a0000000-0000-0000-0000-000000000004'); set role authenticated;
+select tests.ok((select count(*) = 0 from public.messages), 'messages: students see none');
+reset role;
+select tests.login('a0000000-0000-0000-0000-000000000001'); set role authenticated;
+select tests.ok((select count(*) = 1 from public.broadcast_reads), 'broadcast reads: admin sees who has read');
+delete from public.messages where entity_id is null;
+select tests.ok((select count(*) = 0 from public.broadcast_reads), 'broadcast reads: deleting a broadcast removes its reads');
+
 -- Turnover: cash must be zero
 select tests.fails($$select public.close_school_year(2, 2)$$, 'turnover: refused while cash is on hand');
 reset role;
@@ -296,5 +331,53 @@ select tests.ok((select status = 'pending' from public.profiles where id = 'a000
 set role authenticated;
 select tests.fails('select * from private.bootstrap_admins', 'bootstrap admin: signed-in users cannot read the list');
 reset role;
+
+-- Student ID sign-in helpers: server function only (service_role), lockout after 5 failures in 15 minutes
+select tests.ok(not has_function_privilege('anon', 'public.student_login_lookup(text)', 'execute')
+            and not has_function_privilege('authenticated', 'public.student_login_lookup(text)', 'execute')
+            and not has_function_privilege('authenticated', 'public.student_login_record(text, boolean)', 'execute'),
+  'student login: browser roles cannot look up emails or write attempts');
+select tests.ok(has_function_privilege('service_role', 'public.student_login_lookup(text)', 'execute'),
+  'student login: the server function (service_role) can');
+select tests.ok((select email = 'stu1@test' and locked_until is null from public.student_login_lookup(' 2024-0317 ')),
+  'student login: an approved student ID resolves to its email (trimmed), not locked');
+select tests.ok((select email is null from public.student_login_lookup('2024-0318')),
+  'student login: a pending student ID resolves to nothing');
+select public.student_login_record('2024-0317', false) from generate_series(1, 4);
+select tests.ok((select locked_until is null from public.student_login_lookup('2024-0317')), 'student login: 4 failures, not locked');
+select public.student_login_record('2024-0317', false);
+select tests.ok((select locked_until > now() from public.student_login_lookup('2024-0317')), 'student login: 5th failure locks the ID');
+update private.login_attempts set at = at - interval '16 minutes' where student_no = '2024-0317';
+select tests.ok((select locked_until is null from public.student_login_lookup('2024-0317')), 'student login: lock ends after 15 minutes');
+
+-- Chat quota + keep-alive (migration 13)
+select tests.ok(has_function_privilege('anon', 'public.keep_alive()', 'execute')
+            and not has_function_privilege('anon', 'public.use_chat_quota()', 'execute'),
+  'keep-alive: anonymous ping allowed; chat quota needs a login');
+select tests.ok(public.keep_alive() = 'ok', 'keep-alive: returns ok');
+select tests.login('a0000000-0000-0000-0000-000000000004'); set role authenticated;   -- approved student
+select tests.ok(public.use_chat_quota() = 29, 'chat quota: first question leaves 29');
+select public.use_chat_quota() from generate_series(1, 29);
+select tests.fails($$select public.use_chat_quota()$$, 'chat quota: the 31st question of the day is refused');
+select tests.fails($$select * from private.chat_usage$$, 'chat quota: usage table is not readable');
+reset role;
+select tests.login('a0000000-0000-0000-0000-000000000001'); set role authenticated;   -- admin
+select tests.ok(public.use_chat_quota() is null, 'chat quota: admin is unlimited');
+reset role;
+
+-- Manila dates (migration 12): "today" is the Manila calendar day even when UTC is still on the previous day
+select tests.ok(pg_get_expr(d.adbin, d.adrelid) ilike '%Asia/Manila%', 'dates: ledger default date is the Manila day')
+  from pg_attrdef d join pg_attribute a on a.attrelid = d.adrelid and a.attnum = d.adnum
+ where d.adrelid = 'public.ledger_entries'::regclass and a.attname = 'occurred_on';
+select tests.ok(pg_get_viewdef('public.accredited_list'::regclass) ilike '%Asia/Manila%', 'dates: Expired uses the Manila day');
+
+-- Student IDs are cleaned everywhere (migration 10): spaces removed, letters upper-cased
+insert into public.students (student_no, full_name) values (' norm 0009 ', 'Norm Test');
+select tests.ok((select student_no = 'NORM0009' from public.students where full_name = 'Norm Test'), 'student IDs: roster IDs are cleaned');
+insert into auth.users (id, email, raw_user_meta_data)
+values ('a0000000-0000-0000-0000-000000000010', 'norm@test', '{"requested_role":"student","student_no":"norm 0009"}');
+select tests.ok((select requested_student_no = 'NORM0009' from public.profiles where email = 'norm@test'), 'student IDs: sign-up requests are cleaned');
+select tests.ok((select locked_until is null from public.student_login_lookup(' 2024 -0317')) and
+                (select email = 'stu1@test' from public.student_login_lookup('2024-0317 ')), 'student IDs: sign-in lookup cleans the typed ID');
 
 select format('%s checks passed', count(*)) as result from tests.results;

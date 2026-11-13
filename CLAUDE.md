@@ -3,7 +3,7 @@
 Fund monitoring app for OMSC Office of Student Affairs (SAS) clubs & organizations.
 Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud PWA + Android app.
 
-## Status (updated 2026-11-12, session 3)
+## Status (updated 2026-11-12, session 4)
 - Phase 0 (repo setup) — DONE
 - Phase 1 (business rules) — DONE, CONFIRMED by Neil: `docs/business-rules.md` +
   `scripts/phase1-rules-check.sql` (passes). Full dues payment only; students see counts only
@@ -11,9 +11,31 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
 - Phase 3 (database) — DONE: Supabase project `e-cfunds` (ref nvmlawpojydnouzqilaf, Singapore, Free),
   7 migrations live, `bash scripts/phase3-db-test.sh` = 89/89, security advisor clean. See `docs/database.md`
 - First admin: Neil's Gmail is on `private.bootstrap_admins` → becomes admin on first verified sign-in
-- NEXT: Phase 4 — migrate entities + logos, accredited list + history from the old system → needs
-  `C:\xampp\htdocs\mini system` shared (Remote Control) or a session run on Neil's PC.
-  School year dates: left for SAS to set in the app (Neil, session 3)
+- Phase 4 (data) — DONE (session 4, run on Neil's PC): 10 orgs/clubs (ids 1–10 = old ids; SSG school-wide),
+  dues ₱10–35 all `school_year`, logos in Storage `logos/<id>/logo.png`, accredited list (10) + history
+  (10 inserts + 3 old edits). Load: `supabase/seed/phase4_old_system_data.sql` (run once, self-checks);
+  logos: `node scripts/phase4-upload-logos.mjs` (reads `.env` SUPABASE_URL + SUPABASE_SECRET_KEY, gitignored)
+- Phase 5 (app) — IN PROGRESS (session 4): Vite 8 + React 19 + TS + Tailwind 4 + supabase-js + React Query +
+  React Router 8 in `src/`. Auth (email/password, Google button, reset), pending-request screen, Admin
+  (dashboard, approvals, orgs & logos, accredited + history, school year), Treasurer (home, members/dues,
+  requests with "If approved" preview + receipts), Student (my dues, reports). `npm run dev` → localhost:3000.
+  tsc strict + build pass; sign-in/register screenshotted light/dark × phone/desktop.
+  Migration 8 `set_my_request` (pending user states role/org/student ID; needed for Google sign-ups).
+  Session 4 later: admin/treasurer/student screens all screenshot-checked; JOES money flow tested (TEST data);
+  Student ID sign-in (migrations 9–10 + Edge Function `student-login`, lockout 5/15 min, IDs cleaned) + My account.
+  Messaging (migration 11 + Realtime): org conversations, broadcasts with per-treasurer reads, unread badges,
+  admin phone nav = Dashboard/Approvals/Orgs/Messages/More. Live-tested admin↔JOES, test messages deleted.
+  Exports: org financial report (PDF w/ charts + ledger CSV), school summary (PDF+CSV), members CSV, accredited
+  (PDF+CSV); OMSC letterhead (seal cropped from Storage logos/brand/omsc-seal-source.jpg), Inter font embedded
+  (₱), jsPDF lazy-loaded. Chart colours validated (dataviz). Migration 12: "today" = Manila day (ledger default + Expired). Faster load: lazy screens + idle warm-up,
+  react/supabase/app-libs chunks; sign-in JS 175 → 159 KB gz; students download student screens only.
+- Phase 6 — BUILT (session 4): Edge Function `chat` (verify_jwt on; reads with the caller's own token → RLS-scoped;
+  Gemini default, swappable via AI_PROVIDER; 30 questions/day, admin unlimited — migration 13), "Ask E-CFunds"
+  button for every role; keep-alive = `public.keep_alive()` (anon) + `.github/workflows/keep-alive.yml` every 3 days.
+  LIVE: GEMINI_API_KEY added; model auto-picked (gemini-3.5-flash-lite). Admin + student tested (numbers, Taglish,
+  privacy/injection refusals). Waiting: GitHub variable SUPABASE_PUBLISHABLE_KEY + merge for the keep-alive.
+  Treasurer chat + exports tested too (chat v5: reply language decided server-side from the latest question). PR: phase-5-app → main (open on GitHub by Neil). School year dates: SAS sets them in the app
+- Local repo on Neil's PC: `C:\xampp\htdocs\E-CFunds`; old system stays a plain folder (never commit from it)
 - Gemini key: old key removed from old code; Neil has a NEW key (adds it himself in Phase 6)
 - Full plan & phases: `docs/plan.md` · Handoff checklist: `docs/handoff.md`
 - What each session made: `docs/sessions.md` · Neil's working rules: `docs/working-rules.md`
@@ -70,13 +92,15 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
 - Old Gemini key was hard-coded in `api/config.php` → treated as leaked, rotated
 
 ## Working rules (from Neil)
-- WORK AUTONOMOUSLY through the phases. Only stop to hand Neil what Claude can't do itself
-  (account logins, keys, approvals, installs on his PC) — list them in `docs/handoff.md`
+- ASK FIRST (Neil, session 4): when a decision is unclear, ask Neil before acting — don't decide alone.
+  Things only Neil can do (logins, keys, approvals, installs) go in `docs/handoff.md`
 - Product decisions are already made (see `docs/plan.md`); don't re-ask them. Ask only when
   something is genuinely unknown and a wrong guess would be costly
 - Never hallucinate; verify facts and numbers
 - To-do lists include a self-check step; don't advance until current step is verified
 - UI: premium quality, always design light AND dark mode
+- Screenshot every page built (light + dark, phone + desktop) to confirm the layout looks right (session 4)
+- Start in plan mode; ask questions until ~95% sure, never assume (`docs/working-rules.md` #2)
 - "ULTRA…" = maximum-quality output
 - Update this file at session end; keep it 150–200 lines max; link out to docs/
 
