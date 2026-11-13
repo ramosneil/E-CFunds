@@ -165,6 +165,8 @@ export type Database = {
           paid_amount: number; to_collect: string[];
         };
       };
+      save_push_token: { Args: { p_token: string; p_platform?: string }; Returns: undefined };
+      drop_push_token: { Args: { p_token: string }; Returns: undefined };
       announce: { Args: { p_audience: 'students' | 'treasurers' | 'everyone'; p_title: string; p_body: string }; Returns: number };
       note_app_updated: { Args: { p_build: string }; Returns: undefined };
       mark_notifications_read: { Args: Record<string, never>; Returns: number };

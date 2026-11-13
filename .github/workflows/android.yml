@@ -87,6 +87,19 @@ jobs:
             echo "kind=debug" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Firebase config (push notifications)
+        env:
+          GSJ: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -n "$GSJ" ]; then
+            printf '%s' "$GSJ" > android/app/google-services.json
+            python3 -c "import json; d=json.load(open('android/app/google-services.json')); assert any(c['client_info']['android_client_info']['package_name']=='ph.edu.omsc.ecfunds' for c in d['client']), 'package name not in google-services.json'"               && echo "google-services.json OK"
+          elif [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "::error::GitHub secret GOOGLE_SERVICES_JSON is missing — release apps need it for push notifications"; exit 1
+          else
+            echo "::warning::No GOOGLE_SERVICES_JSON — this test build has no push notifications"
+          fi
+
       - name: Build the APK
         working-directory: android
         env:
@@ -112,7 +125,7 @@ jobs:
 
       - name: Remove the key file
         if: always()
-        run: rm -f "$RUNNER_TEMP/release.jks"
+        run: rm -f "$RUNNER_TEMP/release.jks" android/app/google-services.json
 
       - uses: actions/upload-artifact@v6
         with:

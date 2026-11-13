@@ -25,6 +25,7 @@ android/local.properties
 *.aab
 *.keystore
 *.jks
+android/app/google-services.json
 
 # Data dumps (contain student personal data)
 *.sql.gz

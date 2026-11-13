@@ -12,6 +12,7 @@ import { useLiveNotifications } from '../lib/notifications';
 import { useLiveScreens } from '../lib/live';
 import { isNative } from '../lib/native';
 import { askNotifyOnce, clearPhoneNotifications } from '../lib/phone';
+import { registerPush } from '../lib/push';
 
 // phone: false = desktop sidebar only (on phones these live in the admin "More" menu).
 type Item = { to: string; label: string; icon: ComponentType<{ className?: string }>; phone?: false; badge?: 'messages' };
@@ -55,7 +56,7 @@ export function Shell() {
   useLiveScreens(profile?.status === 'approved' ? uid : undefined);
   useEffect(() => {
     if (!isNative) return;
-    if (uid) { void askNotifyOnce(); return () => { void clearPhoneNotifications(); }; }
+    if (uid) { void registerPush().then(() => askNotifyOnce()); return () => { void clearPhoneNotifications(); }; }
   }, [uid]);
   const role = profile?.role ?? 'student';
   const items = NAV[role];

@@ -49,7 +49,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profile: profileQ.data ?? null,
     profileLoading: !!uid && profileQ.isLoading,
     refreshProfile: () => { void profileQ.refetch(); },
-    signOut: async () => { await supabase.auth.signOut(); qc.clear(); },
+    signOut: async () => {
+      // Android app: stop this phone's push notifications for this account first (needs the session).
+      await import('./push').then((m) => m.unregisterPush()).catch(() => {});
+      await supabase.auth.signOut(); qc.clear();
+    },
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

@@ -57,6 +57,7 @@ export async function requestNotify(): Promise<PhonePermission> {
 /** Post a phone notification (only when E-CFunds isn't on screen). */
 export async function phoneNotify(n: { id: number; title: string; body?: string | null; link?: string | null }) {
   if (document.visibilityState === 'visible') return false;
+  if ((await import('./push')).pushActive()) return false;   // push already delivers it
   const p = await plugin();
   if (!p) return false;
   try {
