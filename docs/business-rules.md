@@ -76,9 +76,21 @@ counts of orgs and clubs, students, paid and unpaid dues, and pending requests.
 - **Dues are set by each org/club** (Neil: "each org decides"). Each entity has a `dues_period`
   (`school_year` or `semester`) and a `dues_amount`. A membership is one student × entity × period,
   with its own `amount_due`, which is copied from the entity default and can be edited before payment.
-- **Membership limits:** a student can have at most **1 organization + 1 club** per school year.
-  **SSG is school-wide:** every enrolled student is automatically an SSG member, and SSG does
-  **not** count toward the 1-organization limit. (Entity flag: `is_school_wide`.)
+- **Organizations are mandatory by course** (Neil, 2026-11-13; migration 15 `course_memberships`):
+  | Course | Organizations (automatic) |
+  |---|---|
+  | BSIT (BS Information Technology) | SSG, PADC, LSC |
+  | BEED (Bachelor of Elementary Education) | SSG, YMO, LSC |
+  | BSBA OM (Operations Management) | SSG, LSC, JOES |
+  | BSBA FM (Financial Management) | SSG, LSC, JFMS |
+  | any other course / no course | SSG only (+ max 1 organization added by hand) |
+  Whoever adds the student (any org or club treasurer), they are enrolled in SSG + their course organizations
+  for the current school year, Unpaid, at each org's own dues; each org collects its own dues. A course student
+  cannot join an organization outside their course. Course change: new course orgs added, unpaid old ones
+  removed, paid ones kept. New school year/semester made current → everyone enrolled again.
+  Rules live in `public.courses` + `public.course_orgs` (SAS can change them).
+- **SSG is school-wide:** every student on the roster is automatically an SSG member every year.
+- **Clubs are voluntary:** max **1 club** per school year, added by the club's treasurer.
 - **Marking Paid:** the treasurer marks a membership Paid, which writes one `collection` entry
   (amount = `amount_due`, date, recorded_by). Only full payment is supported, the same as the old system.
 - **Undoing Paid** (a mistake): this writes a `reversal` that cancels the collection. Nothing is deleted.

@@ -158,3 +158,10 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   bootstrap_admins RLS (promote fn is SECURITY DEFINER owned by table owner). /privacy page (plain-language, RA 10173,
   names Supabase/Vercel/Google Gemini) live, screenshotted light/dark × phone/desktop; links on sign-in + My account.
   Google Branding: home + privacy link saved → Publish app → In production. Live dashboard: ₱0.00, 10 orgs, 0 students.
+- Course-based memberships (plan mode; Neil: treasurers add students, orgs mandatory by course, each org collects,
+  others SSG only; BSBA → LSC not YMO; SSG = whole campus; club adds → course orgs too). Supabase connector failed
+  (service error) → Neil reset the DB password, put SUPABASE_DB_URL in .env, downloaded the Supabase CA; Claude
+  connects with verified TLS (pg 8.23.1 in scratchpad; an attempt without cert checking was blocked, rightly).
+  Rehearsal of 18 cases (each course, club adds, refusals, course change keeps paid, new year, no duplicates,
+  ledger untouched) rolled back → applied + recorded as 20261113130000. Real BSIT student (Sports Club, paid ₱20)
+  now also in SSG/PADC/LSC unpaid. Neil also rotated the secret key after it showed in a screenshot.
