@@ -27,9 +27,8 @@ Update it every session: tick done items, add new ones.
 - [x] GitHub variable `SUPABASE_PUBLISHABLE_KEY` added, PR #2 merged, keep-alive run verified (session 4)
 
 ## Phase 7 (installable app + Android APK) — now
-- [ ] Make the app's signing key ONCE (steps Claude gave in chat; uses Java's `keytool`, already on this PC).
-      Keep `ecfunds-release.jks` + its password somewhere safe (Google Drive + a notebook). Lose it = phones can
-      never get updates of the app; you'd have to uninstall and reinstall.
+- [x] Signing key made by Claude (2026-11-13) in `Documents\E-CFunds-signing` on Neil's PC (random password in
+      a .txt there; SHA-256 fingerprint starts 0D:58:C9:73). [ ] Neil: back up that whole folder (Google Drive/USB).
 - [ ] GitHub → E-CFunds → Settings → Secrets and variables → Actions → New repository secret, 4 times:
       `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` (= ecfunds), `ANDROID_KEY_PASSWORD`
 - [ ] Actions → "Build Android app" → Run workflow (branch main after merge) → download the APK artifact →
