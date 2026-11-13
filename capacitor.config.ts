@@ -15,6 +15,10 @@ const config: CapacitorConfig = {
     // Silent app-code updates, self-hosted (src/lib/ota.ts + scripts/make-ota-bundle.mjs). No Capgo cloud: automatic
     // checks and statistics are switched off; the app itself checks e-cfunds.vercel.app/ota/manifest.json.
     CapacitorUpdater: { autoUpdate: false, statsUrl: '', resetWhenUpdate: true, appReadyTimeout: 15000 },
+    // Full screen: the status bar is hidden at start (src/lib/phone.ts); insets reach CSS as env(safe-area-inset-*).
+    SystemBars: { insetsHandling: 'css', initialViewportFitValueHint: 'cover' },
+    // Phone notifications: white ₱ (res/drawable/ic_stat_notify.xml) tinted royal blue.
+    LocalNotifications: { smallIcon: 'ic_stat_notify', iconColor: '#2447C4' },
   },
 };
 

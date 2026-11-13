@@ -1,4 +1,4 @@
-import { Suspense, useState, type ComponentType } from 'react';
+import { Suspense, useEffect, useState, type ComponentType } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router';
 import { BadgeCheck, Building2, CalendarRange, CheckCheck, Ellipsis, Home, LogOut, MessagesSquare, Receipt, Users, BarChart3, UserRound } from 'lucide-react';
 import { useAuth } from '../lib/auth';
@@ -10,6 +10,8 @@ import { ChatButton } from './ChatButton';
 import { NotificationBell } from './NotificationBell';
 import { useLiveNotifications } from '../lib/notifications';
 import { useLiveScreens } from '../lib/live';
+import { isNative } from '../lib/native';
+import { askNotifyOnce, clearPhoneNotifications } from '../lib/phone';
 
 // phone: false = desktop sidebar only (on phones these live in the admin "More" menu).
 type Item = { to: string; label: string; icon: ComponentType<{ className?: string }>; phone?: false; badge?: 'messages' };
@@ -51,6 +53,10 @@ export function Shell() {
   const uid = session?.user.id;
   useLiveNotifications(uid);
   useLiveScreens(profile?.status === 'approved' ? uid : undefined);
+  useEffect(() => {
+    if (!isNative) return;
+    if (uid) { void askNotifyOnce(); return () => { void clearPhoneNotifications(); }; }
+  }, [uid]);
   const role = profile?.role ?? 'student';
   const items = NAV[role];
   const phoneItems = items.filter((i) => i.phone !== false);
@@ -90,7 +96,7 @@ export function Shell() {
       </aside>
 
       <div className="min-w-0 flex flex-col">
-        <header className="lg:hidden sticky top-0 z-30 bg-bg/90 backdrop-blur border-b border-line px-5 h-16 flex items-center justify-between">
+        <header className="lg:hidden sticky top-0 z-30 bg-bg/90 backdrop-blur border-b border-line px-5 pt-[env(safe-area-inset-top)] h-[calc(4rem+env(safe-area-inset-top))] flex items-center justify-between">
           <Brand />
           <div className="flex items-center">
             {uid && <NotificationBell uid={uid} />}

@@ -10,6 +10,12 @@ import './index.css';
 
 // Android app: finish Google sign-in when the phone's browser hands the app link back (src/lib/nativeAuth.ts).
 if (isNative) void import('./lib/nativeAuth').then((m) => m.listenForAuthLinks());
+// Android app: full screen (status bar hidden), again whenever the app comes back.
+if (isNative) void import('./lib/phone').then(async (m) => {
+  await m.fullScreen();
+  const { App } = await import('@capacitor/app');
+  await App.addListener('resume', () => { void m.fullScreen(); });
+});
 // Android app: silent app-code updates (src/lib/ota.ts).
 if (isNative) void import('./lib/ota').then((m) => m.startOta()).catch((e) => console.warn('[ota]', e));
 

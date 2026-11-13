@@ -19,7 +19,7 @@ export function AuthLayout({ title, sub, children }: { title: string; sub?: Reac
         </div>
         <p className="text-hero-muted text-[13px]">Office of Student Affairs and Services</p>
       </aside>
-      <main className="flex flex-col px-5 py-6 sm:px-10">
+      <main className="flex flex-col px-5 py-6 pt-[max(1.5rem,env(safe-area-inset-top))] sm:px-10">
         <div className="flex items-center justify-between lg:justify-end">
           <span className="lg:hidden"><Brand /></span>
           <ThemeToggle />

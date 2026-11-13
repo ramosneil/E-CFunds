@@ -1,8 +1,9 @@
 import { useEffect, useState, useSyncExternalStore, type FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import { CheckCircle2, Download, IdCard, KeyRound, RefreshCw, Smartphone } from 'lucide-react';
+import { BellRing, CheckCircle2, Download, IdCard, KeyRound, RefreshCw, Smartphone } from 'lucide-react';
 import { applyReady, checkForUpdate, otaState } from '../lib/ota';
+import { notifyPermission, requestNotify, type PhonePermission } from '../lib/phone';
 import { install } from '../lib/install';
 import { AndroidAppLink } from '../components/AndroidAppLink';
 import { PasswordInput, PasswordStrength } from '../components/PasswordInput';
@@ -53,6 +54,7 @@ export function Account() {
           )}
         </Card>
         <PasswordCard hasPassword={hasPassword} />
+        {isNative && <PhoneNotifyCard />}
         {isNative ? <AppUpdateCard /> : <InstallCard />}
       </div>
       <p className="mt-6 text-[13px] text-muted"><Link to="/privacy" className="text-primary font-semibold">Privacy notice</Link> · what E-CFunds keeps and who can see it</p>
@@ -155,6 +157,28 @@ function AppUpdateCard() {
         <Button variant="soft" className="w-full mt-4" busy={busy} onClick={async () => { setBusy(true); await checkForUpdate(); setBusy(false); }}>
           <RefreshCw className="size-5" />Check for updates
         </Button>
+      )}
+    </Card>
+  );
+}
+
+/** Android app: phone notifications on/off (Android asks for permission; if refused, it must be allowed in Settings). */
+function PhoneNotifyCard() {
+  const [perm, setPerm] = useState<PhonePermission | null>(null);
+  useEffect(() => { void notifyPermission().then(setPerm); }, []);
+  if (perm === null || perm === 'unavailable') return null;
+  return (
+    <Card>
+      <SectionTitle>Phone notifications</SectionTitle>
+      {perm === 'granted' ? (
+        <p className="flex items-center gap-2 text-[14px] text-ok font-semibold"><CheckCircle2 className="size-5" aria-hidden />On — E-CFunds can notify you on this phone.</p>
+      ) : perm === 'denied' ? (
+        <p className="text-[14px] text-muted">Off. To turn them on: phone <b>Settings → Apps → E-CFunds → Notifications</b> → allow.</p>
+      ) : (
+        <>
+          <p className="text-[14px] text-muted -mt-1 mb-4">Get payments, requests, messages and announcements in your phone's notifications.</p>
+          <Button className="w-full" onClick={async () => setPerm(await requestNotify())}><BellRing className="size-5" />Turn on notifications</Button>
+        </>
       )}
     </Card>
   );

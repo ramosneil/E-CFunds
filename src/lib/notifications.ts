@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from './supabase';
 import { peso } from './format';
 import { toast } from './toast';
+import { phoneNotify } from './phone';
 import type { Database } from './database.types';
 
 export type Note = Database['public']['Tables']['notifications']['Row'];
@@ -47,7 +48,9 @@ export function useLiveNotifications(uid: string | undefined) {
         const old = p.old as Partial<Note> | undefined;
         if (p.eventType === 'UPDATE' && old?.count === n.count) return;   // only "marked read" changed
         const d = display(n);
-        toast({ title: d.title, body: d.body ?? undefined, href: n.link ?? undefined });
+        void phoneNotify({ id: n.id * 10 + (n.count % 10), title: d.title, body: d.body, link: n.link }).then((sent) => {
+          if (!sent) toast({ title: d.title, body: d.body ?? undefined, href: n.link ?? undefined });
+        });
         // Money-related events change numbers on screen: refresh them too.
         if (!['message', 'announcement', 'app_update', 'account'].includes(n.kind)) void qc.invalidateQueries();
       })

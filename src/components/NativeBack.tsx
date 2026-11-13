@@ -26,7 +26,9 @@ export function NativeBack() {
       });
       remove = () => { void h.remove(); };
     });
-    return () => remove?.();
+    const open = (e: Event) => nav(String((e as CustomEvent).detail || '/'));
+    window.addEventListener('ecfunds:open', open);
+    return () => { remove?.(); window.removeEventListener('ecfunds:open', open); };
   }, [nav]);
   return null;
 }

@@ -39,4 +39,6 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Phone notifications (Android 13+ asks the user; src/lib/phone.ts). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>
