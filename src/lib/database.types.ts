@@ -148,7 +148,10 @@ export type Database = {
     Functions: {
       add_member: {
         Args: { p_student_no: string; p_full_name: string; p_course: string | null; p_year_level?: number | null };
-        Returns: { student_id: number; new_student: boolean; member_of: string[] | null; course: string | null };
+        Returns: {
+          student_id: number; new_student: boolean; member_of: string[] | null; course: string | null;
+          paid_amount: number; to_collect: string[];
+        };
       };
       admin_adjust: { Args: { p_amount: number; p_direction: number; p_entity_id: number; p_pocket: E['pocket']; p_reason: string }; Returns: number };
       admin_release: { Args: { p_amount: number; p_description: string; p_entity_id: number }; Returns: number };

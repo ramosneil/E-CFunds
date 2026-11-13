@@ -165,3 +165,7 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   Rehearsal of 18 cases (each course, club adds, refusals, course change keeps paid, new year, no duplicates,
   ledger untouched) rolled back → applied + recorded as 20261113130000. Real BSIT student (Sports Club, paid ₱20)
   now also in SSG/PADC/LSC unpaid. Neil also rotated the secret key after it showed in a screenshot.
+- Per-semester + pay-when-added (plan mode; Neil: org AND club fees per semester, clubs chosen each semester,
+  adding = paid, treasurers set amounts). Migration 16 rehearsed (12 cases: paid on add + ledger line, to-collect
+  in other course orgs, 2nd club same sem refused, sem 2 → SSG+course orgs only, different club in sem 2 OK, ₱0
+  fee no ledger line, no duplicates) → applied + recorded 20261113150000. Members list is per current semester.
