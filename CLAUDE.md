@@ -97,6 +97,8 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
     `supabase_migrations.schema_migrations`). Advisors can't run without the connector — check RLS/grants by hand.
 - **Edge Functions:** deploy with the connector (full file content); CORS allows exact origins only:
   localhost:3000, 127.0.0.1:3000, `https://localhost` (Android), `https://e-cfunds.vercel.app`.
+- **Never use window.confirm/prompt/alert** (silently fail in the Android app) → `confirmAsk/promptAsk/alertAsk`
+  from `src/lib/confirm.ts`.
 - **Types:** `src/lib/database.types.ts` is hand-trimmed — add new tables/columns/RPCs there.
 - **Web deploy:** push/merge to `main` → Vercel builds production automatically.
 - **Android release:** push a tag `vX.Y.Z` → signed APK + GitHub Release (tags with `-` = pre-release). Signing key
