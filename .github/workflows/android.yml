@@ -14,7 +14,7 @@ on:
     tags: ['v*']
 
 permissions:
-  contents: read
+  contents: write   # signed tag builds publish a GitHub Release (the website's "Get the Android app" link)
 
 concurrency:
   group: android-${{ github.ref }}
@@ -114,9 +114,25 @@ jobs:
         if: always()
         run: rm -f "$RUNNER_TEMP/release.jks"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: E-CFunds-${{ steps.v.outputs.name }}-${{ steps.key.outputs.kind }}
           path: out/*.apk
           if-no-files-found: error
           retention-days: 30
+
+      # Signed version tags only: public GitHub Release. E-CFunds.apk (fixed name) is what
+      # https://github.com/ramosneil/E-CFunds/releases/latest/download/E-CFunds.apk always points to.
+      # Tags with a "-" (v0.8.0-beta.1) become pre-releases and do NOT replace "latest".
+      - name: Publish the release
+        if: startsWith(github.ref, 'refs/tags/v') && steps.key.outputs.kind == 'signed'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NAME: ${{ steps.v.outputs.name }}
+        run: |
+          cp "out/E-CFunds-$NAME-signed.apk" "out/E-CFunds.apk"
+          pre=""; [[ "$NAME" == *-* ]] && pre="--prerelease"
+          gh release create "$GITHUB_REF_NAME" "out/E-CFunds-$NAME-signed.apk" "out/E-CFunds.apk" \
+            --title "E-CFunds $NAME" $pre \
+            --notes "Android app for E-CFunds. On your phone: download **E-CFunds.apk**, open it, and allow installing from your browser if asked. Installs over the previous version."
+          echo "::notice title=Release published::https://github.com/$GITHUB_REPOSITORY/releases/tag/$GITHUB_REF_NAME"
