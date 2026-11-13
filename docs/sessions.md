@@ -184,3 +184,8 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - Fix (Neil confirmed): Delete conversation did nothing in the app — window.confirm/prompt/alert unreliable in the
   Android WebView → in-app confirmation sheet (`src/lib/confirm.ts`, ConfirmHost) for all 6 uses. Rule: never use
   window.confirm/prompt/alert.
+- Push (Part D): local notifications only showed in-app (Android pauses the app on Home) → FCM push. Neil made the
+  Firebase project + secrets (GOOGLE_SERVICES_JSON on GitHub, FCM_SERVICE_ACCOUNT on Supabase); /mcp sign-in doesn't
+  work in the desktop app → Supabase access token in .env + CLI deploy. Migration 22 rehearsed (own tokens, push_job
+  only for service_role+secret, sign-out drops token) + applied; v1.1.0 (build 9) installed; 2 phones registered;
+  direct call to `push` → {"sent":1}. pg_net timeout 5 s → 20 s (migration 23; cold start took ~3.8 s).

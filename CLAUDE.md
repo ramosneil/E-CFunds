@@ -35,7 +35,12 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - v1.0.0 APK (build 8, ota.json minNativeBuild=8): full screen (Capacitor SystemBars hides the status bar),
   phone notifications via @capacitor/local-notifications while the app is open/in background (`src/lib/phone.ts`),
   Android Back button (`NativeBack.tsx`), App updates + Phone notifications cards in My account.
-- NEXT: Part D push notifications when closed (Firebase, Neil's steps). Ideas: custom domain, own email sender (SMTP), more course rules if SAS adds courses.
+- Push when closed (migrations 22–23, v1.1.0 = build 9): Firebase project E-CFunds; `push_devices` (token saved
+  after sign-in, dropped on sign-out); new notification → pg_net → Edge Function `push` (secret in private.push_config;
+  FCM_SERVICE_ACCOUNT secret) → FCM. APK gets google-services.json from GitHub secret GOOGLE_SERVICES_JSON.
+  Deploy functions without the connector: `SUPABASE_ACCESS_TOKEN` in .env + `npx supabase@2.122.0 functions deploy
+  <name> --project-ref nvmlawpojydnouzqilaf --use-api` (add `--no-verify-jwt` for push/student-login).
+- NEXT: Neil confirms a push with the app swiped away when closed (Firebase, Neil's steps). Ideas: custom domain, own email sender (SMTP), more course rules if SAS adds courses.
 
 ## Memberships & fees (Neil, 2026-11-13 — migrations 15–17)
 - **Organizations are mandatory by course** (tables `courses`, `course_orgs`; SAS can change them):
