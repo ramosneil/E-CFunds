@@ -63,7 +63,8 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
   BSBA FM→SSG/LSC/JFMS, others SSG; automatic whoever adds the student; Add member has course dropdown + preview.
   DB access when the connector fails: `SUPABASE_DB_URL` in `.env` + Supabase CA (`Downloads/prod-ca-2021.crt`)
 - Per semester (migration 16): all org/club fees per semester, clubs chosen each semester (max 1), Add member =
-  pay now ("Add & record ₱X"); other course orgs show the student "To collect"
+  pay now ("Add & record ₱X"); other course orgs show the student "To collect". Clubs carry over each semester
+  (migration 17, "Carried over" tag); switching club removes the old unpaid listing
 - NEXT: real use — SAS sets school-year dates, adds treasurers/rosters. Ideas: custom domain, email sender (SMTP)
 - Local repo on Neil's PC: `C:\xampp\htdocs\E-CFunds`; old system stays a plain folder (never commit from it)
 - Gemini key: old key removed from old code; NEW key is the Supabase secret GEMINI_API_KEY (never in git)

@@ -92,7 +92,10 @@ counts of orgs and clubs, students, paid and unpaid dues, and pending requests.
 - **SSG is school-wide:** every student on the roster is automatically an SSG member every semester.
 - **Fees are per SEMESTER** for every organization and club (Neil, 2026-11-13; migration 16); each treasurer sets
   their own amount. SSG + course organizations are enrolled again when SAS makes a semester current.
-- **Clubs are the student's choice each semester:** never carried over; max **1 club per semester**.
+- **Clubs are the student's choice each semester** (max **1 club per semester**): when a semester starts, a student
+  who paid a club last semester is listed in the same club again, "To collect", tagged "Carried over" (migration
+  17). Staying = the club records the fee; switching = the new club adds them and the old carried listing is
+  removed automatically. A club already paid this semester blocks a switch.
 - **The fee is mandatory — pay when added:** a treasurer adds a member only when the student pays; Add member
   records the payment (collection line) at once. Course organizations that didn't add the student list them as
   **"To collect"** until their own treasurer records the payment.
