@@ -133,3 +133,5 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   splash. `chat` v6 + `student-login` v3 allow `https://localhost` (preflight checked; other origins still get no
   CORS). Workflow `android.yml` with env-based signing in `android/app/build.gradle`. Verified in headless Edge:
   service worker active, offline reload → app + pill, back online → pill gone, new version → "Update available".
+- Repo found public; Neil made it private, then chose PUBLIC again. Checked files + full history: no emails, keys or
+  student data (only adviser surnames on the accredited seed list, from the old system).

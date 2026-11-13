@@ -62,6 +62,6 @@ Update it every session: tick done items, add new ones.
 - [x] School year dates: SAS sets them in the app (session 3)
 - [x] Connected `C:\xampp\htdocs\mini system` (session 2)
 - [x] Answered Phase 1 money-model questions (session 2)
-- [x] Created private repo `ramosneil/E-CFunds`
+- [x] Created repo `ramosneil/E-CFunds` (made PUBLIC by Neil on 2026-11-13 — anyone can read the code; never commit keys or student data)
 - [x] Gave Claude's GitHub App access to the repo
 - [x] Created a new Gemini key

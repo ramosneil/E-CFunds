@@ -96,6 +96,7 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
 - Student login: Google OR Student ID + password; staff: email/password or Google
 
 ## Security (non-negotiable)
+- Repo `ramosneil/E-CFunds` is PUBLIC (Neil, 2026-11-13): everything committed is world-readable
 - No secrets in git. Keys live in Supabase secrets / Vercel env / local `.env` (gitignored)
 - Every table has RLS; test each role
 - Old Gemini key was hard-coded in `api/config.php` → treated as leaked, rotated
