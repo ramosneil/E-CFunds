@@ -6,18 +6,15 @@ Update it every session: tick done items, add new ones.
 ## Phase 4: data migration — DONE 2026-11-12 (nothing left for Neil)
 
 ## Phase 5 (app) — now
-- [ ] BEFORE REAL USE: clean up JOES test data (Neil chose "leave it for now", session 4): ₱15 saved from
-      TEST entries (pay ₱20 → remit ₱20 → release ₱5 → expense ₱5), roster student TEST-0001 "TEST Student",
-      test treasurer account. Ask Neil, then admin_adjust −₱15 saved "TEST cleanup" + deactivate TEST-0001.
+- [x] JOES TEST data + TEST-0001 wiped (Neil chose full wipe, 2026-11-13)
 - [x] Become the first admin: with the dev server running (`npm run dev` in `E-CFunds`), open
       http://localhost:3000 → "Create an account" with your Claude-account Gmail → open the confirmation
       email on this PC → you land back signed in as SAS Admin. Then tell Claude "I'm in".
       If the email link opens a page that won't load: Supabase → Authentication → URL Configuration →
       Site URL `http://localhost:3000`, and add `http://localhost:3000/**` under Redirect URLs.
 
-- [ ] Decide: Supabase advisor warns "Leaked password protection disabled" (Authentication → Passwords). Claude believes
-      it needs a paid plan; check the switch in the dashboard — if it's free to turn on, turn it on.
-- [ ] BEFORE REAL USE also remove the test student account (TEST-0001, 3rd email) with the JOES test data above.
+- [x] Leaked-password protection: Pro plan only (Supabase docs) → stays off on Free; app requires 8+ characters
+- [x] Test treasurer, test student and rejected sign-up accounts deleted (Neil approved, 2026-11-13)
 
 - If the app shows "Loading…" forever and Supabase answers 521/522: Supabase dashboard → e-cfunds → Project Settings
       → General → Restart project (happened once, 2026-11-13 01:03 Manila; data intact after restart).
@@ -41,11 +38,9 @@ Update it every session: tick done items, add new ones.
       GitHub → Settings → Applications → Vercel → Configure)
 - [x] Supabase URL Configuration: Site URL https://e-cfunds.vercel.app + 4 redirect URLs
 - [x] Google Cloud project E-CFunds, OAuth web client, Google provider ON in Supabase; Neil's Gmail = test user
-- [ ] BEFORE REAL USE: Google Auth Platform → Audience → Publish app (button was greyed out — hover it to see why;
-      likely Branding needs filling; never upload a logo = forces Google review). Until then only test users can
-      use "Continue with Google"; email/Student ID work for everyone.
+- [x] Google app published (Claude filled Branding: home page + privacy link, then Publish → In production)
 - [x] Installed v0.8.0 over 0.7 from the site's "Get the Android app"; Google sign-in inside the app works (2026-11-13)
-- [ ] Merge PR phase-8-deploy → main
+- [x] Merge phase-8-deploy → main (merged from this PC on Neil's OK, 2026-11-13)
 
 ## Done
 - [x] Name stays "Junior Operation Executive Society (JOES)"; its logo (old `OAES.png`) reads "Office Administration

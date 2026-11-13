@@ -49,14 +49,17 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
   team ramosneil; production = `main`, previews behind Vercel login; env VITE_SUPABASE_URL/PUBLISHABLE_KEY).
   `vercel.json` = SPA fallback + caching + security headers. Supabase Site URL = live site; redirect list has live,
   localhost, 127.0.0.1 and `ph.edu.omsc.ecfunds://auth/callback`. Google sign-in ON (Google Cloud project E-CFunds,
-  OAuth app still in TESTING → only listed test users; publish before real use). Android app: Google opens in the
+  OAuth app published / In production). Android app: Google opens in the
   phone browser and returns via the app link (`src/lib/nativeAuth.ts`); email links from the app go to the live
   site (`LIVE_URL` in `src/lib/native.ts`). Edge Functions allow exact origins only (localhost, app, live site).
   Signed `v*` tags publish a GitHub Release; site links to `releases/latest/download/E-CFunds.apk` (Android only).
   Live QA: 7 admin screens OK, assistant ₱15 correct, Student ID function answers live origin, offline OK,
   Lighthouse phone 98/100/100/100, desktop 100s
-- NEXT: merge PR phase-8-deploy → main. Before real use: publish Google app, clean JOES TEST data + test accounts,
-  decide leaked-password protection. All 8 plan phases built
+- PRE-LAUNCH DONE (2026-11-13): all TEST data wiped (ledger/requests/dues/roster/receipt/audit lines; guards paused
+  only inside one transaction, rehearsed first); test accounts deleted → only Neil's admin; Google app PUBLISHED
+  (Branding: home + /privacy); public privacy notice at /privacy (RA 10173); private.bootstrap_admins RLS on
+  (migration 14). Leaked-password protection = Pro plan only → stays off on Free (advisor WARN expected)
+- NEXT: real use — SAS sets school-year dates, adds treasurers/rosters. Ideas: custom domain, email sender (SMTP)
 - Local repo on Neil's PC: `C:\xampp\htdocs\E-CFunds`; old system stays a plain folder (never commit from it)
 - Gemini key: old key removed from old code; NEW key is the Supabase secret GEMINI_API_KEY (never in git)
 - Full plan & phases: `docs/plan.md` · Handoff checklist: `docs/handoff.md`

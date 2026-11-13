@@ -152,3 +152,9 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   Treasurer/student screens not re-clicked on live (same build as localhost-tested; origins/auth verified).
 - v0.8.0 tag: signed (fingerprint matches), GitHub Release published, releases/latest/download/E-CFunds.apk → 302 →
   200 4,443,785 B APK. Neil installed it over 0.7 from the live site; Google sign-in inside the app works. Phase 8 DONE.
+- Pre-launch (Neil: full wipe, delete 3 accounts, privacy page + publish, bootstrap RLS). Inventory → rehearsal in a
+  DO block that always raises (counts: 0 ledger/requests/dues/students, 1 user, 48 audit lines, guards back on) →
+  real run, same numbers; append-only guard re-tested (refuses). Receipt image deleted via Storage API. Migration 14
+  bootstrap_admins RLS (promote fn is SECURITY DEFINER owned by table owner). /privacy page (plain-language, RA 10173,
+  names Supabase/Vercel/Google Gemini) live, screenshotted light/dark × phone/desktop; links on sign-in + My account.
+  Google Branding: home + privacy link saved → Publish app → In production. Live dashboard: ₱0.00, 10 orgs, 0 students.
