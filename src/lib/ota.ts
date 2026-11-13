@@ -18,6 +18,8 @@ export type OtaStatus = { at: string; text: string; ok: boolean; ready?: string 
 
 const get = (k: string) => { try { return localStorage.getItem(k); } catch { return null; } };
 const put = (k: string, v: string | null) => { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch { /* ignore */ } };
+// A downloaded bundle is 'pending' until it has been switched to once; after that it's 'success'. Both are usable.
+const usable = (status: string) => status === 'pending' || status === 'success';
 const msg = (e: unknown) => (e instanceof Error ? e.message : String((e as { message?: unknown })?.message ?? e)).slice(0, 160);
 
 let needsApk = false;
@@ -60,7 +62,7 @@ export async function applyReady(): Promise<boolean> {
     put(READY, null);
     if (version === __BUILD_ID__) return false;
     const { Updater } = await plugins();
-    const ok = (await Updater.list()).bundles.some((b) => b.id === id && b.status === 'success');
+    const ok = (await Updater.list()).bundles.some((b) => b.id === id && usable(b.status));
     if (!ok) { setStatus('The downloaded update was not usable — it will download again.', false); return false; }
     await Updater.set({ id });        // reloads the app into the new code
     return true;
@@ -80,7 +82,7 @@ export async function checkForUpdate(): Promise<OtaStatus | null> {
     const build = Number((await App.getInfo()).build) || 0;
     if (m.minNativeBuild > build) { needsApk = true; setStatus('A new app (APK) is needed for this update.', false); return otaState.status(); }
     setStatus('Downloading the newest version…', true);
-    const have = (await Updater.list()).bundles.find((b) => b.version === m.version && b.status === 'success');
+    const have = (await Updater.list()).bundles.find((b) => b.version === m.version && usable(b.status));
     const bundle = have ?? await Updater.download({ url: m.url, version: m.version, checksum: m.sha256 });
     put(READY, JSON.stringify({ id: bundle.id, version: m.version }));
     setStatus('Update downloaded — it applies the next time you open E-CFunds.', true);
