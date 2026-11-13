@@ -176,3 +176,5 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   reopens → now applies at next start); B) strong passwords + eye + Terms (migration 18); C) notifications
   (migrations 19–20, each rehearsed rolled-back): admin, treasurer and student events, announcements, app-update notes.
   Bell/pop-up not yet seen live (pane signed out). Part D (push when closed) pending Neil's Firebase setup.
+- Live screens (migration 21, rehearsed: 1 tick per statement, students read ticks but 0 ledger rows, anon refused,
+  trimming): all roles' screens refresh within ~0.5 s of any change. App-code updates already cover all roles.
