@@ -1,7 +1,8 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState, useSyncExternalStore, type FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import { CheckCircle2, Download, IdCard, KeyRound, Smartphone } from 'lucide-react';
+import { CheckCircle2, Download, IdCard, KeyRound, RefreshCw, Smartphone } from 'lucide-react';
+import { applyReady, checkForUpdate, otaState } from '../lib/ota';
 import { install } from '../lib/install';
 import { AndroidAppLink } from '../components/AndroidAppLink';
 import { PasswordInput, PasswordStrength } from '../components/PasswordInput';
@@ -52,7 +53,7 @@ export function Account() {
           )}
         </Card>
         <PasswordCard hasPassword={hasPassword} />
-        {!isNative && <InstallCard />}
+        {isNative ? <AppUpdateCard /> : <InstallCard />}
       </div>
       <p className="mt-6 text-[13px] text-muted"><Link to="/privacy" className="text-primary font-semibold">Privacy notice</Link> · what E-CFunds keeps and who can see it</p>
     </>
@@ -129,6 +130,32 @@ function InstallCard() {
       )}
       {msg && <p className="text-[13px] text-ok mt-3">{msg}</p>}
       {!install.isIOS() && <AndroidAppLink always />}
+    </Card>
+  );
+}
+
+/** Android app: which version is running, the last update check, and buttons to check / apply now. */
+function AppUpdateCard() {
+  const status = useSyncExternalStore(otaState.subscribe, otaState.status);
+  const [busy, setBusy] = useState(false);
+  const when = status ? new Intl.DateTimeFormat('en-PH', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Manila' }).format(new Date(status.at)) : null;
+  return (
+    <Card>
+      <SectionTitle>App updates</SectionTitle>
+      <dl className="divide-y divide-line text-[14px]">
+        <Row k="Version" v={__BUILD_ID__} />
+        <Row k="Last check" v={when ?? 'Not yet'} />
+      </dl>
+      {status && <p className={`mt-3 text-[14px] ${status.ok ? 'text-muted' : 'text-bad'}`}>{status.text}</p>}
+      {status?.ready && status.ready !== __BUILD_ID__ ? (
+        <Button className="w-full mt-4" onClick={async () => { setBusy(true); if (!(await applyReady())) setBusy(false); }} busy={busy}>
+          <RefreshCw className="size-5" />Restart to update
+        </Button>
+      ) : (
+        <Button variant="soft" className="w-full mt-4" busy={busy} onClick={async () => { setBusy(true); await checkForUpdate(); setBusy(false); }}>
+          <RefreshCw className="size-5" />Check for updates
+        </Button>
+      )}
     </Card>
   );
 }
