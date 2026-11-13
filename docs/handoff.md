@@ -26,14 +26,13 @@ Update it every session: tick done items, add new ones.
 - [x] Added the Gemini key as Supabase secret `GEMINI_API_KEY` (session 4) — assistant is live.
 - [x] GitHub variable `SUPABASE_PUBLISHABLE_KEY` added, PR #2 merged, keep-alive run verified (session 4)
 
-## Phase 7 (installable app + Android APK) — now
+## Phase 7 (installable app + Android APK) — DONE 2026-11-13
 - [x] Signing key made by Claude (2026-11-13) in `Documents\E-CFunds-signing` on Neil's PC (random password in
       a .txt there; SHA-256 fingerprint starts 0D:58:C9:73). [ ] Neil: back up that whole folder (Google Drive/USB).
 - [x] 4 ANDROID_* secrets added (2026-11-13). First signed build: tag v0.7.0-beta.4, run #4, APK fingerprint matches the key.
       Re-paste tip: open the .txt in Notepad → Ctrl+A, Ctrl+C (the clipboard command pasted itself the first time).
-- [ ] Actions → "Build Android app" → Run workflow (branch main after merge) → download the APK artifact →
-      install on your phone (allow "Install unknown apps" for your browser/Files) → try: sign in with email and
-      Student ID, dashboard, export a PDF (share sheet), Ask E-CFunds, airplane mode (offline pill)
+- [x] Installed the signed APK (v0.7.0-beta.4) on Neil's phone — works (2026-11-13)
+- [ ] Merge PR phase-7-pwa → main on GitHub
 - Note: `npm audit` shows 10 moderate/low issues only in BUILD tools (@capacitor/assets, vite-plugin-pwa's
   workbox-build); none ship inside the app (`npm audit --omit=dev` = 0).
 
