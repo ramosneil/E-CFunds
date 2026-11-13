@@ -1,18 +1,32 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router';
 import { MailCheck } from 'lucide-react';
 import { supabase, errorText } from '../../lib/supabase';
 import { Alert, Button, Field, Input } from '../../components/ui';
 import { AuthLayout, Divider, GoogleButton } from './AuthLayout';
-import { isNative } from '../../lib/native';
+import { isNative, webOrigin } from '../../lib/native';
+import { NATIVE_AUTH_ERROR, nativeGoogleSignIn } from '../../lib/nativeAuth';
+import { AndroidAppLink } from '../../components/AndroidAppLink';
 
-const redirect = () => window.location.origin + '/';
+const redirect = () => webOrigin() + '/';
+const googleError = (m: string) => /provider is not enabled/i.test(m)
+  ? 'Google sign-in is not switched on yet. Use email and password for now.' : m;
 
+/** Browser: normal Google redirect. Android app: Google opens in the phone's browser and returns via an app link. */
 export async function googleSignIn(setErr: (s: string) => void) {
+  if (isNative) { const m = await nativeGoogleSignIn(); if (m) setErr(googleError(m)); return; }
   const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirect() } });
-  if (error) setErr(/provider is not enabled/i.test(error.message)
-    ? 'Google sign-in is not switched on yet. Use email and password for now.'
-    : errorText(error));
+  if (error) setErr(googleError(errorText(error)));
+}
+
+/** Shows errors that come back from the Android Google sign-in round-trip. */
+function useNativeAuthErrors(setErr: (s: string) => void) {
+  useEffect(() => {
+    if (!isNative) return;
+    const on = (e: Event) => setErr(googleError(String((e as CustomEvent).detail)));
+    window.addEventListener(NATIVE_AUTH_ERROR, on);
+    return () => window.removeEventListener(NATIVE_AUTH_ERROR, on);
+  }, [setErr]);
 }
 
 export function SignIn() {
@@ -20,6 +34,7 @@ export function SignIn() {
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+  useNativeAuthErrors(setErr);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -50,9 +65,8 @@ export function SignIn() {
 
   return (
     <AuthLayout title="Welcome back" sub="Sign in to see your club funds.">
-      {/* Google blocks sign-in inside app windows, so the Android app shows email / Student ID only (Phase 8 adds deep links). */}
-      {!isNative && <><GoogleButton onClick={() => googleSignIn(setErr)} />
-      <Divider label="or with email or Student ID" /></>}
+      <GoogleButton onClick={() => googleSignIn(setErr)} />
+      <Divider label="or with email or Student ID" />
       <form onSubmit={submit} className="space-y-4">
         <Field label="Email or Student ID" hint="Students: your Student ID works once SAS has approved your account.">
           <Input autoComplete="username" autoCapitalize="none" spellCheck={false} required value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -65,6 +79,7 @@ export function SignIn() {
         <Link to="/forgot" className="text-primary font-semibold">Forgot password?</Link>
         <Link to="/register" className="text-primary font-semibold">Create an account</Link>
       </div>
+      <AndroidAppLink />
     </AuthLayout>
   );
 }
@@ -76,6 +91,7 @@ export function Register() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [sent, setSent] = useState(false);
+  useNativeAuthErrors(setErr);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -102,8 +118,8 @@ export function Register() {
 
   return (
     <AuthLayout title="Create your account" sub="Students and treasurers sign up here. SAS approves every account.">
-      {!isNative && <><GoogleButton onClick={() => googleSignIn(setErr)} />
-      <Divider label="or with email" /></>}
+      <GoogleButton onClick={() => googleSignIn(setErr)} />
+      <Divider label="or with email" />
       <form onSubmit={submit} className="space-y-4">
         <Field label="Full name"><Input autoComplete="name" required value={name} onChange={(e) => setName(e.target.value)} /></Field>
         <Field label="Email"><Input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
@@ -124,7 +140,7 @@ export function Forgot() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     setBusy(true); setErr('');
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin + '/reset' });
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: webOrigin() + '/reset' });
     setBusy(false);
     if (error) setErr(errorText(error)); else setDone(true);
   }

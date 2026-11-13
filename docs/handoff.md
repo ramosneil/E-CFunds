@@ -32,18 +32,20 @@ Update it every session: tick done items, add new ones.
 - [x] 4 ANDROID_* secrets added (2026-11-13). First signed build: tag v0.7.0-beta.4, run #4, APK fingerprint matches the key.
       Re-paste tip: open the .txt in Notepad → Ctrl+A, Ctrl+C (the clipboard command pasted itself the first time).
 - [x] Installed the signed APK (v0.7.0-beta.4) on Neil's phone — works (2026-11-13)
-- [ ] Merge PR phase-7-pwa → main on GitHub
+- [x] Merge PR phase-7-pwa → main on GitHub (PR #3, 2026-11-13)
 - Note: `npm audit` shows 10 moderate/low issues only in BUILD tools (@capacitor/assets, vite-plugin-pwa's
   workbox-build); none ship inside the app (`npm audit --omit=dev` = 0).
 
-## Phase 5 (Google login)
-- [ ] In Google Cloud Console, add the new app's URLs to your OAuth client
-      (Claude will give you the exact URLs)
-
-## Phase 8 (Deploy)
-- [ ] Add the live app address to the `student-login` function: Supabase → Edge Functions → Secrets →
-      `ALLOWED_ORIGINS` = `https://<the vercel address>` (Claude will give the exact value)
-- [ ] Approve linking the GitHub repo to Vercel (Claude does the rest via the Vercel connector)
+## Phase 8 (live site + Google) — 2026-11-13
+- [x] Approved Vercel connector access; installed Vercel's GitHub app (all repos — can narrow to E-CFunds:
+      GitHub → Settings → Applications → Vercel → Configure)
+- [x] Supabase URL Configuration: Site URL https://e-cfunds.vercel.app + 4 redirect URLs
+- [x] Google Cloud project E-CFunds, OAuth web client, Google provider ON in Supabase; Neil's Gmail = test user
+- [ ] BEFORE REAL USE: Google Auth Platform → Audience → Publish app (button was greyed out — hover it to see why;
+      likely Branding needs filling; never upload a logo = forces Google review). Until then only test users can
+      use "Continue with Google"; email/Student ID work for everyone.
+- [x] Installed v0.8.0 over 0.7 from the site's "Get the Android app"; Google sign-in inside the app works (2026-11-13)
+- [ ] Merge PR phase-8-deploy → main
 
 ## Done
 - [x] Name stays "Junior Operation Executive Society (JOES)"; its logo (old `OAES.png`) reads "Office Administration

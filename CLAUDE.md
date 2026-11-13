@@ -45,7 +45,18 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
   (the Claude browser pane can't register service workers). Signing key made by Claude on Neil's PC
   (`Documents\E-CFunds-signing`, outside repo; fingerprint 0D:58:C9:73…); first signed APK v0.7.0-beta.4 installed
   and working on Neil's phone (2026-11-13). New release: push tag `vX.Y.Z` → download artifact from the run
-- NEXT: Phase 8 — Vercel deploy, ALLOWED_ORIGINS, Google OAuth URLs, deep links for Google sign-in in the app
+- Phase 8 — DONE (session 4, branch `phase-8-deploy`; v0.8.0 APK released, Google works in the app): https://e-cfunds.vercel.app (Vercel project `e-cfunds`,
+  team ramosneil; production = `main`, previews behind Vercel login; env VITE_SUPABASE_URL/PUBLISHABLE_KEY).
+  `vercel.json` = SPA fallback + caching + security headers. Supabase Site URL = live site; redirect list has live,
+  localhost, 127.0.0.1 and `ph.edu.omsc.ecfunds://auth/callback`. Google sign-in ON (Google Cloud project E-CFunds,
+  OAuth app still in TESTING → only listed test users; publish before real use). Android app: Google opens in the
+  phone browser and returns via the app link (`src/lib/nativeAuth.ts`); email links from the app go to the live
+  site (`LIVE_URL` in `src/lib/native.ts`). Edge Functions allow exact origins only (localhost, app, live site).
+  Signed `v*` tags publish a GitHub Release; site links to `releases/latest/download/E-CFunds.apk` (Android only).
+  Live QA: 7 admin screens OK, assistant ₱15 correct, Student ID function answers live origin, offline OK,
+  Lighthouse phone 98/100/100/100, desktop 100s
+- NEXT: merge PR phase-8-deploy → main. Before real use: publish Google app, clean JOES TEST data + test accounts,
+  decide leaked-password protection. All 8 plan phases built
 - Local repo on Neil's PC: `C:\xampp\htdocs\E-CFunds`; old system stays a plain folder (never commit from it)
 - Gemini key: old key removed from old code; NEW key is the Supabase secret GEMINI_API_KEY (never in git)
 - Full plan & phases: `docs/plan.md` · Handoff checklist: `docs/handoff.md`

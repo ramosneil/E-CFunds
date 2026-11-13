@@ -7,14 +7,16 @@ import { createClient } from 'npm:@supabase/supabase-js@2.119.0';
 const URL = Deno.env.get('SUPABASE_URL')!;
 const ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-// Browser origins allowed to call this function. Add the live app address (Phase 8) with the ALLOWED_ORIGINS secret.
+// Browser origins allowed to call this function (more can be added with the ALLOWED_ORIGINS secret).
 const ORIGINS = new Set(['http://localhost:3000', 'http://127.0.0.1:3000', 'https://localhost' /* Android app */,
+  'https://e-cfunds.vercel.app' /* live site */,
   ...(Deno.env.get('ALLOWED_ORIGINS') ?? '').split(',').map((s) => s.trim()).filter(Boolean)]);
+const allowed = (o: string | null): o is string => !!o && ORIGINS.has(o);   // exact addresses only
 
 const admin = createClient(URL, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });
 
 function cors(origin: string | null): Record<string, string> {
-  return origin && ORIGINS.has(origin)
+  return allowed(origin)
     ? { 'Access-Control-Allow-Origin': origin, 'Vary': 'Origin',
         'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
         'Access-Control-Allow-Methods': 'POST, OPTIONS' }

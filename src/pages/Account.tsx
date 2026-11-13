@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, Download, IdCard, KeyRound, Smartphone } from 'lucide-react';
 import { install } from '../lib/install';
+import { AndroidAppLink } from '../components/AndroidAppLink';
 import { isNative } from '../lib/native';
 import { useAuth } from '../lib/auth';
 import { useEntities } from '../lib/data';
@@ -120,6 +121,7 @@ function InstallCard() {
         </div>
       )}
       {msg && <p className="text-[13px] text-ok mt-3">{msg}</p>}
+      {!install.isIOS() && <AndroidAppLink always />}
     </Card>
   );
 }

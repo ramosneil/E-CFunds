@@ -5,7 +5,11 @@ import { AuthProvider } from './lib/auth';
 import { App } from './App';
 import { AppStatus } from './components/AppStatus';
 import './lib/install';
+import { isNative } from './lib/native';
 import './index.css';
+
+// Android app: finish Google sign-in when the phone's browser hands the app link back (src/lib/nativeAuth.ts).
+if (isNative) void import('./lib/nativeAuth').then((m) => m.listenForAuthLinks());
 
 const qc = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: true } },
