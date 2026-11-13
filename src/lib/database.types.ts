@@ -10,7 +10,9 @@ export type Database = {
     Tables: {
       notifications: {
         Row: {
-          id: number; recipient: string; kind: 'request' | 'request_decision' | 'payment' | 'account' | 'message';
+          id: number; recipient: string;
+          kind: 'request' | 'request_decision' | 'payment' | 'account' | 'message' | 'receipt' | 'fees' | 'account_decision'
+            | 'announcement' | 'members' | 'semester' | 'fee_change' | 'app_update';
           title: string; body: string | null; link: string | null; group_key: string | null; count: number;
           amount: number | null; created_at: string; updated_at: string; read_at: string | null;
         };
@@ -163,6 +165,8 @@ export type Database = {
           paid_amount: number; to_collect: string[];
         };
       };
+      announce: { Args: { p_audience: 'students' | 'treasurers' | 'everyone'; p_title: string; p_body: string }; Returns: number };
+      note_app_updated: { Args: { p_build: string }; Returns: undefined };
       mark_notifications_read: { Args: Record<string, never>; Returns: number };
       accept_terms: { Args: Record<string, never>; Returns: string };
       admin_adjust: { Args: { p_amount: number; p_direction: number; p_entity_id: number; p_pocket: E['pocket']; p_reason: string }; Returns: number };

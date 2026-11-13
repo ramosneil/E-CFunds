@@ -72,6 +72,15 @@ prevents two approvals racing past a limit.
   unpaid) runs from `period_became_current` after `enroll_by_course`. `add_member` for a club removes the student's
   unpaid carried rows in other clubs (switch) and refuses if another club is already paid this semester.
 
+## Notifications (migrations 19–20, 2026-11-13)
+- `notifications` (recipient, kind, title, body, link, group_key, count, amount, read_at), own rows only, Realtime.
+  `private.notify(recipients, kind, title, body, link, group, amount, append)` merges same-group unread rows within 60 s.
+- Admin: request filed, dues payment (merged per org), account to approve, treasurer message.
+- Treasurer: request decided, SAS message/broadcast, new members to collect (merged), semester started, fee set by SAS,
+  account approved/rejected. Student: payment receipt, new fees to pay (merged, course/carried rows only),
+  account approved/rejected, announcements. Everyone: app updated (`note_app_updated`, once per version).
+- `announce(audience, title, body)` admin-only → students / treasurers / everyone.
+
 ## Design notes
 - Balances are never stored: `private.d_cash/d_saved` implement business-rules §2; reports sum the ledger.
 - A wrong remittance/release is corrected with two `admin_adjust` rows (reversal only for single-pocket kinds).

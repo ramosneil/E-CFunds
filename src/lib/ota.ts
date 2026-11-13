@@ -10,6 +10,16 @@ import { toast } from './toast';
 
 const LAST = 'ecfunds:build';
 const READY = 'ecfunds:ota-ready';
+const ANNOUNCED = 'ecfunds:ota-announced';
+
+/** Keep "E-CFunds was updated" in the bell too (signed-in people only; once per version). */
+export async function noteInBell() {
+  try {
+    const { supabase } = await import('./supabase');
+    const { data } = await supabase.auth.getSession();
+    if (data.session) await supabase.rpc('note_app_updated', { p_build: __BUILD_ID__ });
+  } catch { /* not important */ }
+}
 type Manifest = { version: string; url: string; sha256: string; minNativeBuild: number };
 
 let needsApk = false;
@@ -28,7 +38,10 @@ export async function startOta() {
 
   const last = get(LAST);
   put(LAST, __BUILD_ID__);
-  if (last && last !== __BUILD_ID__) toast({ title: 'E-CFunds was updated', body: 'You have the newest version.', tone: 'ok' });
+  if (last && last !== __BUILD_ID__) {
+    toast({ title: 'E-CFunds was updated', body: 'You have the newest version.', tone: 'ok' });
+    void noteInBell();
+  }
 
   // Apply a version downloaded earlier (stored as {id, version}).
   const applyReady = async () => {
@@ -58,6 +71,10 @@ export async function startOta() {
       const have = (await CapacitorUpdater.list()).bundles.find((b) => b.version === m.version && b.status === 'success');
       const bundle = have ?? await CapacitorUpdater.download({ url: m.url, version: m.version, checksum: m.sha256 });
       put(READY, JSON.stringify({ id: bundle.id, version: m.version }));
+      if (get(ANNOUNCED) !== m.version) {
+        put(ANNOUNCED, m.version);
+        toast({ title: 'An update is ready', body: 'It applies the next time you open E-CFunds.', tone: 'info' });
+      }
     } catch (e) { console.warn('[ota] check', e); }
   };
   void check();
