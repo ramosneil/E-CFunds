@@ -50,6 +50,17 @@ Each public function is a thin SECURITY INVOKER wrapper; the real body is SECURI
 `private` schema and checks the caller's role itself. Limits are re-checked at approval; per-entity row lock
 prevents two approvals racing past a limit.
 
+## Course-based memberships (migration 15, 2026-11-13)
+- `courses` (code, name, sort) and `course_orgs` (course, entity_id): everyone signed in reads; admin writes.
+- `memberships.via_course` = made automatically. `private.enroll_by_course(student_id|null)` enrols SSG + course
+  orgs for the current year (semester for per-semester orgs), idempotent. Triggers: student insert / course or
+  is_active change (`students_after_change`), school year or semester becomes current (`period_became_current`).
+- `private.membership_rules`: course students only in their course orgs; others max 1 organization; clubs max 1;
+  updates of an existing row (pay/undo) never blocked.
+- `add_member(p_student_no, p_full_name, p_course, p_year_level)` → `{student_id, new_student, member_of[], course}`:
+  the treasurer's Add member (finds/creates roster student, enrols, adds own club or own org for non-course students).
+- Applied over a direct verified-TLS connection (connector was down): rehearsal of 18 cases rolled back first.
+
 ## Design notes
 - Balances are never stored: `private.d_cash/d_saved` implement business-rules §2; reports sum the ledger.
 - A wrong remittance/release is corrected with two `admin_adjust` rows (reversal only for single-pocket kinds).
