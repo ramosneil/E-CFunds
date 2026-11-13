@@ -2,10 +2,10 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, UserPlus, Users } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
-import { useCurrentYear, useEntities, useSemesters } from '../../lib/data';
+import { useCurrentYear, useEntities } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
 import { date, normStudentNo, peso } from '../../lib/format';
-import { Alert, Button, Card, Chip, DuesBar, Empty, Field, Input, PageHeader, Sheet, Spinner } from '../../components/ui';
+import { Alert, Button, Card, Chip, DuesBar, Empty, Field, Input, PageHeader, Select, Sheet, Spinner } from '../../components/ui';
 import { NoYear, Segmented } from '../../components/common';
 import { ExportMenu, exportsLib } from '../../components/ExportMenu';
 
@@ -88,7 +88,10 @@ export function Members() {
             {rows.map((m) => (
               <li key={m.id} className="px-4 sm:px-5 py-3 flex items-center gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold truncate">{m.student?.full_name}</p>
+                  <p className="font-semibold truncate flex items-center gap-2">
+                    <span className="truncate">{m.student?.full_name}</span>
+                    {m.via_course && <span className="shrink-0 text-[11px] font-semibold px-2 h-5 rounded-full inline-flex items-center bg-primary-soft text-primary" title="Added automatically by the student's course">From course</span>}
+                  </p>
                   <p className="text-[13px] text-muted truncate">{m.student?.student_no}{m.student?.course ? ` · ${m.student.course}` : ''}{m.student?.year_level ? ` ${m.student.year_level}` : ''}{m.is_paid ? ` · paid ${date(m.paid_at)}` : ''}</p>
                 </div>
                 <span className="money font-semibold hidden sm:block">{peso(m.amount_due)}</span>
@@ -103,68 +106,128 @@ export function Members() {
           </ul>
         </Card>
       )}
-      {adding && entity && <AddMember onClose={() => setAdding(false)} entityId={entityId} yearId={year.data.id} dues={Number(entity.dues_amount)} perSemester={entity.dues_period === 'semester'} />}
+      {adding && entity && <AddMember onClose={() => setAdding(false)} entityId={entityId} dues={Number(entity.dues_amount)} perSemester={entity.dues_period === 'semester'} />}
     </>
   );
 }
 
-function AddMember({ onClose, entityId, yearId, dues, perSemester }: { onClose: () => void; entityId: number; yearId: number; dues: number; perSemester: boolean }) {
+/** Course list + which organizations each course belongs to (SAS-managed rules; SSG is everyone). */
+function useCourseRules() {
+  return useQuery({
+    queryKey: ['course-rules'],
+    staleTime: 10 * 60_000,
+    queryFn: async () => {
+      const [c, o] = await Promise.all([
+        supabase.from('courses').select('code, name, sort').order('sort'),
+        supabase.from('course_orgs').select('course, entity_id'),
+      ]);
+      if (c.error) throw c.error;
+      if (o.error) throw o.error;
+      return { courses: c.data, orgs: o.data };
+    },
+  });
+}
+
+const OTHER = '__other';
+
+function AddMember({ onClose, entityId, dues, perSemester }: { onClose: () => void; entityId: number; dues: number; perSemester: boolean }) {
   const qc = useQueryClient();
-  const sems = useSemesters(yearId);
+  const rules = useCourseRules();
+  const entities = useEntities();
   const [no, setNo] = useState('');
   const [name, setName] = useState('');
-  const [course, setCourse] = useState('');
+  const [pick, setPick] = useState('');          // course code, OTHER, or '' (not chosen)
+  const [otherCourse, setOtherCourse] = useState('');
   const [level, setLevel] = useState('');
-  const [found, setFound] = useState<{ id: number; full_name: string } | null | undefined>(undefined);
+  const [found, setFound] = useState<{ id: number; full_name: string; course: string | null } | null | undefined>(undefined);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+  const [done, setDone] = useState<{ name: string; memberOf: string[] } | null>(null);
+
+  const me = entities.data?.find((e) => e.id === entityId);
+  // The course that will count: the roster's, if the student already has one; otherwise what the treasurer picks.
+  const course = (found?.course ?? (pick === OTHER ? otherCourse : pick)).trim().toUpperCase().replace(/\s+/g, ' ');
+  const courseOrgIds = (rules.data?.orgs ?? []).filter((o) => o.course === course).map((o) => o.entity_id);
+  const isCourseStudent = courseOrgIds.length > 0;
+  const ssg = entities.data?.filter((e) => e.is_school_wide) ?? [];
+  const preview = [
+    ...ssg,
+    ...(entities.data ?? []).filter((e) => courseOrgIds.includes(e.id) && !e.is_school_wide),
+    ...(me && !me.is_school_wide && !courseOrgIds.includes(me.id) ? [me] : []),
+  ];
+  // An organization treasurer cannot take a student whose course belongs to other organizations.
+  const blocked = !!me && me.category === 'organization' && !me.is_school_wide && isCourseStudent && !courseOrgIds.includes(me.id);
 
   async function lookup() {
     if (normStudentNo(no).length < 3) return;
-    const { data, error } = await supabase.from('students').select('id, full_name').eq('student_no', normStudentNo(no)).maybeSingle();
+    const { data, error } = await supabase.from('students').select('id, full_name, course').eq('student_no', normStudentNo(no)).maybeSingle();
     if (error) setErr(errorText(error)); else setFound(data);
   }
 
   async function submit(e: FormEvent) {
     e.preventDefault();
+    if (found === null && !pick) { setErr('Choose the student’s course.'); return; }
     setBusy(true); setErr('');
-    try {
-      let studentId = found?.id;
-      if (!studentId) {
-        const s = await supabase.from('students').insert({
-          student_no: normStudentNo(no), full_name: name.trim(), course: course.trim() || null, year_level: level ? Number(level) : null,
-        }).select('id').single();
-        if (s.error) throw s.error;
-        studentId = s.data.id;
-      }
-      const semesterId = perSemester ? sems.data?.find((s) => s.is_current)?.id : undefined;
-      if (perSemester && !semesterId) throw new Error('Your dues are per semester, but SAS has not set the current semester yet.');
-      const m = await supabase.from('memberships').insert({ student_id: studentId, entity_id: entityId, school_year_id: yearId, semester_id: semesterId ?? null, amount_due: dues });
-      if (m.error) throw /duplicate key/.test(m.error.message) ? new Error('This student is already a member.') : m.error;
-      void qc.invalidateQueries();
-      onClose();
-    } catch (x) { setErr(errorText(x)); } finally { setBusy(false); }
+    const { data, error } = await supabase.rpc('add_member', {
+      p_student_no: normStudentNo(no), p_full_name: name.trim(), p_course: course || null,
+      p_year_level: level ? Number(level) : null,
+    });
+    setBusy(false);
+    if (error) { setErr(errorText(error)); return; }
+    void qc.invalidateQueries();
+    setDone({ name: found?.full_name ?? name.trim(), memberOf: data?.member_of ?? [] });
   }
+
+  if (done) return (
+    <Sheet open onClose={onClose} title="Member added">
+      <Alert tone="ok"><b>{done.name}</b> is now a member of: {done.memberOf.join(', ') || '—'}.</Alert>
+      <p className="text-[14px] text-muted mt-3">Each organization and club collects its own dues; they all start unpaid.</p>
+      <Button className="w-full h-[54px] mt-5" onClick={onClose}>Done</Button>
+    </Sheet>
+  );
 
   return (
     <Sheet open onClose={onClose} title="Add member">
       <form onSubmit={submit} className="space-y-4">
         <Field label="Student ID" hint="We check the school roster first.">
-          <Input required value={no} onChange={(e) => { setNo(e.target.value); setFound(undefined); }} onBlur={lookup} placeholder="e.g. 2024-0317" />
+          <Input required value={no} onChange={(e) => { setNo(e.target.value); setFound(undefined); setErr(''); }} onBlur={lookup} placeholder="e.g. 2024-0317" />
         </Field>
-        {found ? <Alert tone="ok">On the roster: <b>{found.full_name}</b></Alert> : found === null && (
+        {found ? <Alert tone="ok">On the roster: <b>{found.full_name}</b>{found.course ? ` · ${found.course}` : ''}</Alert> : found === null && (
           <>
             <Alert tone="warn">Not on the roster yet. Add their details:</Alert>
-            <Field label="Full name"><Input required value={name} onChange={(e) => setName(e.target.value)} /></Field>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Course"><Input value={course} onChange={(e) => setCourse(e.target.value)} placeholder="BSIT" /></Field>
-              <Field label="Year level"><Input type="number" min={1} max={6} value={level} onChange={(e) => setLevel(e.target.value)} /></Field>
+            <Field label="Full name"><Input required value={name} onChange={(e) => setName(e.target.value)} autoComplete="off" /></Field>
+            <div className="grid grid-cols-[1fr_7rem] gap-3">
+              <Field label="Course">
+                <Select required value={pick} onChange={(e) => setPick(e.target.value)}>
+                  <option value="" disabled>Choose…</option>
+                  {(rules.data?.courses ?? []).map((c) => <option key={c.code} value={c.code}>{c.code} · {c.name}</option>)}
+                  <option value={OTHER}>Other course…</option>
+                </Select>
+              </Field>
+              <Field label="Year level"><Input type="number" inputMode="numeric" min={1} max={6} value={level} onChange={(e) => setLevel(e.target.value)} /></Field>
             </div>
+            {pick === OTHER && <Field label="Other course" hint="Students of other courses join SSG automatically."><Input required value={otherCourse} onChange={(e) => setOtherCourse(e.target.value)} placeholder="e.g. BSCRIM" /></Field>}
           </>
         )}
-        <p className="text-[14px] text-muted">Dues: <b className="text-ink money">{peso(dues)}</b> {perSemester ? 'this semester' : 'this school year'}, starts unpaid.</p>
+        {found !== undefined && (course || found) && (blocked ? (
+          <Alert>
+            {course} students belong to {['SSG', ...(entities.data ?? []).filter((x) => courseOrgIds.includes(x.id)).map((x) => x.short_name)].join(', ')}, set by their course.
+            They can’t be added to {me?.short_name}.
+          </Alert>
+        ) : (
+          <div className="rounded-[16px] bg-primary-soft text-primary p-4 text-[14px]">
+            <p className="font-semibold">Will be a member of</p>
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {preview.map((x) => (
+                <span key={x.id} className={`px-2.5 h-7 rounded-full inline-flex items-center text-[13px] font-semibold ${x.id === entityId ? 'bg-primary text-on-primary' : 'bg-surface text-ink border border-line'}`}>{x.short_name}</span>
+              ))}
+            </div>
+            <p className="text-[12.5px] mt-2 opacity-90">{isCourseStudent ? `Organizations come from the course (${course}). ` : ''}Each one collects its own dues.</p>
+          </div>
+        ))}
+        <p className="text-[14px] text-muted">Your dues: <b className="text-ink money">{peso(dues)}</b> {perSemester ? 'this semester' : 'this school year'}, starts unpaid.</p>
         {err && <Alert>{err}</Alert>}
-        <Button type="submit" busy={busy} disabled={found === undefined} className="w-full h-[54px]">Add member</Button>
+        <Button type="submit" busy={busy} disabled={found === undefined || blocked} className="w-full h-[54px]">Add member</Button>
         {found === undefined && <p className="text-[13px] text-muted text-center -mt-2">Enter the student ID, then tap outside the box to check it.</p>}
       </form>
     </Sheet>

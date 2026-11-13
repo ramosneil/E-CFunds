@@ -8,6 +8,18 @@ export type Database = {
   __InternalSupabase: { PostgrestVersion: '14.18' };
   public: {
     Tables: {
+      courses: {
+        Row: { code: string; name: string; sort: number };
+        Insert: { code: string; name: string; sort?: number };
+        Update: { code?: string; name?: string; sort?: number };
+        Relationships: [];
+      };
+      course_orgs: {
+        Row: { course: string; entity_id: number };
+        Insert: { course: string; entity_id: number };
+        Update: { course?: string; entity_id?: number };
+        Relationships: [];
+      };
       accredited_entries: {
         Row: {
           academic_year: string | null; accredited_on: string | null; adviser: string | null;
@@ -74,7 +86,7 @@ export type Database = {
         Row: {
           amount_due: number; collection_entry_id: number | null; created_at: string; entity_id: number; id: number;
           is_paid: boolean; paid_at: string | null; recorded_by: string | null; school_year_id: number;
-          semester_id: number | null; student_id: number;
+          semester_id: number | null; student_id: number; via_course: boolean;
         };
         Insert: { amount_due: number; entity_id: number; school_year_id: number; semester_id?: number | null; student_id: number };
         Update: { amount_due?: number };
@@ -134,6 +146,10 @@ export type Database = {
       };
     };
     Functions: {
+      add_member: {
+        Args: { p_student_no: string; p_full_name: string; p_course: string | null; p_year_level?: number | null };
+        Returns: { student_id: number; new_student: boolean; member_of: string[] | null; course: string | null };
+      };
       admin_adjust: { Args: { p_amount: number; p_direction: number; p_entity_id: number; p_pocket: E['pocket']; p_reason: string }; Returns: number };
       admin_release: { Args: { p_amount: number; p_description: string; p_entity_id: number }; Returns: number };
       cancel_request: { Args: { p_request_id: number }; Returns: undefined };
