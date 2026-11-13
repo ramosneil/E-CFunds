@@ -4,6 +4,7 @@ import { useAuth } from './lib/auth';
 import { supabase } from './lib/supabase';
 import { Loading, Spinner } from './components/ui';
 import { Shell } from './components/Shell';
+import { Toaster } from './components/Toaster';
 
 // Every screen loads on demand, so a visitor only downloads the screens their role can open.
 // `load` is kept so the same files can be warmed in the background (see warmUp).
@@ -48,6 +49,7 @@ export function App() {
   return (
     <BrowserRouter>
       <RecoveryRedirect />
+      <Toaster />
       <Routes>
         {/* Public for everyone, signed in or not (Google's consent screen links here). */}
         <Route path="/privacy" element={<Lazy><Privacy /></Lazy>} />
