@@ -89,8 +89,13 @@ counts of orgs and clubs, students, paid and unpaid dues, and pending requests.
   cannot join an organization outside their course. Course change: new course orgs added, unpaid old ones
   removed, paid ones kept. New school year/semester made current → everyone enrolled again.
   Rules live in `public.courses` + `public.course_orgs` (SAS can change them).
-- **SSG is school-wide:** every student on the roster is automatically an SSG member every year.
-- **Clubs are voluntary:** max **1 club** per school year, added by the club's treasurer.
+- **SSG is school-wide:** every student on the roster is automatically an SSG member every semester.
+- **Fees are per SEMESTER** for every organization and club (Neil, 2026-11-13; migration 16); each treasurer sets
+  their own amount. SSG + course organizations are enrolled again when SAS makes a semester current.
+- **Clubs are the student's choice each semester:** never carried over; max **1 club per semester**.
+- **The fee is mandatory — pay when added:** a treasurer adds a member only when the student pays; Add member
+  records the payment (collection line) at once. Course organizations that didn't add the student list them as
+  **"To collect"** until their own treasurer records the payment.
 - **Marking Paid:** the treasurer marks a membership Paid, which writes one `collection` entry
   (amount = `amount_due`, date, recorded_by). Only full payment is supported, the same as the old system.
 - **Undoing Paid** (a mistake): this writes a `reversal` that cancels the collection. Nothing is deleted.

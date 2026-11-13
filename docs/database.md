@@ -61,6 +61,12 @@ prevents two approvals racing past a limit.
   the treasurer's Add member (finds/creates roster student, enrols, adds own club or own org for non-course students).
 - Applied over a direct verified-TLS connection (connector was down): rehearsal of 18 cases rolled back first.
 
+## Per-semester + pay when added (migration 16, 2026-11-13)
+- All entities `dues_period = 'semester'`; current-year rows moved into the current semester.
+- `membership_rules`: max-1 club (and max-1 org for non-course students) counted per semester.
+- `add_member` records the payment for the caller's own entity (`private.record_payment`; ₱0 fee → marked paid,
+  no ledger line); returns `paid_amount` and `to_collect` (other orgs still unpaid). Rehearsed 12 cases, rolled back.
+
 ## Design notes
 - Balances are never stored: `private.d_cash/d_saved` implement business-rules §2; reports sum the ledger.
 - A wrong remittance/release is corrected with two `admin_adjust` rows (reversal only for single-pocket kinds).

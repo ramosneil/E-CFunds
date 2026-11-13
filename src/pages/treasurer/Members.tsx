@@ -2,7 +2,7 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, UserPlus, Users } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
-import { useCurrentYear, useEntities } from '../../lib/data';
+import { useCurrentYear, useEntities, useSemesters } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
 import { date, normStudentNo, peso } from '../../lib/format';
 import { Alert, Button, Card, Chip, DuesBar, Empty, Field, Input, PageHeader, Select, Sheet, Spinner } from '../../components/ui';
@@ -15,6 +15,9 @@ export function Members() {
   const year = useCurrentYear();
   const entities = useEntities();
   const entity = entities.data?.find((e) => e.id === entityId);
+  const sems = useSemesters(year.data?.id);
+  const perSemester = entity?.dues_period === 'semester';
+  const sem = sems.data?.find((s) => s.is_current);
   const qc = useQueryClient();
   const [q, setQ] = useState('');
   const [show, setShow] = useState<'all' | 'unpaid' | 'paid'>('all');
@@ -23,12 +26,15 @@ export function Members() {
   const [err, setErr] = useState('');
 
   const members = useQuery({
-    queryKey: ['memberships', entityId, year.data?.id],
-    enabled: !!year.data,
+    queryKey: ['memberships', entityId, year.data?.id, perSemester ? sem?.id : null],
+    enabled: !!year.data && !!entity && (!perSemester || !!sem),
     queryFn: async () => {
-      const { data, error } = await supabase.from('memberships')
+      // Fees are per semester: each semester has its own member list (clubs are chosen again every semester).
+      let qy = supabase.from('memberships')
         .select('*, student:students(id, student_no, full_name, course, year_level)')
-        .eq('entity_id', entityId).eq('school_year_id', year.data!.id).order('created_at', { ascending: false });
+        .eq('entity_id', entityId).eq('school_year_id', year.data!.id);
+      if (perSemester && sem) qy = qy.eq('semester_id', sem.id);
+      const { data, error } = await qy.order('created_at', { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -66,7 +72,7 @@ export function Members() {
 
   return (
     <>
-      <PageHeader title="Members" sub={entity ? `${entity.short_name} · dues ${peso(entity.dues_amount)} ${entity.dues_period === 'semester' ? 'per semester' : 'per school year'}` : undefined}
+      <PageHeader title="Members" sub={entity ? `${entity.short_name} · fee ${peso(entity.dues_amount)} ${perSemester ? `per semester${sem ? ` · ${sem.term === 1 ? '1st' : '2nd'} semester` : ''}` : 'per school year'}` : undefined}
         action={<div className="flex items-center gap-2">
           {entity && <ExportMenu label="CSV" options={[{ label: 'Members & dues', kind: 'csv', run: async () => (await exportsLib()).membersCsv(entity, year.data!) }]} />}
           <Button aria-label="Add member" onClick={() => setAdding(true)}><UserPlus className="size-5" /><span className="hidden sm:inline">Add member</span></Button>
@@ -77,11 +83,12 @@ export function Members() {
           <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted" aria-hidden />
           <Input aria-label="Search members" placeholder="Search name or student ID" value={q} onChange={(e) => setQ(e.target.value)} className="pl-12" />
         </div>
-        <div className="sm:w-72"><Segmented value={show} onChange={setShow} options={[['all', 'All'], ['unpaid', 'Unpaid'], ['paid', 'Paid']]} /></div>
+        <div className="sm:w-72"><Segmented value={show} onChange={setShow} options={[['all', 'All'], ['unpaid', 'To collect'], ['paid', 'Paid']]} /></div>
       </div>
+      {perSemester && sems.isSuccess && !sem && <div className="mb-3"><Alert tone="warn">SAS hasn’t set the current semester yet, so members can’t be added. Ask SAS to open it on the School year page.</Alert></div>}
       {err && <div className="mb-3"><Alert>{err}</Alert></div>}
       {members.isLoading ? <Spinner /> : !all.length ? (
-        <Card><Empty icon={<Users className="size-6" />} title="No members yet">Add students by their student ID. Their dues start as unpaid.</Empty></Card>
+        <Card><Empty icon={<Users className="size-6" />} title="No members yet this semester">Add a student when they pay: adding records their fee. Students of your course organizations also appear here automatically, to collect.</Empty></Card>
       ) : (
         <Card className="p-0">
           <ul className="divide-y divide-line">
@@ -142,7 +149,7 @@ function AddMember({ onClose, entityId, dues, perSemester }: { onClose: () => vo
   const [found, setFound] = useState<{ id: number; full_name: string; course: string | null } | null | undefined>(undefined);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
-  const [done, setDone] = useState<{ name: string; memberOf: string[] } | null>(null);
+  const [done, setDone] = useState<{ name: string; paid: number; toCollect: string[] } | null>(null);
 
   const me = entities.data?.find((e) => e.id === entityId);
   // The course that will count: the roster's, if the student already has one; otherwise what the treasurer picks.
@@ -175,13 +182,15 @@ function AddMember({ onClose, entityId, dues, perSemester }: { onClose: () => vo
     setBusy(false);
     if (error) { setErr(errorText(error)); return; }
     void qc.invalidateQueries();
-    setDone({ name: found?.full_name ?? name.trim(), memberOf: data?.member_of ?? [] });
+    setDone({ name: found?.full_name ?? name.trim(), paid: Number(data?.paid_amount ?? 0), toCollect: data?.to_collect ?? [] });
   }
 
   if (done) return (
     <Sheet open onClose={onClose} title="Member added">
-      <Alert tone="ok"><b>{done.name}</b> is now a member of: {done.memberOf.join(', ') || '—'}.</Alert>
-      <p className="text-[14px] text-muted mt-3">Each organization and club collects its own dues; they all start unpaid.</p>
+      <Alert tone="ok"><b>{done.name}</b> is a member of {me?.short_name}{done.paid > 0 ? <> · <b className="money">{peso(done.paid)}</b> recorded as paid</> : ''}.</Alert>
+      {done.toCollect.length > 0 && (
+        <p className="text-[14px] text-muted mt-3">Also listed by their course, <b className="text-ink">to collect</b> by each treasurer: {done.toCollect.join(', ')}.</p>
+      )}
       <Button className="w-full h-[54px] mt-5" onClick={onClose}>Done</Button>
     </Sheet>
   );
@@ -222,12 +231,14 @@ function AddMember({ onClose, entityId, dues, perSemester }: { onClose: () => vo
                 <span key={x.id} className={`px-2.5 h-7 rounded-full inline-flex items-center text-[13px] font-semibold ${x.id === entityId ? 'bg-primary text-on-primary' : 'bg-surface text-ink border border-line'}`}>{x.short_name}</span>
               ))}
             </div>
-            <p className="text-[12.5px] mt-2 opacity-90">{isCourseStudent ? `Organizations come from the course (${course}). ` : ''}Each one collects its own dues.</p>
+            <p className="text-[12.5px] mt-2 opacity-90">{isCourseStudent ? `Organizations come from the course (${course}). ` : ''}Each one collects its own fee.</p>
           </div>
         ))}
-        <p className="text-[14px] text-muted">Your dues: <b className="text-ink money">{peso(dues)}</b> {perSemester ? 'this semester' : 'this school year'}, starts unpaid.</p>
+        <p className="text-[14px] text-muted">
+          The fee is mandatory: adding records <b className="text-ink money">{peso(dues)}</b> {perSemester ? 'for this semester' : 'for this school year'} as <b className="text-ink">paid</b> now. Only add the student once they’ve paid you.
+        </p>
         {err && <Alert>{err}</Alert>}
-        <Button type="submit" busy={busy} disabled={found === undefined || blocked} className="w-full h-[54px]">Add member</Button>
+        <Button type="submit" busy={busy} disabled={found === undefined || blocked} className="w-full h-[54px]">{dues > 0 ? `Add & record ${peso(dues)}` : 'Add member'}</Button>
         {found === undefined && <p className="text-[13px] text-muted text-center -mt-2">Enter the student ID, then tap outside the box to check it.</p>}
       </form>
     </Sheet>
