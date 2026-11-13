@@ -169,3 +169,6 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   adding = paid, treasurers set amounts). Migration 16 rehearsed (12 cases: paid on add + ledger line, to-collect
   in other course orgs, 2nd club same sem refused, sem 2 → SSG+course orgs only, different club in sem 2 OK, ₱0
   fee no ledger line, no duplicates) → applied + recorded 20261113150000. Members list is per current semester.
+- Clubs carry over (Neil: re-list clubs too; same club or switch, student's choice). Migration 17 rehearsed (carry
+  paid only, stay = pay carried row, switch removes old carried row, paid elsewhere refused, new year carries from
+  last 2nd sem, orgs re-listed, no duplicates) → applied 20261113170000. "Carried over" tag on Members.

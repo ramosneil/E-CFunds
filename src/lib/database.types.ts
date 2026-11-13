@@ -86,7 +86,7 @@ export type Database = {
         Row: {
           amount_due: number; collection_entry_id: number | null; created_at: string; entity_id: number; id: number;
           is_paid: boolean; paid_at: string | null; recorded_by: string | null; school_year_id: number;
-          semester_id: number | null; student_id: number; via_course: boolean;
+          semester_id: number | null; student_id: number; via_course: boolean; carried_over: boolean;
         };
         Insert: { amount_due: number; entity_id: number; school_year_id: number; semester_id?: number | null; student_id: number };
         Update: { amount_due?: number };

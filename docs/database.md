@@ -67,6 +67,11 @@ prevents two approvals racing past a limit.
 - `add_member` records the payment for the caller's own entity (`private.record_payment`; ₱0 fee → marked paid,
   no ledger line); returns `paid_amount` and `to_collect` (other orgs still unpaid). Rehearsed 12 cases, rolled back.
 
+## Clubs carry over (migration 17, 2026-11-13)
+- `memberships.carried_over`; `private.carry_clubs()` (paid club rows of the previous semester → current semester,
+  unpaid) runs from `period_became_current` after `enroll_by_course`. `add_member` for a club removes the student's
+  unpaid carried rows in other clubs (switch) and refuses if another club is already paid this semester.
+
 ## Design notes
 - Balances are never stored: `private.d_cash/d_saved` implement business-rules §2; reports sum the ledger.
 - A wrong remittance/release is corrected with two `admin_adjust` rows (reversal only for single-pocket kinds).
