@@ -7,7 +7,11 @@ import { VitePWA } from 'vite-plugin-pwa';
 // file instead of dozens of tiny requests. jsPDF and the export code are not listed: they stay on-demand chunks.
 const lib = (pkgs: string) => new RegExp(`[\\\\/]node_modules[\\\\/](${pkgs})[\\\\/]`);
 
+// Which code this is: the git commit (Vercel and GitHub builds of the same commit get the same id), else "dev".
+const BUILD_ID = (process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA || 'dev').slice(0, 12);
+
 export default defineConfig({
+  define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
   plugins: [
     react(),
     tailwindcss(),
