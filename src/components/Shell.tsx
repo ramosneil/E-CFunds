@@ -7,6 +7,8 @@ import { useMessagesRealtime, useUnread } from '../lib/messages';
 import { Brand } from '../pages/auth/AuthLayout';
 import { EntityLogo, Loading, Sheet, ThemeToggle } from './ui';
 import { ChatButton } from './ChatButton';
+import { NotificationBell } from './NotificationBell';
+import { useLiveNotifications } from '../lib/notifications';
 
 // phone: false = desktop sidebar only (on phones these live in the admin "More" menu).
 type Item = { to: string; label: string; icon: ComponentType<{ className?: string }>; phone?: false; badge?: 'messages' };
@@ -45,6 +47,8 @@ export function Shell() {
   const [more, setMore] = useState(false);
   useMessagesRealtime();
   const unread = useUnread();
+  const uid = session?.user.id;
+  useLiveNotifications(uid);
   const role = profile?.role ?? 'student';
   const items = NAV[role];
   const phoneItems = items.filter((i) => i.phone !== false);
@@ -87,13 +91,15 @@ export function Shell() {
         <header className="lg:hidden sticky top-0 z-30 bg-bg/90 backdrop-blur border-b border-line px-5 h-16 flex items-center justify-between">
           <Brand />
           <div className="flex items-center">
+            {uid && <NotificationBell uid={uid} />}
             <ThemeToggle />
             <NavLink to="/account" aria-label="My account" className="size-11 grid place-items-center rounded-full text-muted hover:bg-surface2"><UserRound className="size-5" /></NavLink>
             <button onClick={signOut} aria-label="Sign out" className="size-11 grid place-items-center rounded-full text-muted hover:bg-surface2 cursor-pointer"><LogOut className="size-5" /></button>
           </div>
         </header>
-        <div className="hidden lg:flex items-center justify-end h-14 px-8 text-[13px] text-muted">
-          {year.data ? <>School year <b className="text-ink ml-1">{year.data.label}</b></> : 'No school year open'}
+        <div className="hidden lg:flex items-center justify-end gap-3 h-14 px-8 text-[13px] text-muted">
+          <span>{year.data ? <>School year <b className="text-ink ml-1">{year.data.label}</b></> : 'No school year open'}</span>
+          {uid && <NotificationBell uid={uid} />}
         </div>
         <main className={`flex-1 w-full max-w-6xl mx-auto px-5 sm:px-8 pt-5 lg:pt-0 lg:pb-12 ${chat ? 'pb-[92px]' : 'pb-28'}`}>
           <Suspense fallback={<Loading />}><Outlet /></Suspense>
