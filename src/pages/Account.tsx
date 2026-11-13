@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router';
 import { CheckCircle2, Download, IdCard, KeyRound, Smartphone } from 'lucide-react';
 import { install } from '../lib/install';
 import { AndroidAppLink } from '../components/AndroidAppLink';
@@ -51,6 +52,7 @@ export function Account() {
         <PasswordCard hasPassword={hasPassword} />
         {!isNative && <InstallCard />}
       </div>
+      <p className="mt-6 text-[13px] text-muted"><Link to="/privacy" className="text-primary font-semibold">Privacy notice</Link> · what E-CFunds keeps and who can see it</p>
     </>
   );
 }

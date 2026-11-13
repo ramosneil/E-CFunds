@@ -27,6 +27,7 @@ const StudentHome = page(() => import('./pages/student/Home'), 'StudentHome');
 const Reports = page(() => import('./pages/student/Reports'), 'Reports');
 const Account = page(() => import('./pages/Account'), 'Account');
 const Messages = page(() => import('./pages/Messages'), 'Messages');
+const Privacy = page(() => import('./pages/Privacy'), 'Privacy');
 
 const ROLE_PAGES = {
   admin: [AdminDashboard, Approvals, Orgs, EntityDetail, Messages, Accredited, Calendar, Account],
@@ -47,7 +48,11 @@ export function App() {
   return (
     <BrowserRouter>
       <RecoveryRedirect />
-      <Gate />
+      <Routes>
+        {/* Public for everyone, signed in or not (Google's consent screen links here). */}
+        <Route path="/privacy" element={<Lazy><Privacy /></Lazy>} />
+        <Route path="*" element={<Gate />} />
+      </Routes>
     </BrowserRouter>
   );
 }

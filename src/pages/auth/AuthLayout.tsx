@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Link } from 'react-router';
 import { ThemeToggle } from '../../components/ui';
 
 export function AuthLayout({ title, sub, children }: { title: string; sub?: ReactNode; children: ReactNode }) {
@@ -30,6 +31,7 @@ export function AuthLayout({ title, sub, children }: { title: string; sub?: Reac
             <div className="mt-7">{children}</div>
           </div>
         </div>
+        <p className="text-center text-[12.5px] text-muted"><Link to="/privacy" className="hover:text-ink underline-offset-2 hover:underline">Privacy notice</Link></p>
       </main>
     </div>
   );
