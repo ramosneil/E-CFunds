@@ -139,3 +139,14 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   Builds #2/#3 failed: the secret held the pasted command text (91 chars) — workflow now names a bad key/password/
   alias clearly; Neil re-pasted from Notepad. Build #4 (v0.7.0-beta.4): signed, fingerprint matches; Neil installed it
   on his phone — works. Phase 7 DONE; PR phase-7-pwa → main next.
+- Phase 8 (plan mode; Neil: free vercel.app address, full Google setup, Google inside the APK, APK via GitHub Releases).
+  Vercel project e-cfunds created via connector after Neil approved access + installed Vercel's GitHub app; env vars set;
+  first prod build (before env) was blank → promoted the phase-8 build to production. vercel.json (SPA fallback,
+  immutable assets, no-cache sw/index/manifest, nosniff/referrer/permissions/frame headers) verified with curl.
+  Edge Functions chat v7 + student-login v4: + https://e-cfunds.vercel.app; a Vercel-preview regex was dropped
+  (anyone could name a project to match it) → exact origins only; lookalike origin gets no CORS. Google: first try
+  landed on localhost (Site URL/redirect list not saved) → Neil fixed → live Google sign-in OK, linked to his admin
+  account (Password + Google). Live QA: 7 admin screens 150–480 ms no errors, assistant JOES ₱15 total/₱15 saved ✓,
+  student-login from live origin → 401 "Wrong Student ID or password." (1 test failure logged for TEST-0001),
+  offline pill + SW on live ✓, Lighthouse mobile 98/100/100/100, desktop 100/100/100/100, Android link on Android UA ✓.
+  Treasurer/student screens not re-clicked on live (same build as localhost-tested; origins/auth verified).
