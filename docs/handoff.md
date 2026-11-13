@@ -22,11 +22,9 @@ Update it every session: tick done items, add new ones.
 - If the app shows "Loading…" forever and Supabase answers 521/522: Supabase dashboard → e-cfunds → Project Settings
       → General → Restart project (happened once, 2026-11-13 01:03 Manila; data intact after restart).
 
-## Phase 6 (AI chatbot + keep-alive) — built 2026-11-13, waiting on these two
+## Phase 6 (AI chatbot + keep-alive) — DONE 2026-11-13
 - [x] Added the Gemini key as Supabase secret `GEMINI_API_KEY` (session 4) — assistant is live.
-- [ ] GitHub → ramosneil/E-CFunds → Settings → Secrets and variables → Actions → **Variables** tab → New repository
-      variable: name `SUPABASE_PUBLISHABLE_KEY`, value = the publishable key (public; Claude gives it). The keep-alive
-      starts running every 3 days once the pull request is merged into `main` (Actions tab → "Keep Supabase awake").
+- [x] GitHub variable `SUPABASE_PUBLISHABLE_KEY` added, PR #2 merged, keep-alive run verified (session 4)
 
 ## Phase 5 (Google login)
 - [ ] In Google Cloud Console, add the new app's URLs to your OAuth client

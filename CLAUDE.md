@@ -3,7 +3,7 @@
 Fund monitoring app for OMSC Office of Student Affairs (SAS) clubs & organizations.
 Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud PWA + Android app.
 
-## Status (updated 2026-11-12, session 4)
+## Status (updated 2026-11-13, session 4)
 - Phase 0 (repo setup) — DONE
 - Phase 1 (business rules) — DONE, CONFIRMED by Neil: `docs/business-rules.md` +
   `scripts/phase1-rules-check.sql` (passes). Full dues payment only; students see counts only
@@ -29,14 +29,15 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
   (PDF+CSV); OMSC letterhead (seal cropped from Storage logos/brand/omsc-seal-source.jpg), Inter font embedded
   (₱), jsPDF lazy-loaded. Chart colours validated (dataviz). Migration 12: "today" = Manila day (ledger default + Expired). Faster load: lazy screens + idle warm-up,
   react/supabase/app-libs chunks; sign-in JS 175 → 159 KB gz; students download student screens only.
-- Phase 6 — BUILT (session 4): Edge Function `chat` (verify_jwt on; reads with the caller's own token → RLS-scoped;
+- Phase 6 — DONE (session 4): Edge Function `chat` (verify_jwt on; reads with the caller's own token → RLS-scoped;
   Gemini default, swappable via AI_PROVIDER; 30 questions/day, admin unlimited — migration 13), "Ask E-CFunds"
   button for every role; keep-alive = `public.keep_alive()` (anon) + `.github/workflows/keep-alive.yml` every 3 days.
   LIVE: GEMINI_API_KEY added; model auto-picked (gemini-3.5-flash-lite). Admin + student tested (numbers, Taglish,
-  privacy/injection refusals). Waiting: GitHub variable SUPABASE_PUBLISHABLE_KEY + merge for the keep-alive.
+  privacy/injection refusals). PR #2 merged into main 2026-11-13; keep-alive verified (GitHub run → 200 "ok").
   Treasurer chat + exports tested too (chat v5: reply language decided server-side from the latest question). PR: phase-5-app → main (open on GitHub by Neil). School year dates: SAS sets them in the app
+- NEXT: Phase 7 — PWA (installable) + Android APK via Capacitor; branch `phase-7-pwa`
 - Local repo on Neil's PC: `C:\xampp\htdocs\E-CFunds`; old system stays a plain folder (never commit from it)
-- Gemini key: old key removed from old code; Neil has a NEW key (adds it himself in Phase 6)
+- Gemini key: old key removed from old code; NEW key is the Supabase secret GEMINI_API_KEY (never in git)
 - Full plan & phases: `docs/plan.md` · Handoff checklist: `docs/handoff.md`
 - What each session made: `docs/sessions.md` · Neil's working rules: `docs/working-rules.md`
 
