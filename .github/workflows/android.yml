@@ -1,0 +1,103 @@
+# Builds the E-CFunds Android app (APK) on GitHub's machines (Phase 7). Nothing needs installing on a PC.
+# Run it: Actions → "Build Android app" → Run workflow, or push a tag like v1.0.0.
+# Download: open the finished run → Artifacts → E-CFunds-<version>-<signed|debug>.
+#
+# Needs (Settings → Secrets and variables → Actions):
+#   Variable  SUPABASE_PUBLISHABLE_KEY   (public key, already added for keep-alive)
+#   Secrets   ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+# Without the 4 secrets it still builds a DEBUG app for testing (cannot be updated by the real signed app later).
+name: Build Android app
+
+on:
+  workflow_dispatch: {}
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Version
+        id: v
+        run: |
+          base=$(node -p "require('./package.json').version")
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then name="${GITHUB_REF_NAME#v}"; else name="$base-build.$GITHUB_RUN_NUMBER"; fi
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "APP_VERSION_NAME=$name" >> "$GITHUB_ENV"
+          echo "APP_VERSION_CODE=$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
+          echo "Version $name (code $GITHUB_RUN_NUMBER)"
+
+      - name: Install
+        run: npm ci
+
+      - name: Build the web app
+        env:
+          VITE_SUPABASE_URL: https://nvmlawpojydnouzqilaf.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          if [ -z "$VITE_SUPABASE_PUBLISHABLE_KEY" ]; then echo "::error::Repo variable SUPABASE_PUBLISHABLE_KEY is not set"; exit 1; fi
+          npm run build
+
+      - name: Copy it into the Android project
+        run: npx cap sync android
+
+      - name: Signing key
+        id: key
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
+            echo "ANDROID_KEYSTORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+            echo "kind=signed" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::No signing secrets yet — building a DEBUG app for testing only."
+            echo "kind=debug" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build the APK
+        working-directory: android
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          if [ "${{ steps.key.outputs.kind }}" = "signed" ]; then task=assembleRelease; out=app/build/outputs/apk/release/app-release.apk
+          else task=assembleDebug; out=app/build/outputs/apk/debug/app-debug.apk; fi
+          ./gradlew --no-daemon "$task"
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          cp "$out" "$GITHUB_WORKSPACE/out/E-CFunds-${{ steps.v.outputs.name }}-${{ steps.key.outputs.kind }}.apk"
+          ls -l "$GITHUB_WORKSPACE/out"
+
+      - name: Remove the key file
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.jks"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: E-CFunds-${{ steps.v.outputs.name }}-${{ steps.key.outputs.kind }}
+          path: out/*.apk
+          if-no-files-found: error
+          retention-days: 30

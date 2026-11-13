@@ -26,6 +26,18 @@ Update it every session: tick done items, add new ones.
 - [x] Added the Gemini key as Supabase secret `GEMINI_API_KEY` (session 4) — assistant is live.
 - [x] GitHub variable `SUPABASE_PUBLISHABLE_KEY` added, PR #2 merged, keep-alive run verified (session 4)
 
+## Phase 7 (installable app + Android APK) — now
+- [ ] Make the app's signing key ONCE (steps Claude gave in chat; uses Java's `keytool`, already on this PC).
+      Keep `ecfunds-release.jks` + its password somewhere safe (Google Drive + a notebook). Lose it = phones can
+      never get updates of the app; you'd have to uninstall and reinstall.
+- [ ] GitHub → E-CFunds → Settings → Secrets and variables → Actions → New repository secret, 4 times:
+      `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` (= ecfunds), `ANDROID_KEY_PASSWORD`
+- [ ] Actions → "Build Android app" → Run workflow (branch main after merge) → download the APK artifact →
+      install on your phone (allow "Install unknown apps" for your browser/Files) → try: sign in with email and
+      Student ID, dashboard, export a PDF (share sheet), Ask E-CFunds, airplane mode (offline pill)
+- Note: `npm audit` shows 10 moderate/low issues only in BUILD tools (@capacitor/assets, vite-plugin-pwa's
+  workbox-build); none ship inside the app (`npm audit --omit=dev` = 0).
+
 ## Phase 5 (Google login)
 - [ ] In Google Cloud Console, add the new app's URLs to your OAuth client
       (Claude will give you the exact URLs)

@@ -6,7 +6,7 @@ import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2.1
 
 const URL = Deno.env.get('SUPABASE_URL')!;
 const ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
-const ORIGINS = new Set(['http://localhost:3000', 'http://127.0.0.1:3000',
+const ORIGINS = new Set(['http://localhost:3000', 'http://127.0.0.1:3000', 'https://localhost' /* Android app */,
   ...(Deno.env.get('ALLOWED_ORIGINS') ?? '').split(',').map((s) => s.trim()).filter(Boolean)]);
 
 type Turn = { role: 'user' | 'assistant'; text: string };

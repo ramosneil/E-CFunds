@@ -1,3 +1,4 @@
+import { saveFile } from './save';
 // CSV for Excel: UTF-8 with a byte-order mark (so Excel shows ₱ correctly), CRLF lines, RFC 4180 quoting.
 // Cells starting with = + - @ are prefixed with ' so a spreadsheet never runs them as formulas.
 export type Cell = string | number | null | undefined;
@@ -13,13 +14,7 @@ function cell(v: Cell): string {
 export function downloadCsv(filename: string, header: string[], rows: Cell[][]) {
   const body = [header, ...rows].map((r) => r.map(cell).join(',')).join('\r\n');
   const blob = new Blob(['﻿' + body + '\r\n'], { type: 'text/csv;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  return saveFile(filename, blob);
 }
 
 /** File-name-safe piece: "Sci-Math Club" → "Sci-Math_Club". */

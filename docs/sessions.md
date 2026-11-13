@@ -125,3 +125,11 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   writes negatives as plain numbers (-20.00) ✓, members CSV ✓. The pane's PDF viewer didn't draw this time.
 - Neil merged PR #2 (phases 4–6) into main and added the GitHub variable; manual keep-alive run reached Supabase
   (edge log 03:03 UTC, curl/8.18 from GitHub's runner, 200). Local main synced; Phase 7 starts on branch phase-7-pwa.
+- Phase 7 (plan mode; Neil: APK built on GitHub, app bundled inside the APK, ₱ icon, offline = app opens + bar).
+  PWA: vite-plugin-pwa 2.0.0 (manifest, 48 precached files, Google Fonts cached, Supabase never cached, prompt
+  updates), icons from `public/icon.svg` (@vite-pwa/assets-generator). Offline pill (amber soft tokens, below the
+  phone header) + Install card in My account, screenshotted light/dark × phone/desktop. Capacitor 8.6.0 Android
+  project, filesystem + share plugins (exports → share sheet in the app), Google button hidden in the app, ₱ icon +
+  splash. `chat` v6 + `student-login` v3 allow `https://localhost` (preflight checked; other origins still get no
+  CORS). Workflow `android.yml` with env-based signing in `android/app/build.gradle`. Verified in headless Edge:
+  service worker active, offline reload → app + pill, back online → pill gone, new version → "Update available".

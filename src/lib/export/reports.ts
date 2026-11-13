@@ -70,7 +70,7 @@ export async function orgReport(format: 'pdf' | 'csv', entity: Entity, year: Yea
   const base = `E-CFunds_${slug(entity.short_name)}_report_${year.label}`;
 
   if (format === 'csv') {
-    downloadCsv(`${base}.csv`,
+    await downloadCsv(`${base}.csv`,
       ['Date', 'Type', 'Description', 'Pocket', 'Cash change', 'Saved change', 'Total change'],
       ledger.map((l) => {
         const c = dCash(l), s = dSaved(l);
@@ -119,7 +119,7 @@ export async function orgReport(format: 'pdf' | 'csv', entity: Entity, year: Yea
     foot: ledger.length ? [['', '', 'Year so far', signed(ledger.reduce((a, l) => a + dCash(l), 0)), signed(ledger.reduce((a, l) => a + dSaved(l), 0)), signed(ledger.reduce((a, l) => a + dCash(l) + dSaved(l), 0))]] : undefined,
     footStyles: { font: 'Inter', fontStyle: 'bold', fillColor: '#F4F6FB', textColor: '#0D1530', halign: 'right' },
   });
-  finish(doc, `${base}.pdf`);
+  await finish(doc, `${base}.pdf`);
 }
 
 // ---------------------------------------------------------------- 2. School-wide summary (admin)
@@ -131,7 +131,7 @@ export async function schoolSummary(format: 'pdf' | 'csv', year: Year) {
   const line = (r: EntityReport) => [r.name, r.category, r.previous_funds, r.collections, r.expenses, r.cash_on_hand, r.saved_with_sas, r.total_fund, r.members, r.paid_members];
 
   if (format === 'csv') {
-    downloadCsv(`${base}.csv`, header, [
+    await downloadCsv(`${base}.csv`, header, [
       ...rows.map((r) => line(r).map((v) => (typeof v === 'number' && !Number.isInteger(v) ? v.toFixed(2) : v))),
       ['ALL ORGS & CLUBS', '', sum('previous_funds').toFixed(2), sum('collections').toFixed(2), sum('expenses').toFixed(2), sum('cash_on_hand').toFixed(2), sum('saved_with_sas').toFixed(2), sum('total_fund').toFixed(2), sum('members'), sum('paid_members')],
     ]);
@@ -163,7 +163,7 @@ export async function schoolSummary(format: 'pdf' | 'csv', year: Year) {
     footStyles: { font: 'Inter', fontStyle: 'bold', fillColor: '#F4F6FB', textColor: '#0D1530' },
     columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' }, 4: { halign: 'right' }, 5: { halign: 'right' }, 6: { halign: 'right', fontStyle: 'bold' }, 7: { halign: 'center' } },
   });
-  finish(doc, `${base}.pdf`);
+  await finish(doc, `${base}.pdf`);
 }
 
 // ---------------------------------------------------------------- 3. Members & dues (CSV)
@@ -172,7 +172,7 @@ export async function membersCsv(entity: Entity, year: Year) {
     .select('amount_due, is_paid, paid_at, student:students(student_no, full_name, course, year_level)')
     .eq('entity_id', entity.id).eq('school_year_id', year.id));
   const sorted = [...rows].sort((a, b) => (a.student?.full_name ?? '').localeCompare(b.student?.full_name ?? ''));
-  downloadCsv(`E-CFunds_${slug(entity.short_name)}_members_${year.label}.csv`,
+  await downloadCsv(`E-CFunds_${slug(entity.short_name)}_members_${year.label}.csv`,
     ['Student ID', 'Full name', 'Course', 'Year level', 'Amount due', 'Status', 'Paid on'],
     sorted.map((m) => [m.student?.student_no, m.student?.full_name, m.student?.course, m.student?.year_level, Number(m.amount_due).toFixed(2), m.is_paid ? 'Paid' : 'Unpaid', m.paid_at ? manilaDate(m.paid_at) : '']));
 }
@@ -183,7 +183,7 @@ export async function accredited(format: 'pdf' | 'csv') {
   const status = (s: string | null) => (s ? s[0].toUpperCase() + s.slice(1) : '');
   const today = manilaDate();
   if (format === 'csv') {
-    downloadCsv(`E-CFunds_accredited-list_${today}.csv`,
+    await downloadCsv(`E-CFunds_accredited-list_${today}.csv`,
       ['Name', 'Type', 'Adviser', 'Academic year', 'Accredited on', 'Expires on', 'Status', 'Remarks'],
       rows.map((a) => [a.name, a.category, a.adviser, a.academic_year, a.accredited_on, a.expires_on, status(a.effective_status), a.remarks]));
     return;
@@ -202,5 +202,5 @@ export async function accredited(format: 'pdf' | 'csv') {
       }
     },
   });
-  finish(doc, `E-CFunds_accredited-list_${today}.pdf`);
+  await finish(doc, `E-CFunds_accredited-list_${today}.pdf`);
 }

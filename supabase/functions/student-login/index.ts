@@ -8,7 +8,7 @@ const URL = Deno.env.get('SUPABASE_URL')!;
 const ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
 const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 // Browser origins allowed to call this function. Add the live app address (Phase 8) with the ALLOWED_ORIGINS secret.
-const ORIGINS = new Set(['http://localhost:3000', 'http://127.0.0.1:3000',
+const ORIGINS = new Set(['http://localhost:3000', 'http://127.0.0.1:3000', 'https://localhost' /* Android app */,
   ...(Deno.env.get('ALLOWED_ORIGINS') ?? '').split(',').map((s) => s.trim()).filter(Boolean)]);
 
 const admin = createClient(URL, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });

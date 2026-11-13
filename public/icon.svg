@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- E-CFunds app icon: white ₱ drawn as shapes (no font needed) on the brand royal-blue tile.
+       Full-bleed square so it also works as a maskable/adaptive icon; the glyph stays inside the central safe zone. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2447C4"/>
+      <stop offset="1" stop-color="#13297A"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <g fill="none" stroke="#FFFFFF" stroke-linejoin="round">
+    <!-- stem + bowl of the P -->
+    <path d="M204 384 V150 H276 a74 74 0 0 1 0 148 H204" stroke-width="44"/>
+  </g>
+  <g fill="#FFFFFF">
+    <!-- the two bars that make P into ₱ -->
+    <rect x="136" y="190" width="252" height="20" rx="10"/>
+    <rect x="136" y="236" width="252" height="20" rx="10"/>
+  </g>
+  <!-- gold "cash" accent from the design system -->
+  <circle cx="376" cy="372" r="26" fill="#F0C14B"/>
+</svg>

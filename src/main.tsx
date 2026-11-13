@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './lib/auth';
 import { App } from './App';
+import { AppStatus } from './components/AppStatus';
+import './lib/install';
 import './index.css';
 
 const qc = new QueryClient({
@@ -14,6 +16,7 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={qc}>
       <AuthProvider>
         <App />
+        <AppStatus />
       </AuthProvider>
     </QueryClientProvider>
   </StrictMode>,

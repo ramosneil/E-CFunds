@@ -1,6 +1,8 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { IdCard, KeyRound } from 'lucide-react';
+import { CheckCircle2, Download, IdCard, KeyRound, Smartphone } from 'lucide-react';
+import { install } from '../lib/install';
+import { isNative } from '../lib/native';
 import { useAuth } from '../lib/auth';
 import { useEntities } from '../lib/data';
 import { supabase, errorText } from '../lib/supabase';
@@ -46,6 +48,7 @@ export function Account() {
           )}
         </Card>
         <PasswordCard hasPassword={hasPassword} />
+        {!isNative && <InstallCard />}
       </div>
     </>
   );
@@ -83,6 +86,40 @@ function PasswordCard({ hasPassword }: { hasPassword: boolean }) {
         {msg && <Alert tone={msg.tone}>{msg.text}</Alert>}
         <Button type="submit" busy={busy} className="w-full"><KeyRound className="size-5" />{hasPassword ? 'Change password' : 'Set password'}</Button>
       </form>
+    </Card>
+  );
+}
+
+/** Install E-CFunds on this phone/computer (installable web app). Hidden inside the Android app itself. */
+function InstallCard() {
+  const [, tick] = useState(0);
+  useEffect(() => install.subscribe(() => tick((n) => n + 1)), []);
+  const [msg, setMsg] = useState('');
+  if (install.installed()) {
+    return (
+      <Card>
+        <SectionTitle>App</SectionTitle>
+        <p className="flex items-center gap-2 text-[14px] text-ok font-semibold"><CheckCircle2 className="size-5" aria-hidden />E-CFunds is installed on this device.</p>
+      </Card>
+    );
+  }
+  return (
+    <Card>
+      <SectionTitle>Install the app</SectionTitle>
+      <p className="text-[14px] text-muted -mt-1 mb-4">Put E-CFunds on your home screen. It opens full-screen and starts instantly, even on a weak signal.</p>
+      {install.available() ? (
+        <Button className="w-full" onClick={async () => setMsg((await install.prompt()) ? 'Installed — look for E-CFunds on your home screen.' : '')}>
+          <Download className="size-5" />Install E-CFunds
+        </Button>
+      ) : (
+        <div className="rounded-[16px] bg-surface2 p-4 text-[14px] flex gap-3">
+          <Smartphone className="size-5 shrink-0 text-primary" aria-hidden />
+          {install.isIOS()
+            ? <p>On iPhone: tap the <b>Share</b> button in Safari, then <b>Add to Home Screen</b>.</p>
+            : <p>Open your browser menu (<b>⋮</b>) and choose <b>Install app</b> or <b>Add to Home screen</b>.</p>}
+        </div>
+      )}
+      {msg && <p className="text-[13px] text-ok mt-3">{msg}</p>}
     </Card>
   );
 }

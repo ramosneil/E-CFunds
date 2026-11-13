@@ -35,7 +35,15 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
   LIVE: GEMINI_API_KEY added; model auto-picked (gemini-3.5-flash-lite). Admin + student tested (numbers, Taglish,
   privacy/injection refusals). PR #2 merged into main 2026-11-13; keep-alive verified (GitHub run → 200 "ok").
   Treasurer chat + exports tested too (chat v5: reply language decided server-side from the latest question). PR: phase-5-app → main (open on GitHub by Neil). School year dates: SAS sets them in the app
-- NEXT: Phase 7 — PWA (installable) + Android APK via Capacitor; branch `phase-7-pwa`
+- Phase 7 — BUILT (session 4, branch `phase-7-pwa`): installable PWA (vite-plugin-pwa: pre-caches app files, never
+  Supabase data; "Update available → Reload" prompt; Install card in My account) + offline pill ("You're offline").
+  Android: Capacitor 8 (`android/`, app id `ph.edu.omsc.ecfunds` — permanent), ₱ icon/splash (`assets/` +
+  `node scripts/make-app-assets.mjs` → `npx capacitor-assets generate --android`). In the app: exports go to the
+  share sheet (`src/lib/export/save.ts`), Google sign-in hidden until Phase 8 deep links. Edge Functions allow
+  origin `https://localhost` (the app). APK built on GitHub: `.github/workflows/android.yml` (Run workflow or tag
+  `v*`; signed when the 4 ANDROID_* secrets exist, else debug). Offline + update prompt verified in headless Edge
+  (the Claude browser pane can't register service workers). WAITING: Neil's signing key + phone test (handoff)
+- NEXT: Phase 8 — Vercel deploy, ALLOWED_ORIGINS, Google OAuth URLs, deep links for Google sign-in in the app
 - Local repo on Neil's PC: `C:\xampp\htdocs\E-CFunds`; old system stays a plain folder (never commit from it)
 - Gemini key: old key removed from old code; NEW key is the Supabase secret GEMINI_API_KEY (never in git)
 - Full plan & phases: `docs/plan.md` · Handoff checklist: `docs/handoff.md`
