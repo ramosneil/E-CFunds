@@ -22,14 +22,13 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
   student on the roster. Test data was wiped before launch.
 - Database: **24 migrations** live (last `20261114070000_add_member_unpaid`).
-- Android: latest APK **v1.1.1 = build 10** (self-update fix: downloaded bundles are 'pending' until first used;
-  self-update confirmed end to end on Neil's phone).
-  `ota.json` minNativeBuild = 10.
-- Open items: Neil should delete the Supabase access token when no longer needed (`docs/handoff.md`). The Add member
-  sheet / "Carried over" tag were never seen on a treasurer's screen by Claude (no treasurer login).
+- Android: latest APK **v1.1.1 = build 10**; `ota.json` minNativeBuild = 10.
+- **Confirmed working on Neil's phone:** push notifications with the app closed, app self-update end to end
+  (download → reopen → "E-CFunds was updated"), Back button, full screen, Delete conversation, Add member (adds only).
+- Open items: Neil should delete the Supabase access token when no longer needed (`docs/handoff.md`).
 - Ideas not started: browser (web) push, custom domain, own email sender (SMTP), more course rules.
 
-## Memberships & fees (migrations 15–17)
+## Memberships & fees (migrations 15–17, 24)
 - **Organizations are mandatory by course** (tables `courses`, `course_orgs`; SAS can change them):
   BSIT → SSG, PADC, LSC · BEED → SSG, YMO, LSC · BSBA OM → SSG, LSC, JOES · BSBA FM → SSG, LSC, JFMS ·
   other course / no course → SSG only (+ max 1 organization added by hand).
@@ -96,6 +95,9 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   127.0.0.1:3000, `https://localhost` (Android), `https://e-cfunds.vercel.app`.
 - **Never use window.confirm/prompt/alert** (silently fail in the Android app) → `confirmAsk/promptAsk/alertAsk`
   from `src/lib/confirm.ts`.
+- **App self-update rules** (`src/lib/ota.ts`): a downloaded bundle is `pending` until first used, then `success` —
+  accept both. If a bug ever breaks self-update on phones, they can't fix themselves: release a fixed APK first,
+  then raise `ota.json` minNativeBuild to its build number → old apps show "A new version of the app is ready".
 - **Types:** `src/lib/database.types.ts` is hand-trimmed — add new tables/columns/RPCs there.
 - **Web deploy:** merge/push to `main` → Vercel builds production (and the OTA package) automatically.
 - **Android release:** push tag `vX.Y.Z` → signed APK + GitHub Release (tags with `-` = pre-release). Needs GitHub
