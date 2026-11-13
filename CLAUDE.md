@@ -32,6 +32,9 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   upper/lower/number/symbol + meter + eye icon; Terms at /terms (checkbox on sign-up, `terms_accepted_at`).
 - Live screens (migration 21): data-free ticks in `live_changes` (statement triggers) → every approved user's open
   screens re-fetch within ~0.5 s (`src/lib/live.ts`).
+- v1.0.0 APK (build 8, ota.json minNativeBuild=8): full screen (Capacitor SystemBars hides the status bar),
+  phone notifications via @capacitor/local-notifications while the app is open/in background (`src/lib/phone.ts`),
+  Android Back button (`NativeBack.tsx`), App updates + Phone notifications cards in My account.
 - NEXT: Part D push notifications when closed (Firebase, Neil's steps). Ideas: custom domain, own email sender (SMTP), more course rules if SAS adds courses.
 
 ## Memberships & fees (Neil, 2026-11-13 — migrations 15–17)

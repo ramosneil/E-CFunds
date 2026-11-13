@@ -178,3 +178,6 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   Bell/pop-up not yet seen live (pane signed out). Part D (push when closed) pending Neil's Firebase setup.
 - Live screens (migration 21, rehearsed: 1 tick per statement, students read ticks but 0 ledger rows, anon refused,
   trimming): all roles' screens refresh within ~0.5 s of any change. App-code updates already cover all roles.
+- 2026-11-14: v0.9.0 never self-updated (first OTA logic) → v0.9.1 with everything + Back button + update status; Neil
+  confirmed it works. v1.0.0: status bar hidden (full screen) + phone notifications (local) + permission card;
+  minNativeBuild=8 so 0.9.x phones get 'Update the app'. Push when closed (Firebase) still pending.
