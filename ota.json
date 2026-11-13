@@ -1,4 +1,4 @@
 {
   "//": "Lowest Android app build (versionCode = GitHub run number) that can run the current app code. Raise it only when a change needs a new APK (new Capacitor plugin or permission); older apps then show 'Update the app'.",
-  "minNativeBuild": 8
+  "minNativeBuild": 10
 }

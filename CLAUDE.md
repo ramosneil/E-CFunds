@@ -22,7 +22,8 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
   student on the roster. Test data was wiped before launch.
 - Database: **24 migrations** live (last `20261114070000_add_member_unpaid`).
-- Android: latest APK **v1.1.0 = build 9** (installed on Neil's phone; push confirmed). `ota.json` minNativeBuild = 8.
+- Android: latest APK **v1.1.1 = build 10** (self-update fix: downloaded bundles are 'pending' until first used).
+  `ota.json` minNativeBuild = 10.
 - Open items: Neil should delete the Supabase access token when no longer needed (`docs/handoff.md`). The Add member
   sheet / "Carried over" tag were never seen on a treasurer's screen by Claude (no treasurer login).
 - Ideas not started: browser (web) push, custom domain, own email sender (SMTP), more course rules.

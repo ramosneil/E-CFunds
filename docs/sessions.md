@@ -193,3 +193,5 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - Neil: adding a member must not auto-pay → migration 24 (add_member adds only; rows made in the same action don't
   count as duplicates; student notified of every new unpaid fee; treasurer not notified about their own add). Sheet:
   "Add member" → "They paid · ₱X" / "Not yet". Rehearsed: no ledger line until Record; then 1 line.
+- Self-update bug: ota.ts accepted only bundle status 'success', but a fresh download is 'pending' → every update
+  rejected ("not usable"). Fixed; v1.1.1 (build 10); minNativeBuild=10 so older apps show "Update the app".
