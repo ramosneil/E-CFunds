@@ -23,7 +23,7 @@ Source system: `C:\xampp\htdocs\mini system` (PHP + MySQL/XAMPP).
 | Reports | PDF reports, Excel/CSV export, receipt/proof attachments, full audit log |
 | Data | START FRESH (2026-11-12): old students/funds are test data. Migrate entities + logos, accredited list + history, admin. Real rosters via import |
 | Design | Keep OMSC/OSA royal-blue + gold brand, modern redesign, light + dark |
-| Repo | `ramosneil/E-CFunds` (private) |
+| Repo | `ramosneil/E-CFunds` (PUBLIC — Neil's choice, 2026-11-13) |
 
 ## 2. Issues found in the old system (must fix)
 1. Gemini API key hard-coded in `api/config.php` → never commit; rotate key; store as Supabase secret.

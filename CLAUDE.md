@@ -3,7 +3,7 @@
 Fund monitoring app for OMSC Office of Student Affairs (SAS) clubs & organizations.
 Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud PWA + Android app.
 
-## Status (updated 2026-11-12, session 4)
+## Status (updated 2026-11-13, session 4)
 - Phase 0 (repo setup) — DONE
 - Phase 1 (business rules) — DONE, CONFIRMED by Neil: `docs/business-rules.md` +
   `scripts/phase1-rules-check.sql` (passes). Full dues payment only; students see counts only
@@ -29,14 +29,25 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
   (PDF+CSV); OMSC letterhead (seal cropped from Storage logos/brand/omsc-seal-source.jpg), Inter font embedded
   (₱), jsPDF lazy-loaded. Chart colours validated (dataviz). Migration 12: "today" = Manila day (ledger default + Expired). Faster load: lazy screens + idle warm-up,
   react/supabase/app-libs chunks; sign-in JS 175 → 159 KB gz; students download student screens only.
-- Phase 6 — BUILT (session 4): Edge Function `chat` (verify_jwt on; reads with the caller's own token → RLS-scoped;
+- Phase 6 — DONE (session 4): Edge Function `chat` (verify_jwt on; reads with the caller's own token → RLS-scoped;
   Gemini default, swappable via AI_PROVIDER; 30 questions/day, admin unlimited — migration 13), "Ask E-CFunds"
   button for every role; keep-alive = `public.keep_alive()` (anon) + `.github/workflows/keep-alive.yml` every 3 days.
   LIVE: GEMINI_API_KEY added; model auto-picked (gemini-3.5-flash-lite). Admin + student tested (numbers, Taglish,
-  privacy/injection refusals). Waiting: GitHub variable SUPABASE_PUBLISHABLE_KEY + merge for the keep-alive.
+  privacy/injection refusals). PR #2 merged into main 2026-11-13; keep-alive verified (GitHub run → 200 "ok").
   Treasurer chat + exports tested too (chat v5: reply language decided server-side from the latest question). PR: phase-5-app → main (open on GitHub by Neil). School year dates: SAS sets them in the app
+- Phase 7 — DONE (session 4, branch `phase-7-pwa`, PR to main pending): installable PWA (vite-plugin-pwa: pre-caches app files, never
+  Supabase data; "Update available → Reload" prompt; Install card in My account) + offline pill ("You're offline").
+  Android: Capacitor 8 (`android/`, app id `ph.edu.omsc.ecfunds` — permanent), ₱ icon/splash (`assets/` +
+  `node scripts/make-app-assets.mjs` → `npx capacitor-assets generate --android`). In the app: exports go to the
+  share sheet (`src/lib/export/save.ts`), Google sign-in hidden until Phase 8 deep links. Edge Functions allow
+  origin `https://localhost` (the app). APK built on GitHub: `.github/workflows/android.yml` (Run workflow or tag
+  `v*`; signed when the 4 ANDROID_* secrets exist, else debug). Offline + update prompt verified in headless Edge
+  (the Claude browser pane can't register service workers). Signing key made by Claude on Neil's PC
+  (`Documents\E-CFunds-signing`, outside repo; fingerprint 0D:58:C9:73…); first signed APK v0.7.0-beta.4 installed
+  and working on Neil's phone (2026-11-13). New release: push tag `vX.Y.Z` → download artifact from the run
+- NEXT: Phase 8 — Vercel deploy, ALLOWED_ORIGINS, Google OAuth URLs, deep links for Google sign-in in the app
 - Local repo on Neil's PC: `C:\xampp\htdocs\E-CFunds`; old system stays a plain folder (never commit from it)
-- Gemini key: old key removed from old code; Neil has a NEW key (adds it himself in Phase 6)
+- Gemini key: old key removed from old code; NEW key is the Supabase secret GEMINI_API_KEY (never in git)
 - Full plan & phases: `docs/plan.md` · Handoff checklist: `docs/handoff.md`
 - What each session made: `docs/sessions.md` · Neil's working rules: `docs/working-rules.md`
 
@@ -87,6 +98,7 @@ Rebuild of a PHP/MySQL/XAMPP system (`C:\xampp\htdocs\mini system`) as a cloud P
 - Student login: Google OR Student ID + password; staff: email/password or Google
 
 ## Security (non-negotiable)
+- Repo `ramosneil/E-CFunds` is PUBLIC (Neil, 2026-11-13): everything committed is world-readable
 - No secrets in git. Keys live in Supabase secrets / Vercel env / local `.env` (gitignored)
 - Every table has RLS; test each role
 - Old Gemini key was hard-coded in `api/config.php` → treated as leaked, rotated

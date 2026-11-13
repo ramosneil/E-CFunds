@@ -4,6 +4,7 @@ import { MailCheck } from 'lucide-react';
 import { supabase, errorText } from '../../lib/supabase';
 import { Alert, Button, Field, Input } from '../../components/ui';
 import { AuthLayout, Divider, GoogleButton } from './AuthLayout';
+import { isNative } from '../../lib/native';
 
 const redirect = () => window.location.origin + '/';
 
@@ -49,8 +50,9 @@ export function SignIn() {
 
   return (
     <AuthLayout title="Welcome back" sub="Sign in to see your club funds.">
-      <GoogleButton onClick={() => googleSignIn(setErr)} />
-      <Divider label="or with email or Student ID" />
+      {/* Google blocks sign-in inside app windows, so the Android app shows email / Student ID only (Phase 8 adds deep links). */}
+      {!isNative && <><GoogleButton onClick={() => googleSignIn(setErr)} />
+      <Divider label="or with email or Student ID" /></>}
       <form onSubmit={submit} className="space-y-4">
         <Field label="Email or Student ID" hint="Students: your Student ID works once SAS has approved your account.">
           <Input autoComplete="username" autoCapitalize="none" spellCheck={false} required value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -100,8 +102,8 @@ export function Register() {
 
   return (
     <AuthLayout title="Create your account" sub="Students and treasurers sign up here. SAS approves every account.">
-      <GoogleButton onClick={() => googleSignIn(setErr)} />
-      <Divider label="or with email" />
+      {!isNative && <><GoogleButton onClick={() => googleSignIn(setErr)} />
+      <Divider label="or with email" /></>}
       <form onSubmit={submit} className="space-y-4">
         <Field label="Full name"><Input autoComplete="name" required value={name} onChange={(e) => setName(e.target.value)} /></Field>
         <Field label="Email"><Input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
