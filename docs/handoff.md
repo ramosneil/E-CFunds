@@ -29,8 +29,8 @@ Update it every session: tick done items, add new ones.
 ## Phase 7 (installable app + Android APK) — now
 - [x] Signing key made by Claude (2026-11-13) in `Documents\E-CFunds-signing` on Neil's PC (random password in
       a .txt there; SHA-256 fingerprint starts 0D:58:C9:73). [ ] Neil: back up that whole folder (Google Drive/USB).
-- [ ] GitHub → E-CFunds → Settings → Secrets and variables → Actions → New repository secret, 4 times:
-      `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` (= ecfunds), `ANDROID_KEY_PASSWORD`
+- [x] 4 ANDROID_* secrets added (2026-11-13). First signed build: tag v0.7.0-beta.4, run #4, APK fingerprint matches the key.
+      Re-paste tip: open the .txt in Notepad → Ctrl+A, Ctrl+C (the clipboard command pasted itself the first time).
 - [ ] Actions → "Build Android app" → Run workflow (branch main after merge) → download the APK artifact →
       install on your phone (allow "Install unknown apps" for your browser/Files) → try: sign in with email and
       Student ID, dashboard, export a PDF (share sheet), Ask E-CFunds, airplane mode (offline pill)
