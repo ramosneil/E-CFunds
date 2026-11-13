@@ -23,8 +23,7 @@ Update it every session: tick done items, add new ones.
       → General → Restart project (happened once, 2026-11-13 01:03 Manila; data intact after restart).
 
 ## Phase 6 (AI chatbot + keep-alive) — built 2026-11-13, waiting on these two
-- [ ] Add your NEW Gemini key as a Supabase secret named `GEMINI_API_KEY`
-      (Supabase → e-cfunds → Edge Functions → Secrets → Add new secret). Never paste it in chat.
+- [x] Added the Gemini key as Supabase secret `GEMINI_API_KEY` (session 4) — assistant is live.
 - [ ] GitHub → ramosneil/E-CFunds → Settings → Secrets and variables → Actions → **Variables** tab → New repository
       variable: name `SUPABASE_PUBLISHABLE_KEY`, value = the publishable key (public; Claude gives it). The keep-alive
       starts running every 3 days once the pull request is merged into `main` (Actions tab → "Keep Supabase awake").
