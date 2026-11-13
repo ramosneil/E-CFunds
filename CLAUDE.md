@@ -30,6 +30,8 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   `@capgo/capacitor-updater` self-hosted; Vercel builds `/ota/manifest.json` + zip): downloads quietly, applies at the
   next app start; raise `ota.json` minNativeBuild only for native changes (then a new APK). Passwords: 8+ with
   upper/lower/number/symbol + meter + eye icon; Terms at /terms (checkbox on sign-up, `terms_accepted_at`).
+- Live screens (migration 21): data-free ticks in `live_changes` (statement triggers) → every approved user's open
+  screens re-fetch within ~0.5 s (`src/lib/live.ts`).
 - NEXT: Part D push notifications when closed (Firebase, Neil's steps). Ideas: custom domain, own email sender (SMTP), more course rules if SAS adds courses.
 
 ## Memberships & fees (Neil, 2026-11-13 — migrations 15–17)

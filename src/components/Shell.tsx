@@ -9,6 +9,7 @@ import { EntityLogo, Loading, Sheet, ThemeToggle } from './ui';
 import { ChatButton } from './ChatButton';
 import { NotificationBell } from './NotificationBell';
 import { useLiveNotifications } from '../lib/notifications';
+import { useLiveScreens } from '../lib/live';
 
 // phone: false = desktop sidebar only (on phones these live in the admin "More" menu).
 type Item = { to: string; label: string; icon: ComponentType<{ className?: string }>; phone?: false; badge?: 'messages' };
@@ -49,6 +50,7 @@ export function Shell() {
   const unread = useUnread();
   const uid = session?.user.id;
   useLiveNotifications(uid);
+  useLiveScreens(profile?.status === 'approved' ? uid : undefined);
   const role = profile?.role ?? 'student';
   const items = NAV[role];
   const phoneItems = items.filter((i) => i.phone !== false);
