@@ -14,6 +14,23 @@ const SUGGEST: Record<string, string[]> = {
 // The conversation lives only in memory for this visit (kept while the panel is closed, gone on reload).
 let memory: Turn[] = [];
 
+/** Shows the assistant's light Markdown (**bold**, "* " / "- " bullets) as plain React text — never as HTML. */
+function Rich({ text }: { text: string }) {
+  const inline = (s: string) => s.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
+    part.startsWith('**') && part.endsWith('**') ? <strong key={i}>{part.slice(2, -2)}</strong> : <span key={i}>{part.replace(/(^|\s)\*(\S[^*]*?)\*(?=\s|$)/g, '$1$2')}</span>);
+  const blocks: React.ReactNode[] = [];
+  let list: string[] = [];
+  const flush = () => { if (list.length) { blocks.push(<ul key={blocks.length} className="list-disc pl-5 space-y-0.5 my-1">{list.map((l, i) => <li key={i}>{inline(l)}</li>)}</ul>); list = []; } };
+  for (const line of text.split('\n')) {
+    const m = line.match(/^\s*[*-]\s+(.*)$/);
+    if (m) { list.push(m[1]); continue; }
+    flush();
+    if (line.trim()) blocks.push(<p key={blocks.length} className="my-0.5">{inline(line.replace(/^#+\s*/, ''))}</p>);
+  }
+  flush();
+  return <>{blocks}</>;
+}
+
 /** The assistant's chat panel (lazy-loaded the first time the button is pressed). */
 export default function ChatPanel({ onClose }: { onClose: () => void }) {
   const { profile } = useAuth();
@@ -53,7 +70,7 @@ export default function ChatPanel({ onClose }: { onClose: () => void }) {
 
   const role = profile?.role ?? 'student';
   return (
-    <div role="dialog" aria-label="E-CFunds assistant" className="fixed z-50 inset-x-0 bottom-0 sm:inset-auto sm:right-6 sm:bottom-6 sm:w-[400px] h-[min(78dvh,640px)] bg-surface border border-line rounded-t-[24px] sm:rounded-[24px] shadow-2xl flex flex-col overflow-hidden">
+    <div role="dialog" aria-label="E-CFunds assistant" className="fixed z-50 inset-x-0 bottom-0 sm:inset-auto sm:right-6 sm:bottom-[92px] lg:bottom-6 sm:w-[400px] h-[min(78dvh,640px)] sm:h-[min(calc(100dvh-120px),640px)] bg-surface border border-line rounded-t-[24px] sm:rounded-[24px] shadow-2xl flex flex-col overflow-hidden">
       <header className="flex items-center gap-3 px-4 py-3 border-b border-line">
         <span className="size-10 rounded-full bg-primary text-on-primary grid place-items-center"><Sparkles className="size-5" aria-hidden /></span>
         <div className="min-w-0 flex-1">
@@ -77,9 +94,9 @@ export default function ChatPanel({ onClose }: { onClose: () => void }) {
         )}
         {turns.map((t, i) => (
           <div key={i} className={`flex ${t.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[88%] rounded-[18px] px-4 py-2.5 text-[14.5px] whitespace-pre-wrap break-words ${
+            <div className={`max-w-[88%] rounded-[18px] px-4 py-2.5 text-[14.5px] break-words ${t.role === 'user' ? 'whitespace-pre-wrap' : ''} ${
               t.role === 'user' ? 'bg-primary text-on-primary rounded-br-[6px]' : t.error ? 'bg-bad-soft text-bad rounded-bl-[6px]' : 'bg-surface2 rounded-bl-[6px]'}`}>
-              {t.text}
+              {t.role === 'assistant' && !t.error ? <Rich text={t.text} /> : t.text}
             </div>
           </div>
         ))}

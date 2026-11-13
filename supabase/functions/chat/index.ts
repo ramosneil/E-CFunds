@@ -13,11 +13,32 @@ type Turn = { role: 'user' | 'assistant'; text: string };
 interface Provider { configured(): boolean; generate(system: string, turns: Turn[]): Promise<string> }
 
 // ---------------------------------------------------------------- Gemini (default provider)
+// Model: secret GEMINI_MODEL if set; otherwise ask Google which models this key can use and pick the newest stable
+// "flash-lite", then "flash" (no preview/experimental/audio/image variants). Remembered while the function is warm.
+let discovered: string[] | null = null;
+async function geminiModels(key: string): Promise<string[]> {
+  if (discovered) return discovered;
+  const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200', { headers: { 'x-goog-api-key': key } });
+  if (!r.ok) throw new Error(`model list ${r.status}: ${(await r.text()).slice(0, 200)}`);
+  const all = ((await r.json()).models ?? []) as { name: string; supportedGenerationMethods?: string[] }[];
+  const usable = all.filter((m) => m.supportedGenerationMethods?.includes('generateContent'))
+    .map((m) => m.name.replace(/^models\//, ''))
+    .filter((n) => /^gemini-[\d.]+-flash/.test(n) && !/preview|exp|audio|image|tts|live|thinking|latest/.test(n));
+  const ver = (n: string) => parseFloat(n.match(/^gemini-([\d.]+)/)?.[1] ?? '0');
+  const rank = (n: string) => (n.includes('flash-lite') ? 0 : 1);
+  usable.sort((a, b) => rank(a) - rank(b) || ver(b) - ver(a) || a.length - b.length);
+  console.log('chat models available:', usable.slice(0, 6).join(', '));
+  discovered = usable.slice(0, 3);
+  return discovered;
+}
+
 const gemini: Provider = {
   configured: () => !!Deno.env.get('GEMINI_API_KEY'),
   async generate(system, turns) {
     const key = Deno.env.get('GEMINI_API_KEY')!;
-    const models = [Deno.env.get('GEMINI_MODEL'), 'gemini-2.5-flash-lite', 'gemini-2.5-flash'].filter(Boolean) as string[];
+    const pinned = Deno.env.get('GEMINI_MODEL');
+    const models = pinned ? [pinned] : await geminiModels(key);
+    if (!models.length) throw new Error('no Gemini Flash model is available for this key');
     const body = JSON.stringify({
       system_instruction: { parts: [{ text: system }] },
       contents: turns.map((t) => ({ role: t.role === 'assistant' ? 'model' : 'user', parts: [{ text: t.text }] })),
@@ -28,7 +49,7 @@ const gemini: Provider = {
       const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(m)}:generateContent`, {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body,
       });
-      if (r.status === 404) { last = `model ${m} not found`; continue; }               // try the next model
+      if (r.status === 404) { last = `model ${m} not found`; discovered = null; continue; }   // try the next model
       if (r.status === 429) throw new Error('BUSY');
       if (!r.ok) throw new Error(`provider ${r.status}: ${(await r.text()).slice(0, 200)}`);
       const j = await r.json();

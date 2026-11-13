@@ -110,3 +110,7 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   Edge Function `chat` v1 (verify_jwt on; caller-token reads; Gemini with model fallback; strict data-only prompt
   with injection rule). App: lazy ChatPanel + floating button (hidden on Messages). Without the key the app shows
   "not switched on yet" end to end. keep-alive.yml simulated locally: HTTP 200 "ok". Waiting for Neil's key.
+- Assistant live with Neil's key: guessed model names 404'd, so `chat` v3 asks Google's model list and picks the
+  newest stable Flash-Lite (chose gemini-3.5-flash-lite). Admin tests: JOES ₱15.00 (₱15 saved / ₱0 cash) ✓; Taglish
+  question answered in Taglish with ₱15.00 total + 0 pending ✓; "SAS bank account number" → "I don't have that" ✓.
+  Panel renders **bold**/bullets safely (React text, no HTML); lifted above the tab bar on tablets.
