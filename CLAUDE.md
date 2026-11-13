@@ -25,7 +25,12 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Latest APK: v0.8.0 (installed and working on Neil's phone, incl. Google sign-in in the app).
 - Not yet seen on screen: the treasurer's new **Add member** sheet (course dropdown, "Add & record ₱X") and the
   "Carried over" tag — need a treasurer's login; ask the Sports Club treasurer to try it.
-- NEXT ideas: custom domain, own email sender (SMTP), more course rules if SAS adds courses.
+- Notifications (migrations 19–20): bell + pop-up + soft chime (mute per device) for every role; events per role in
+  `docs/database.md`; SAS "Announcement" on the Messages page. Android app updates itself (`src/lib/ota.ts`,
+  `@capgo/capacitor-updater` self-hosted; Vercel builds `/ota/manifest.json` + zip): downloads quietly, applies at the
+  next app start; raise `ota.json` minNativeBuild only for native changes (then a new APK). Passwords: 8+ with
+  upper/lower/number/symbol + meter + eye icon; Terms at /terms (checkbox on sign-up, `terms_accepted_at`).
+- NEXT: Part D push notifications when closed (Firebase, Neil's steps). Ideas: custom domain, own email sender (SMTP), more course rules if SAS adds courses.
 
 ## Memberships & fees (Neil, 2026-11-13 — migrations 15–17)
 - **Organizations are mandatory by course** (tables `courses`, `course_orgs`; SAS can change them):

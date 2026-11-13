@@ -13,6 +13,10 @@ export function display(n: Note): { title: string; body: string | null } {
   if (n.kind === 'payment' && n.count > 1) {
     return { title: n.title.replace('a dues payment', `${n.count} dues payments`), body: `${peso(n.amount ?? 0)} total` };
   }
+  if (n.kind === 'fees') return { title: 'New fees to pay this semester', body: `${n.body ?? ''} · ${peso(n.amount ?? 0)}` };
+  if (n.kind === 'members') {
+    return { title: n.count > 1 ? `${n.count} new members to collect` : 'New member to collect', body: `${peso(n.amount ?? 0)}${n.count > 1 ? ' total' : ''}` };
+  }
   return { title: n.title, body: n.body };
 }
 
@@ -44,7 +48,8 @@ export function useLiveNotifications(uid: string | undefined) {
         if (p.eventType === 'UPDATE' && old?.count === n.count) return;   // only "marked read" changed
         const d = display(n);
         toast({ title: d.title, body: d.body ?? undefined, href: n.link ?? undefined });
-        if (n.kind === 'request' || n.kind === 'request_decision' || n.kind === 'payment') void qc.invalidateQueries();
+        // Money-related events change numbers on screen: refresh them too.
+        if (!['message', 'announcement', 'app_update', 'account'].includes(n.kind)) void qc.invalidateQueries();
       })
       .subscribe();
     return () => { void supabase.removeChannel(ch); };

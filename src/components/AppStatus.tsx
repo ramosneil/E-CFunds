@@ -4,7 +4,7 @@ import { useRegisterSW } from 'virtual:pwa-register/react';
 import { isNative } from '../lib/native';
 import { chime } from '../lib/chime';
 import { toast } from '../lib/toast';
-import { otaState } from '../lib/ota';
+import { noteInBell, otaState } from '../lib/ota';
 import { APK_URL } from './AndroidAppLink';
 
 /** "You're offline" pill (all platforms) + update notices: website "Update available → Reload" and
@@ -36,7 +36,10 @@ function webUpdatedNotice() {
   try {
     const last = localStorage.getItem('ecfunds:build');
     localStorage.setItem('ecfunds:build', __BUILD_ID__);
-    if (last && last !== __BUILD_ID__ && __BUILD_ID__ !== 'dev') toast({ title: 'E-CFunds was updated', body: 'You have the newest version.', tone: 'ok' });
+    if (last && last !== __BUILD_ID__ && __BUILD_ID__ !== 'dev') {
+      toast({ title: 'E-CFunds was updated', body: 'You have the newest version.', tone: 'ok' });
+      void noteInBell();
+    }
   } catch { /* private mode */ }
 }
 

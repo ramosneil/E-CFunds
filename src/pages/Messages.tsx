@@ -7,6 +7,7 @@ import { useEntities } from '../lib/data';
 import { supabase, errorText } from '../lib/supabase';
 import { useBroadcastReads, useMessages, useSenderNames, useUnread, type Message } from '../lib/messages';
 import { Alert, EntityLogo, Spinner } from '../components/ui';
+import { AnnounceSheet } from '../components/AnnounceSheet';
 
 const time = new Intl.DateTimeFormat('en-PH', { hour: 'numeric', minute: '2-digit' });
 const day = new Intl.DateTimeFormat('en-PH', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
@@ -32,6 +33,7 @@ function AdminMessages() {
   const msgs = useMessages();
   const unread = useUnread();
   const open = key === 'all' ? 'all' : key ? Number(key) : null;
+  const [announcing, setAnnouncing] = useState(false);
 
   const rows = useMemo(() => {
     const last = new Map<number | 'all', Message>();
@@ -44,7 +46,12 @@ function AdminMessages() {
 
   const list = (
     <nav aria-label="Conversations" className="flex flex-col min-h-0 h-full">
-      <div className="px-4 pt-4 pb-3"><h1 className="font-display text-[24px] font-extrabold">Messages</h1></div>
+      <div className="px-4 pt-4 pb-3 flex items-center justify-between gap-2">
+        <h1 className="font-display text-[24px] font-extrabold">Messages</h1>
+        <button type="button" onClick={() => setAnnouncing(true)} className="h-10 px-3 rounded-[12px] bg-primary-soft text-primary font-semibold text-[14px] inline-flex items-center gap-1.5 cursor-pointer hover:brightness-95">
+          <Megaphone className="size-4" aria-hidden />Announcement
+        </button>
+      </div>
       <div className="overflow-y-auto min-h-0 flex-1 px-2 pb-2">
         <Link to="/messages/all" className={`flex items-center gap-3 p-3 rounded-[16px] ${open === 'all' ? 'bg-primary-soft' : 'hover:bg-surface2'}`}>
           <span className="size-11 rounded-full bg-gold-soft text-gold-text grid place-items-center shrink-0"><Megaphone className="size-5" /></span>
@@ -85,6 +92,7 @@ function AdminMessages() {
             logo={openEntity ? <EntityLogo path={openEntity.logo_path} name={openEntity.name} size={40} /> : undefined} back />
         )}
       </section>
+      {announcing && <AnnounceSheet onClose={() => setAnnouncing(false)} />}
     </div>
   );
 }

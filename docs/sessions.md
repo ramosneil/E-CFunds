@@ -172,3 +172,7 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - Clubs carry over (Neil: re-list clubs too; same club or switch, student's choice). Migration 17 rehearsed (carry
   paid only, stay = pay carried row, switch removes old carried row, paid elsewhere refused, new year carries from
   last 2nd sem, orgs re-listed, no duplicates) → applied 20261113170000. "Carried over" tag on Members.
+- Session 5 (2026-11-13 evening): A) silent Android updates (v0.9.0 = last manual APK; first logic needed several
+  reopens → now applies at next start); B) strong passwords + eye + Terms (migration 18); C) notifications
+  (migrations 19–20, each rehearsed rolled-back): admin, treasurer and student events, announcements, app-update notes.
+  Bell/pop-up not yet seen live (pane signed out). Part D (push when closed) pending Neil's Firebase setup.
