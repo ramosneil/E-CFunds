@@ -8,6 +8,7 @@ import { supabase, errorText } from '../lib/supabase';
 import { useBroadcastReads, useMessages, useSenderNames, useUnread, type Message } from '../lib/messages';
 import { Alert, EntityLogo, Spinner } from '../components/ui';
 import { AnnounceSheet } from '../components/AnnounceSheet';
+import { confirmAsk } from '../lib/confirm';
 
 const time = new Intl.DateTimeFormat('en-PH', { hour: 'numeric', minute: '2-digit' });
 const day = new Intl.DateTimeFormat('en-PH', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
@@ -159,13 +160,18 @@ function Thread({ scope, title, subtitle, logo, back, includeBroadcasts }: {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void send(); }
   }
   async function remove(m: Message) {
-    if (!window.confirm(m.entity_id === null && admin ? 'Delete this broadcast for every treasurer?' : 'Delete this message?')) return;
+    const sure = await confirmAsk(m.entity_id === null && admin
+      ? { title: 'Delete this broadcast?', body: 'It disappears for every treasurer.', confirm: 'Delete', tone: 'bad' }
+      : { title: 'Delete this message?', body: 'It disappears for both sides.', confirm: 'Delete', tone: 'bad' });
+    if (!sure) return;
     const { error } = await supabase.from('messages').delete().eq('id', m.id);
     if (error) setErr(errorText(error));
     void qc.invalidateQueries({ queryKey: ['messages'] });
   }
   async function removeThread() {
-    if (scope === 'all' || !window.confirm(`Delete the whole ${title} conversation for both sides? This can't be undone.`)) return;
+    if (scope === 'all') return;
+    const sure = await confirmAsk({ title: `Delete the ${title} conversation?`, body: 'Every message disappears for both sides. This cannot be undone.', confirm: 'Delete conversation', tone: 'bad' });
+    if (!sure) return;
     const { error } = await supabase.from('messages').delete().eq('entity_id', scope);
     if (error) setErr(errorText(error));
     void qc.invalidateQueries({ queryKey: ['messages'] });
@@ -182,7 +188,10 @@ function Thread({ scope, title, subtitle, logo, back, includeBroadcasts }: {
           {subtitle && <p className="text-[13px] text-muted truncate">{subtitle}</p>}
         </div>
         {admin && scope !== 'all' && list.length > 0 && (
-          <button onClick={removeThread} className="text-[13px] font-semibold text-bad px-3 h-9 rounded-full hover:bg-bad-soft cursor-pointer">Delete conversation</button>
+          <button onClick={removeThread} aria-label="Delete conversation" title="Delete conversation"
+            className="shrink-0 inline-flex items-center gap-1.5 text-[13px] font-semibold text-bad px-2.5 h-9 rounded-full hover:bg-bad-soft cursor-pointer">
+            <Trash2 className="size-[18px]" aria-hidden /><span className="hidden sm:inline">Delete conversation</span>
+          </button>
         )}
       </header>
 

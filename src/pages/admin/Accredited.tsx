@@ -8,6 +8,7 @@ import type { Json, Row } from '../../lib/database.types';
 import { Alert, Button, Card, Field, Input, PageHeader, Select, Sheet, Spinner, StatusChip } from '../../components/ui';
 import { Segmented } from '../../components/common';
 import { ExportMenu, exportsLib } from '../../components/ExportMenu';
+import { alertAsk, confirmAsk } from '../../lib/confirm';
 
 type Entry = Row<'accredited_entries'>;
 
@@ -25,9 +26,9 @@ export function Accredited() {
   });
 
   async function remove(id: number, name: string) {
-    if (!window.confirm(`Remove "${name}" from the accredited list? It stays in the history.`)) return;
+    if (!(await confirmAsk({ title: 'Remove from the accredited list?', body: `"${name}" is removed from the list. It stays in the history.`, confirm: 'Remove', tone: 'bad' }))) return;
     const { error } = await supabase.from('accredited_entries').delete().eq('id', id);
-    if (error) window.alert(errorText(error));
+    if (error) await alertAsk('Could not remove it', errorText(error));
     void qc.invalidateQueries({ queryKey: ['accredited'] });
     void qc.invalidateQueries({ queryKey: ['accredited-history'] });
   }

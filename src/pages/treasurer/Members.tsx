@@ -8,6 +8,7 @@ import { date, normStudentNo, peso } from '../../lib/format';
 import { Alert, Button, Card, Chip, DuesBar, Empty, Field, Input, PageHeader, Select, Sheet, Spinner } from '../../components/ui';
 import { NoYear, Segmented } from '../../components/common';
 import { ExportMenu, exportsLib } from '../../components/ExportMenu';
+import { promptAsk } from '../../lib/confirm';
 
 export function Members() {
   const { profile } = useAuth();
@@ -56,8 +57,9 @@ export function Members() {
     void qc.invalidateQueries();
   }
   async function undo(id: number, name: string) {
-    const reason = window.prompt(`Undo ${name}'s payment? This adds a reversal to the ledger (nothing is deleted).\n\nReason:`);
-    if (!reason || reason.trim().length < 3) return;
+    const reason = await promptAsk({ title: `Undo ${name}'s payment?`, body: 'This adds a correction (reversal) to the ledger — nothing is deleted.', confirm: 'Undo payment', tone: 'bad',
+      input: { label: 'Reason', placeholder: 'e.g. Recorded for the wrong student', minLength: 3 } });
+    if (!reason) return;
     setBusy(id); setErr('');
     const { error } = await supabase.rpc('undo_payment', { p_membership_id: id, p_reason: reason.trim() });
     setBusy(null);

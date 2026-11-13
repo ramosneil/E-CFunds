@@ -6,6 +6,7 @@ import { Loading, Spinner } from './components/ui';
 import { Shell } from './components/Shell';
 import { Toaster } from './components/Toaster';
 import { NativeBack } from './components/NativeBack';
+import { ConfirmHost } from './components/ConfirmHost';
 
 // Every screen loads on demand, so a visitor only downloads the screens their role can open.
 // `load` is kept so the same files can be warmed in the background (see warmUp).
@@ -53,6 +54,7 @@ export function App() {
       <RecoveryRedirect />
       <Toaster />
       <NativeBack />
+      <ConfirmHost />
       <Routes>
         {/* Public for everyone, signed in or not (Google's consent screen links here). */}
         <Route path="/privacy" element={<Lazy><Privacy /></Lazy>} />

@@ -9,6 +9,7 @@ import { peso } from '../../lib/format';
 import type { Enum } from '../../lib/database.types';
 import { Alert, Button, Card, Empty, Field, Input, PageHeader, Sheet, Spinner } from '../../components/ui';
 import { IfApproved, NoYear, RequestRow, Segmented } from '../../components/common';
+import { confirmAsk } from '../../lib/confirm';
 
 type Kind = Enum<'request_kind'>;
 const KINDS: [Kind, string][] = [['remittance', 'Remit'], ['release', 'Release'], ['expense', 'Expense']];
@@ -24,7 +25,7 @@ export function Requests() {
   const [err, setErr] = useState('');
 
   async function cancel(id: number) {
-    if (!window.confirm('Cancel this request?')) return;
+    if (!(await confirmAsk({ title: 'Cancel this request?', body: 'SAS will no longer see it. You can file a new one any time.', confirm: 'Cancel request', tone: 'bad' }))) return;
     const { error } = await supabase.rpc('cancel_request', { p_request_id: id });
     if (error) setErr(errorText(error));
     void qc.invalidateQueries();
