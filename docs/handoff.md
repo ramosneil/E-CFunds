@@ -44,8 +44,7 @@ Update it every session: tick done items, add new ones.
 - [ ] BEFORE REAL USE: Google Auth Platform → Audience → Publish app (button was greyed out — hover it to see why;
       likely Branding needs filling; never upload a logo = forces Google review). Until then only test users can
       use "Continue with Google"; email/Student ID work for everyone.
-- [ ] Install the v0.8.0 APK (from the site's "Get the Android app" or GitHub Releases) over the old app → try
-      "Continue with Google" inside the app
+- [x] Installed v0.8.0 over 0.7 from the site's "Get the Android app"; Google sign-in inside the app works (2026-11-13)
 - [ ] Merge PR phase-8-deploy → main
 
 ## Done

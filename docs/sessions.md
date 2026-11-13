@@ -150,3 +150,5 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   student-login from live origin → 401 "Wrong Student ID or password." (1 test failure logged for TEST-0001),
   offline pill + SW on live ✓, Lighthouse mobile 98/100/100/100, desktop 100/100/100/100, Android link on Android UA ✓.
   Treasurer/student screens not re-clicked on live (same build as localhost-tested; origins/auth verified).
+- v0.8.0 tag: signed (fingerprint matches), GitHub Release published, releases/latest/download/E-CFunds.apk → 302 →
+  200 4,443,785 B APK. Neil installed it over 0.7 from the live site; Google sign-in inside the app works. Phase 8 DONE.
