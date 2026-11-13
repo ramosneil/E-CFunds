@@ -8,6 +8,16 @@ export type Database = {
   __InternalSupabase: { PostgrestVersion: '14.18' };
   public: {
     Tables: {
+      notifications: {
+        Row: {
+          id: number; recipient: string; kind: 'request' | 'request_decision' | 'payment' | 'account' | 'message';
+          title: string; body: string | null; link: string | null; group_key: string | null; count: number;
+          amount: number | null; created_at: string; updated_at: string; read_at: string | null;
+        };
+        Insert: never;
+        Update: { read_at?: string | null };
+        Relationships: [];
+      };
       courses: {
         Row: { code: string; name: string; sort: number };
         Insert: { code: string; name: string; sort?: number };
@@ -153,6 +163,7 @@ export type Database = {
           paid_amount: number; to_collect: string[];
         };
       };
+      mark_notifications_read: { Args: Record<string, never>; Returns: number };
       accept_terms: { Args: Record<string, never>; Returns: string };
       admin_adjust: { Args: { p_amount: number; p_direction: number; p_entity_id: number; p_pocket: E['pocket']; p_reason: string }; Returns: number };
       admin_release: { Args: { p_amount: number; p_description: string; p_entity_id: number }; Returns: number };
