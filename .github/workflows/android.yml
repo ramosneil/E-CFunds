@@ -66,9 +66,20 @@ jobs:
         id: key
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          PW: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
           if [ -n "$KEYSTORE_B64" ]; then
-            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
+            b64=$(printf '%s' "$KEYSTORE_B64" | tr -d ' \r\n\t\357\273\277')   # ignore spaces, line breaks, BOM
+            if ! printf '%s' "$b64" | base64 -d > "$RUNNER_TEMP/release.jks" 2>/dev/null || [ ! -s "$RUNNER_TEMP/release.jks" ]; then
+              bad=$(printf '%s' "$b64" | tr -d 'A-Za-z0-9+/=' | wc -c)
+              echo "::error title=ANDROID_KEYSTORE_BASE64 is not the key text::It has ${#b64} characters (expected 3832) and $bad characters that cannot be in key text. Paste the contents of ANDROID_KEYSTORE_BASE64.txt again."
+              exit 1
+            fi
+            if ! keytool -list -keystore "$RUNNER_TEMP/release.jks" -storepass "$PW" -alias "$ALIAS" > /dev/null 2>&1; then
+              echo "::error title=Key password or alias does not match::Check ANDROID_KEYSTORE_PASSWORD (contents of ANDROID_KEYSTORE_PASSWORD.txt) and ANDROID_KEY_ALIAS (ecfunds)."
+              exit 1
+            fi
             echo "ANDROID_KEYSTORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
             echo "kind=signed" >> "$GITHUB_OUTPUT"
           else
