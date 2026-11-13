@@ -149,6 +149,7 @@ function AppUpdateCard() {
         <Row k="Last check" v={when ?? 'Not yet'} />
       </dl>
       {status && <p className={`mt-3 text-[14px] ${status.ok ? 'text-muted' : 'text-bad'}`}>{status.text}</p>}
+      <p className="mt-2 text-[13px] text-muted">New versions download by themselves and switch on the next time you open E-CFunds.</p>
       {status?.ready && status.ready !== __BUILD_ID__ ? (
         <Button className="w-full mt-4" onClick={async () => { setBusy(true); if (!(await applyReady())) setBusy(false); }} busy={busy}>
           <RefreshCw className="size-5" />Restart to update
