@@ -190,3 +190,6 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   only for service_role+secret, sign-out drops token) + applied; v1.1.0 (build 9) installed; 2 phones registered;
   direct call to `push` → {"sent":1}. pg_net timeout 5 s → 20 s (migration 23; cold start took ~3.8 s).
 - Neil confirmed the push test popped up on his phone. Part D done (Android).
+- Neil: adding a member must not auto-pay → migration 24 (add_member adds only; rows made in the same action don't
+  count as duplicates; student notified of every new unpaid fee; treasurer not notified about their own add). Sheet:
+  "Add member" → "They paid · ₱X" / "Not yet". Rehearsed: no ledger line until Record; then 1 line.

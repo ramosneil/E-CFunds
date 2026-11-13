@@ -96,9 +96,8 @@ counts of orgs and clubs, students, paid and unpaid dues, and pending requests.
   who paid a club last semester is listed in the same club again, "To collect", tagged "Carried over" (migration
   17). Staying = the club records the fee; switching = the new club adds them and the old carried listing is
   removed automatically. A club already paid this semester blocks a switch.
-- **The fee is mandatory — pay when added:** a treasurer adds a member only when the student pays; Add member
-  records the payment (collection line) at once. Course organizations that didn't add the student list them as
-  **"To collect"** until their own treasurer records the payment.
+- **Adding a member doesn't record a payment** (Neil, 2026-11-14; migration 24, replaces "pay when added"):
+  the student starts "To collect"; the treasurer records the payment when it's paid (or undoes it with a reversal).
 - **Marking Paid:** the treasurer marks a membership Paid, which writes one `collection` entry
   (amount = `amount_due`, date, recorded_by). Only full payment is supported, the same as the old system.
 - **Undoing Paid** (a mistake): this writes a `reversal` that cancels the collection. Nothing is deleted.

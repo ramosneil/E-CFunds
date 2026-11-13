@@ -21,7 +21,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 ## Status (updated 2026-11-14, end of session 5)
 - **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
   student on the roster. Test data was wiped before launch.
-- Database: **23 migrations** live (last `20261114050000_push_timeout`).
+- Database: **24 migrations** live (last `20261114070000_add_member_unpaid`).
 - Android: latest APK **v1.1.0 = build 9** (installed on Neil's phone; push confirmed). `ota.json` minNativeBuild = 8.
 - Open items: Neil should delete the Supabase access token when no longer needed (`docs/handoff.md`). The Add member
   sheet / "Carried over" tag were never seen on a treasurer's screen by Claude (no treasurer login).
@@ -35,7 +35,8 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Whoever adds the student (any org or club treasurer, `add_member`), they're enrolled in SSG + course orgs.
   A course student can't join an organization outside their course.
 - **Fees are per semester** for every org and club; each treasurer sets their own amount.
-- **Pay when added:** "Add & record ₱X" records the payment at once; other course orgs show "To collect".
+- **Add member adds only** (migration 24): the student starts "To collect" in every org/club they're in; the
+  treasurer decides paid/unpaid (Record ₱X right after adding — "They paid" — or later; undo = reversal).
 - **Clubs:** student's choice, max 1 per semester. A new semester re-lists SSG + course orgs and carries last
   semester's paid club members into the same club ("Carried over", to collect); switching club removes that listing.
 
@@ -58,7 +59,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 
 ## Features
 - Admin: dashboard, approvals, orgs & logos, accredited list + history, school year/semesters, messages + Announcement.
-- Treasurer: home (fund, pockets, export), members (course-based, pay when added), requests with "If approved".
+- Treasurer: home (fund, pockets, export), members (course-based; add, then record when paid), requests.
 - Student: my dues, reports. Everyone: My account, "Ask E-CFunds" assistant (Gemini via `chat`, RLS-scoped).
 - Exports: org report PDF (charts, OMSC letterhead, Inter font for ₱) + CSVs, school summary, members, accredited.
 - **Live screens:** data-free ticks in `live_changes` → open screens re-fetch within ~0.5 s (`src/lib/live.ts`).

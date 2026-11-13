@@ -162,7 +162,7 @@ export type Database = {
         Args: { p_student_no: string; p_full_name: string; p_course: string | null; p_year_level?: number | null };
         Returns: {
           student_id: number; new_student: boolean; member_of: string[] | null; course: string | null;
-          paid_amount: number; to_collect: string[];
+          paid_amount: number; to_collect: string[]; membership_id: number | null; amount_due: number;
         };
       };
       save_push_token: { Args: { p_token: string; p_platform?: string }; Returns: undefined };

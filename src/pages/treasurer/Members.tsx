@@ -152,7 +152,9 @@ function AddMember({ onClose, entityId, dues, perSemester }: { onClose: () => vo
   const [found, setFound] = useState<{ id: number; full_name: string; course: string | null } | null | undefined>(undefined);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
-  const [done, setDone] = useState<{ name: string; paid: number; toCollect: string[] } | null>(null);
+  const [done, setDone] = useState<{ name: string; membershipId: number | null; due: number; toCollect: string[] } | null>(null);
+  const [paying, setPaying] = useState(false);
+  const [paid, setPaid] = useState(false);
 
   const me = entities.data?.find((e) => e.id === entityId);
   // The course that will count: the roster's, if the student already has one; otherwise what the treasurer picks.
@@ -185,16 +187,30 @@ function AddMember({ onClose, entityId, dues, perSemester }: { onClose: () => vo
     setBusy(false);
     if (error) { setErr(errorText(error)); return; }
     void qc.invalidateQueries();
-    setDone({ name: found?.full_name ?? name.trim(), paid: Number(data?.paid_amount ?? 0), toCollect: data?.to_collect ?? [] });
+    setDone({ name: found?.full_name ?? name.trim(), membershipId: data?.membership_id ?? null, due: Number(data?.amount_due ?? dues), toCollect: data?.to_collect ?? [] });
   }
 
   if (done) return (
     <Sheet open onClose={onClose} title="Member added">
-      <Alert tone="ok"><b>{done.name}</b> is a member of {me?.short_name}{done.paid > 0 ? <> · <b className="money">{peso(done.paid)}</b> recorded as paid</> : ''}.</Alert>
+      <Alert tone="ok"><b>{done.name}</b> is now a member of {me?.short_name}{paid ? <> · <b className="money">{peso(done.due)}</b> recorded as paid</> : <> · <b>to collect</b> <span className="money">{peso(done.due)}</span></>}.</Alert>
       {done.toCollect.length > 0 && (
         <p className="text-[14px] text-muted mt-3">Also listed by their course, <b className="text-ink">to collect</b> by each treasurer: {done.toCollect.join(', ')}.</p>
       )}
-      <Button className="w-full h-[54px] mt-5" onClick={onClose}>Done</Button>
+      {err && <div className="mt-3"><Alert>{err}</Alert></div>}
+      {!paid && done.membershipId && done.due > 0 ? (
+        <div className="grid grid-cols-2 gap-3 mt-5">
+          <Button variant="soft" className="h-[54px]" onClick={onClose}>Not yet</Button>
+          <Button variant="gold" className="h-[54px]" busy={paying} onClick={async () => {
+            setPaying(true); setErr('');
+            const { error } = await supabase.rpc('record_payment', { p_membership_id: done.membershipId! });
+            setPaying(false);
+            if (error) { setErr(errorText(error)); return; }
+            setPaid(true); void qc.invalidateQueries();
+          }}>They paid · {peso(done.due)}</Button>
+        </div>
+      ) : (
+        <Button className="w-full h-[54px] mt-5" onClick={onClose}>Done</Button>
+      )}
     </Sheet>
   );
 
@@ -238,10 +254,10 @@ function AddMember({ onClose, entityId, dues, perSemester }: { onClose: () => vo
           </div>
         ))}
         <p className="text-[14px] text-muted">
-          The fee is mandatory: adding records <b className="text-ink money">{peso(dues)}</b> {perSemester ? 'for this semester' : 'for this school year'} as <b className="text-ink">paid</b> now. Only add the student once they’ve paid you.
+          They start as <b className="text-ink">to collect</b> (<span className="money">{peso(dues)}</span> {perSemester ? 'this semester' : 'this school year'}). Record the payment when they pay — right after adding, or later from the list.
         </p>
         {err && <Alert>{err}</Alert>}
-        <Button type="submit" busy={busy} disabled={found === undefined || blocked} className="w-full h-[54px]">{dues > 0 ? `Add & record ${peso(dues)}` : 'Add member'}</Button>
+        <Button type="submit" busy={busy} disabled={found === undefined || blocked} className="w-full h-[54px]">Add member</Button>
         {found === undefined && <p className="text-[13px] text-muted text-center -mt-2">Enter the student ID, then tap outside the box to check it.</p>}
       </form>
     </Sheet>
