@@ -1,13 +1,15 @@
 // chat: the E-CFunds assistant (business-rules §4.8; Phase 6). Signed-in users only (verify_jwt = true).
 // Every read uses the CALLER's own token, so Row-Level Security limits the assistant to exactly what that person
 // can already see in the app. The AI provider is swappable (AI_PROVIDER); Gemini is the default.
-// Secrets: GEMINI_API_KEY (required), GEMINI_MODEL (optional), ALLOWED_ORIGINS (live app address, Phase 8).
+// Secrets: GEMINI_API_KEY (required), GEMINI_MODEL (optional), ALLOWED_ORIGINS (extra addresses, optional).
 import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2.119.0';
 
 const URL = Deno.env.get('SUPABASE_URL')!;
 const ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
 const ORIGINS = new Set(['http://localhost:3000', 'http://127.0.0.1:3000', 'https://localhost' /* Android app */,
+  'https://e-cfunds.vercel.app' /* live site */,
   ...(Deno.env.get('ALLOWED_ORIGINS') ?? '').split(',').map((s) => s.trim()).filter(Boolean)]);
+const allowed = (o: string | null): o is string => !!o && ORIGINS.has(o);   // exact addresses only
 
 type Turn = { role: 'user' | 'assistant'; text: string };
 interface Provider { configured(): boolean; generate(system: string, turns: Turn[]): Promise<string> }
@@ -138,7 +140,7 @@ ${JSON.stringify(ctx)}`;
 Deno.serve(async (req) => {
   const origin = req.headers.get('Origin');
   const h: Record<string, string> = { 'Content-Type': 'application/json', Vary: 'Origin' };
-  if (origin && ORIGINS.has(origin)) Object.assign(h, {
+  if (allowed(origin)) Object.assign(h, {
     'Access-Control-Allow-Origin': origin, 'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   });
