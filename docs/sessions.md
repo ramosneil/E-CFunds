@@ -189,3 +189,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   work in the desktop app → Supabase access token in .env + CLI deploy. Migration 22 rehearsed (own tokens, push_job
   only for service_role+secret, sign-out drops token) + applied; v1.1.0 (build 9) installed; 2 phones registered;
   direct call to `push` → {"sent":1}. pg_net timeout 5 s → 20 s (migration 23; cold start took ~3.8 s).
+- Neil confirmed the push test popped up on his phone. Part D done (Android).
