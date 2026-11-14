@@ -32,8 +32,10 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Design tools on Neil's PC: plugins UI Design Review, playwright, Mobile App Design (iOS), Mobile Design System
   (installed with the Claude CLI); Supabase + Figma connectors; GitHub plugin via the Windows user variable
   GITHUB_PERSONAL_ACCESS_TOKEN (expires 2027-02-12).
-- **Website notifications (Web Push) + iPhone web app: live 2026-11-14, server side tested; not yet received on a
-  real browser/iPhone** (Neil to test: Chrome → My account → Turn on; iPhone → Add to Home Screen first).
+- **Website notifications (Web Push) + iPhone web app: live 2026-11-14.** Server side tested; Neil subscribed a
+  browser (web row in `push_devices`); a received browser notification not yet confirmed; no iPhone test yet.
+- **Phone notifications card** (My account, Android): `notifyPermission` times out after 3 s and falls back to the
+  push plugin's permission; the card never hides (fixed + confirmed "On" on Neil's phone, 2026-11-14).
 - **In progress (waiting on people):** web address `ecfunds.omsc.edu.ph` (added to Vercel; OMSC DNS is on
   Cloudflare — letter for IT: `docs/it-request.md`) and own email sender via Resend (Neil's steps:
   `docs/handoff.md` session 6). When IT is done: switch LIVE_URL, OTA SITE, CORS, Vercel primary domain (keep `/ota/*`
