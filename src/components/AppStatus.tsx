@@ -73,7 +73,8 @@ function NeedsApk() {
 
 function Card({ icon, text, children }: { icon: React.ReactNode; text: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div role="alert" className="fixed z-[60] left-4 right-4 sm:left-auto sm:right-6 bottom-[92px] lg:bottom-6 sm:w-[380px] bg-surface border border-line rounded-[18px] shadow-2xl p-4 flex items-center gap-3">
+    // .app-status-card: on Messages (body.chat-open, see index.css) it moves to the top so it never covers Send.
+    <div role="alert" className="app-status-card fixed z-[60] left-4 right-4 sm:left-auto sm:right-6 bottom-[92px] lg:bottom-6 sm:w-[380px] bg-surface border border-line rounded-[18px] shadow-2xl p-4 flex items-center gap-3">
       <span className="size-10 rounded-full bg-primary-soft text-primary grid place-items-center shrink-0">{icon}</span>
       <p className="flex-1 text-[14px]">{text}</p>
       {children}

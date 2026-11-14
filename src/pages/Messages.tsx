@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Megaphone, MessagesSquare, SendHorizontal, Trash2 } from 'lucide-react';
+import { ArrowLeft, Megaphone, MessagesSquare, MoreVertical, Search, SendHorizontal, Trash2 } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { useEntities, useTreasurers } from '../lib/data';
 import { supabase, errorText } from '../lib/supabase';
@@ -10,6 +10,8 @@ import { Alert, EntityLogo, Spinner } from '../components/ui';
 import { AnnounceSheet } from '../components/AnnounceSheet';
 import { confirmAsk } from '../lib/confirm';
 
+/** A phone or tablet (touch screen, no fine pointer) — its keyboard's Enter key should add a new line, not send. */
+const touchKeyboard = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches && !window.matchMedia('(pointer: fine)').matches;
 const time = new Intl.DateTimeFormat('en-PH', { hour: 'numeric', minute: '2-digit' });
 const day = new Intl.DateTimeFormat('en-PH', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
 const short = new Intl.DateTimeFormat('en-PH', { month: 'short', day: 'numeric' });
@@ -24,6 +26,11 @@ const FRAME = 'h-[calc(100dvh-176px-env(safe-area-inset-top)-env(safe-area-inset
 /** Admin: conversation list + open conversation. Treasurer: their one conversation with SAS (+ broadcasts). */
 export function Messages() {
   const { profile } = useAuth();
+  // Lets update notices move to the top while a chat is open, so they never cover Send (src/index.css).
+  useEffect(() => {
+    document.body.classList.add('chat-open');
+    return () => document.body.classList.remove('chat-open');
+  }, []);
   if (profile?.role === 'treasurer') return <TreasurerMessages />;
   return <AdminMessages />;
 }
@@ -35,15 +42,19 @@ function AdminMessages() {
   const unread = useUnread();
   const open = key === 'all' ? 'all' : key ? Number(key) : null;
   const [announcing, setAnnouncing] = useState(false);
+  const [q, setQ] = useState('');
   const treasurers = useTreasurers();
 
   const rows = useMemo(() => {
     const last = new Map<number | 'all', Message>();
     for (const m of msgs.data ?? []) last.set(m.entity_id ?? 'all', m);
-    return (entities.data ?? []).filter((e) => e.is_active).map((e) => ({ e, last: last.get(e.id) }))
+    const s = q.trim().toLowerCase();
+    return (entities.data ?? []).filter((e) => e.is_active)
+      .filter((e) => !s || e.short_name.toLowerCase().includes(s) || e.name.toLowerCase().includes(s))
+      .map((e) => ({ e, last: last.get(e.id) }))
       .sort((a, b) => (b.last?.created_at ?? '').localeCompare(a.last?.created_at ?? '') || a.e.id - b.e.id)
       .map((r) => ({ ...r, unread: unread.byEntity.get(r.e.id) ?? 0 }));
-  }, [entities.data, msgs.data, unread.byEntity]);
+  }, [entities.data, msgs.data, unread.byEntity, q]);
   const lastBroadcast = [...(msgs.data ?? [])].reverse().find((m) => m.entity_id === null);
 
   const list = (
@@ -54,7 +65,12 @@ function AdminMessages() {
           <Megaphone className="size-4" aria-hidden />Announcement
         </button>
       </div>
-      <p className="px-4 pb-3 text-[13px] text-muted">Announcements go to everyone’s bell and phone. <b className="text-ink font-semibold">All treasurers</b> is a chat they can reply to.</p>
+      <p className="px-4 pb-2 text-[13px] text-muted"><b className="text-ink font-semibold">Announcement</b> → everyone's bell. <b className="text-ink font-semibold">All treasurers</b> → a chat they can reply to.</p>
+      <div className="px-4 pb-2 relative">
+        <Search className="size-4 absolute left-7 top-1/2 -translate-y-[calc(50%+4px)] text-muted" aria-hidden />
+        <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search orgs & clubs" aria-label="Search orgs and clubs"
+          className="w-full h-11 pl-10 pr-3 rounded-[12px] bg-surface2 border border-transparent focus:border-primary outline-none text-[14px]" />
+      </div>
       <div className="overflow-y-auto min-h-0 flex-1 px-2 pb-2">
         <Link to="/messages/all" className={`flex items-center gap-3 p-3 rounded-[16px] ${open === 'all' ? 'bg-primary-soft' : 'hover:bg-surface2'}`}>
           <span className="size-11 rounded-full bg-gold-soft text-gold-text grid place-items-center shrink-0"><Megaphone className="size-5" /></span>
@@ -70,7 +86,10 @@ function AdminMessages() {
             <EntityLogo path={e.logo_path} name={e.name} size={44} />
             <span className="min-w-0 flex-1">
               <span className={`block truncate ${n ? 'font-bold' : 'font-semibold'}`}>{e.short_name}</span>
-              <span className={`block text-[13px] truncate ${n ? 'text-ink' : 'text-muted'}`}>{last ? last.body : 'No messages yet'}</span>
+              <span className={`block text-[13px] truncate ${n ? 'text-ink' : 'text-muted'}`}>
+                {last ? last.body : treasurers.data && !treasurers.data.get(e.id)
+                  ? <span className="text-warn">No treasurer yet — nobody reads this</span> : 'No messages yet'}
+              </span>
             </span>
             <span className="flex flex-col items-end gap-1 shrink-0">
               {last && <span className="text-[12px] text-muted">{when(last.created_at)}</span>}
@@ -78,6 +97,7 @@ function AdminMessages() {
             </span>
           </Link>
         ))}
+        {q && !rows.length && <p className="px-3 py-4 text-[14px] text-muted">No org or club matches “{q}”.</p>}
       </div>
     </nav>
   );
@@ -159,8 +179,10 @@ function Thread({ scope, title, subtitle, logo, back, includeBroadcasts }: {
     setBody('');
     void qc.invalidateQueries({ queryKey: ['messages'] });
   }
+  // Computers: Enter sends, Shift+Enter = new line. Phones/tablets (touch keyboards have no Shift+Enter): Enter = new
+  // line, only the Send button sends — so a half-written message never goes out by accident.
   function onKey(e: KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void send(); }
+    if (e.key === 'Enter' && !e.shiftKey && !touchKeyboard) { e.preventDefault(); void send(); }
   }
   async function remove(m: Message) {
     const sure = await confirmAsk(m.entity_id === null && admin
@@ -206,21 +228,30 @@ function Thread({ scope, title, subtitle, logo, back, includeBroadcasts }: {
           const sep = d !== lastDay ? (lastDay = d) : null;
           const readBy = admin && m.entity_id === null ? (reads.data ?? []).filter((r) => r.message_id === m.id).length : null;
           const who = mine ? 'You' : admin ? names.data?.names.get(m.sender_id) ?? 'Treasurer' : 'SAS';
+          const broadcastHere = m.entity_id === null && scope !== 'all';   // a broadcast shown inside a private chat
           return (
             <div key={m.id}>
               {sep && <p className="text-center text-[12px] text-muted my-3">{sep}</p>}
-              <div className={`group flex ${mine ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] sm:max-w-[70%] rounded-[18px] px-4 py-2.5 ${mine ? 'bg-primary text-on-primary rounded-br-[6px]' : 'bg-surface2 rounded-bl-[6px]'}`}>
-                  {m.entity_id === null && scope !== 'all' && <p className={`micro mb-1 ${mine ? 'opacity-80' : 'text-gold-text'}`}>To all treasurers</p>}
+              <div className={`group flex items-center gap-1 ${mine ? 'justify-end' : 'justify-start'}`}>
+                {/* Delete: a finger-sized button beside your own message (and beside broadcasts, for SAS); it asks first. */}
+                {(mine || (admin && m.entity_id === null)) && (
+                  <button onClick={() => remove(m)} aria-label={m.entity_id === null ? 'Delete this broadcast' : 'Delete this message'} title="Delete"
+                    className="order-first size-11 shrink-0 grid place-items-center rounded-full text-muted hover:text-bad hover:bg-bad-soft cursor-pointer">
+                    <MoreVertical className="size-5" aria-hidden />
+                  </button>
+                )}
+                <div className={`max-w-[80%] sm:max-w-[70%] rounded-[18px] px-4 py-2.5 ${
+                  broadcastHere
+                    ? `border-l-4 border-gold ${mine ? 'bg-gold-soft text-ink rounded-br-[6px]' : 'bg-gold-soft rounded-bl-[6px]'}`
+                    : mine ? 'bg-primary text-on-primary rounded-br-[6px]' : 'bg-surface2 rounded-bl-[6px]'}`}>
+                  {/* Broadcasts inside a private chat look different (gold edge + 📢 label), so they can't be mistaken for it. */}
+                  {broadcastHere && <p className="micro mb-1 text-gold-text flex items-center gap-1"><Megaphone className="size-3.5" aria-hidden />To all treasurers</p>}
                   {!mine && <p className="text-[12px] font-semibold opacity-80 mb-0.5">{who}</p>}
                   <p className="whitespace-pre-wrap break-words text-[15px]">{m.body}</p>
-                  <p className={`text-[11px] mt-1 flex items-center gap-2 ${mine ? 'opacity-75 justify-end' : 'text-muted'}`}>
+                  <p className={`text-[11px] mt-1 flex items-center gap-2 ${mine && !broadcastHere ? 'opacity-75 justify-end' : 'text-muted'}`}>
                     {time.format(new Date(m.created_at))}
                     {mine && m.entity_id !== null && <span>· {m.read_at ? 'Seen' : 'Sent'}</span>}
                     {readBy !== null && <span>· Read by {readBy} of {names.data?.treasurers ?? '…'}</span>}
-                    {(mine || (admin && m.entity_id === null)) && (
-                      <button onClick={() => remove(m)} aria-label="Delete message" className="opacity-70 hover:opacity-100 cursor-pointer"><Trash2 className="size-3.5" /></button>
-                    )}
                   </p>
                 </div>
               </div>
@@ -234,6 +265,7 @@ function Thread({ scope, title, subtitle, logo, back, includeBroadcasts }: {
       <div className="border-t border-line p-3 flex items-end gap-2">
         <label className="sr-only" htmlFor="composer">Message</label>
         <textarea id="composer" rows={1} value={body} maxLength={4000} onChange={(e) => setBody(e.target.value)} onKeyDown={onKey}
+          enterKeyHint={touchKeyboard ? 'enter' : 'send'}
           placeholder={scope === 'all' ? 'Message every treasurer…' : 'Write a message…'}
           className="flex-1 resize-none max-h-40 min-h-12 px-4 py-3 rounded-[16px] bg-surface2 border border-transparent focus:border-primary outline-none field-sizing-content" />
         <button onClick={() => void send()} disabled={busy || !body.trim()} aria-label="Send"
