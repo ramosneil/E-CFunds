@@ -245,3 +245,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   - Student Home: each due labelled with its semester, current first; amount above chip (no 3-line wrap).
   - Reports: "Dues · this semester" label, "No members yet", orgs with money first, empty ones as compact rows.
   - Shared: useTreasurers() in src/lib/data.ts.
+- Neil confirmed the admin + student fixes on his phone, incl. the Approve confirm ("Looks right"). Every page has now had a UI review.
