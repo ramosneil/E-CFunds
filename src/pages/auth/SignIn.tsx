@@ -7,6 +7,7 @@ import { AuthLayout, Divider, GoogleButton } from './AuthLayout';
 import { isNative, webOrigin } from '../../lib/native';
 import { NATIVE_AUTH_ERROR, nativeGoogleSignIn } from '../../lib/nativeAuth';
 import { AndroidAppLink } from '../../components/AndroidAppLink';
+import { IphoneAppHint } from '../../components/IphoneInstall';
 import { PasswordInput, PasswordStrength } from '../../components/PasswordInput';
 import { TermsCheckbox, TermsNote } from '../../components/Terms';
 import { meetsRules } from '../../lib/password';
@@ -88,6 +89,7 @@ export function SignIn() {
         <Link to="/register" className="text-primary font-semibold">Create an account</Link>
       </div>
       <AndroidAppLink />
+      <IphoneAppHint />
     </AuthLayout>
   );
 }

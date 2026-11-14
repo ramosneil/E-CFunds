@@ -18,8 +18,8 @@ function when(iso: string) {
   return d.toDateString() === new Date().toDateString() ? time.format(d) : short.format(d);
 }
 
-// Full-height chat area inside the app shell (phone: top bar 64 + bottom bar 76; desktop: top strip 56).
-const FRAME = 'h-[calc(100dvh-176px)] lg:h-[calc(100dvh-104px)]';
+// Full-height chat area inside the app shell (phone: top bar 64 + bottom bar 76 + the notch/home-bar areas; desktop: top strip 56).
+const FRAME = 'h-[calc(100dvh-176px-env(safe-area-inset-top)-env(safe-area-inset-bottom))] lg:h-[calc(100dvh-104px)]';
 
 /** Admin: conversation list + open conversation. Treasurer: their one conversation with SAS (+ broadcasts). */
 export function Messages() {

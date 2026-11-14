@@ -1,9 +1,11 @@
-// push: sends one notification row to the recipient's phones via Firebase Cloud Messaging (HTTP v1).
+// push: sends one notification row to the recipient's devices — Android phones via Firebase Cloud Messaging (HTTP v1),
+// browsers (computers, iPhone Home Screen app) via Web Push with the VAPID keys from push_job (migration 26).
 // Called only by the database (migration 22, pg_net) with the secret from private.push_config in `x-push-secret`;
 // verify_jwt = false because the database has no user token — the secret is the check, and push_job() re-checks it.
 // Secrets: FCM_SERVICE_ACCOUNT (the Firebase service-account JSON). SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are
 // provided by Supabase.
 import { createClient } from 'npm:@supabase/supabase-js@2.119.0';
+import webpush from 'npm:web-push@3.6.7';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -49,15 +51,37 @@ Deno.serve(async (req) => {
 
   const job = await db.rpc('push_job', { p_id: id, p_secret: secret });
   if (job.error) return reply(403, { error: 'not allowed' });
-  const j = job.data as { title: string; body: string; link: string; kind: string; tokens: string[] } | null;
-  if (!j || !j.tokens?.length) return reply(200, { sent: 0 });
+  const j = job.data as {
+    title: string; body: string; link: string; kind: string; tokens: string[];
+    devices?: { token: string; platform: string }[]; vapid?: { public: string; private: string; subject: string } | null;
+  } | null;
+  if (!j) return reply(200, { sent: 0 });
 
+  let sent = 0;
+  // ---- browsers (computers, iPhone Home Screen app): Web Push signed with the VAPID keys ----
+  const web = (j.devices ?? []).filter((d) => d.platform === 'web');
+  if (web.length && j.vapid) {
+    webpush.setVapidDetails(j.vapid.subject, j.vapid.public, j.vapid.private);
+    const payload = JSON.stringify({ title: j.title, body: j.body, link: j.link, kind: j.kind, id });
+    for (const d of web) {
+      try {
+        await webpush.sendNotification(JSON.parse(d.token), payload, { TTL: 86400, urgency: 'high', topic: `ecf${id}` });
+        sent++;
+      } catch (e) {
+        const status = (e as { statusCode?: number }).statusCode;
+        if (status === 404 || status === 410) await db.rpc('push_drop_dead', { p_token: d.token, p_secret: secret });   // unsubscribed
+        else console.error('push: web', status, String((e as { body?: string }).body ?? e).slice(0, 200));
+      }
+    }
+  }
+  if (!j.tokens?.length) return reply(200, { sent });
+
+  // ---- Android phones: Firebase Cloud Messaging ----
   const raw = Deno.env.get('FCM_SERVICE_ACCOUNT');
   if (!raw) { console.error('push: FCM_SERVICE_ACCOUNT secret missing'); return reply(503, { error: 'push not configured' }); }
   let sa: ServiceAccount;
   try { sa = JSON.parse(raw); } catch { console.error('push: FCM_SERVICE_ACCOUNT is not valid JSON'); return reply(503, { error: 'push not configured' }); }
 
-  let sent = 0;
   const token = await accessToken(sa);
   for (const t of j.tokens) {
     const r = await fetch(`https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`, {

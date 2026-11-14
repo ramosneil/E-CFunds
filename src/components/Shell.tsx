@@ -7,6 +7,7 @@ import { useMessagesRealtime, useUnread } from '../lib/messages';
 import { Brand } from '../pages/auth/AuthLayout';
 import { EntityLogo, Loading, Sheet, ThemeToggle } from './ui';
 import { AskTopButton, ChatButton } from './ChatButton';
+import { WebPushBanner } from './WebPushBanner';
 import { NotificationBell } from './NotificationBell';
 import { useLiveNotifications } from '../lib/notifications';
 import { useLiveScreens } from '../lib/live';
@@ -111,12 +112,14 @@ export function Shell() {
           <span>{year.data ? <>School year <b className="text-ink ml-1">{year.data.label}</b></> : 'No school year open'}</span>
           {uid && <NotificationBell uid={uid} />}
         </div>
-        <main className={`flex-1 w-full max-w-6xl mx-auto px-5 sm:px-8 pt-5 lg:pt-0 ${chat ? 'pb-[92px] lg:pb-12' : 'pb-28'}`}>
+        {/* Bottom padding = bottom menu (76 px + the iPhone home-bar area) + breathing room. */}
+        <main className={`flex-1 w-full max-w-6xl mx-auto px-5 sm:px-8 pt-5 lg:pt-0 ${chat ? 'pb-[calc(92px+env(safe-area-inset-bottom))] lg:pb-12' : 'pb-[calc(7rem+env(safe-area-inset-bottom))] lg:pb-28'}`}>
+          {!chat && <WebPushBanner uid={profile?.status === 'approved' ? uid : undefined} />}
           <Suspense fallback={<Loading />}><Outlet /></Suspense>
         </main>
       </div>
 
-      <nav aria-label="Main" className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-surface border-t border-line h-[76px] pb-[env(safe-area-inset-bottom)] flex justify-around items-center px-2">
+      <nav aria-label="Main" className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-surface border-t border-line h-[calc(76px+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)] flex justify-around items-center px-2">
         {phoneItems.map((it) => (
           <NavLink key={it.to} to={it.to} end={it.to === '/'} className="flex-1 flex flex-col items-center gap-1 text-[11px] font-semibold">
             {({ isActive }) => (<>

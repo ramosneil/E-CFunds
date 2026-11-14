@@ -81,6 +81,14 @@ prevents two approvals racing past a limit.
   account approved/rejected, announcements. Everyone: app updated (`note_app_updated`, once per version).
 - `announce(audience, title, body)` admin-only → students / treasurers / everyone.
 
+## Push to phones and browsers (migrations 22–23, 26; 2026-11-14)
+- `push_devices` (own rows only): Android FCM tokens (platform `android`) and browser push subscriptions (platform
+  `web`, JSON with endpoint + keys; `save_push_token` checks the JSON). Saved after sign-in, dropped on sign-out.
+- New notification → trigger → pg_net → Edge Function `push` (secret from `private.push_config`) → `push_job` returns
+  `devices` [{token, platform}], `tokens` (Android) and `vapid` keys (only when a browser is listed) → FCM / Web Push.
+- VAPID key pair lives only in `private.push_config` (written by a local script); the public key is in
+  `src/lib/webpush.ts`. Never regenerate it: every browser subscription would stop working.
+
 ## Design notes
 - Balances are never stored: `private.d_cash/d_saved` implement business-rules §2; reports sum the ledger.
 - A wrong remittance/release is corrected with two `admin_adjust` rows (reversal only for single-pocket kinds).

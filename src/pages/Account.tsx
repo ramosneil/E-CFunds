@@ -1,12 +1,14 @@
 import { useEffect, useState, useSyncExternalStore, type FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import { BellRing, CheckCircle2, Download, IdCard, KeyRound, LogOut, RefreshCw, Smartphone } from 'lucide-react';
+import { BellOff, BellRing, CheckCircle2, Download, IdCard, KeyRound, LogOut, RefreshCw, Smartphone } from 'lucide-react';
+import { isIos, webPushOff, webPushOn, webPushState, type WebPushState } from '../lib/webpush';
 import { askSignOut } from '../lib/confirm';
 import { applyReady, checkForUpdate, otaState } from '../lib/ota';
 import { notifyPermission, requestNotify, type PhonePermission } from '../lib/phone';
 import { install } from '../lib/install';
 import { AndroidAppLink } from '../components/AndroidAppLink';
+import { IphoneSteps } from '../components/IphoneInstall';
 import { PasswordInput, PasswordStrength } from '../components/PasswordInput';
 import { meetsRules } from '../lib/password';
 import { isNative } from '../lib/native';
@@ -55,7 +57,7 @@ export function Account() {
           )}
         </Card>
         <PasswordCard hasPassword={hasPassword} />
-        {isNative && <PhoneNotifyCard />}
+        {isNative ? <PhoneNotifyCard /> : <WebNotifyCard />}
         {isNative ? <AppUpdateCard /> : <InstallCard />}
       </div>
       <Button variant="soft" className="mt-6 w-full sm:w-auto sm:px-6 h-12 text-bad" onClick={() => void askSignOut(signOut)}>
@@ -127,12 +129,12 @@ function InstallCard() {
           <Download className="size-5" />Install E-CFunds
         </Button>
       ) : (
-        <div className="rounded-[16px] bg-surface2 p-4 text-[14px] flex gap-3">
-          <Smartphone className="size-5 shrink-0 text-primary" aria-hidden />
-          {install.isIOS()
-            ? <p>On iPhone: tap the <b>Share</b> button in Safari, then <b>Add to Home Screen</b>.</p>
-            : <p>Open your browser menu (<b>⋮</b>) and choose <b>Install app</b> or <b>Add to Home screen</b>.</p>}
-        </div>
+        isIos() ? <IphoneSteps /> : (
+          <div className="rounded-[16px] bg-surface2 p-4 text-[14px] flex gap-3">
+            <Smartphone className="size-5 shrink-0 text-primary" aria-hidden />
+            <p>Open your browser menu (<b>⋮</b>) and choose <b>Install app</b> or <b>Add to Home screen</b>.</p>
+          </div>
+        )
       )}
       {msg && <p className="text-[13px] text-ok mt-3">{msg}</p>}
       {!install.isIOS() && <AndroidAppLink always />}
@@ -163,6 +165,42 @@ function AppUpdateCard() {
           <RefreshCw className="size-5" />Check for updates
         </Button>
       )}
+    </Card>
+  );
+}
+
+/** Website (computers, iPhone Home Screen app): notifications even when E-CFunds is closed — Web Push. */
+function WebNotifyCard() {
+  const [state, setState] = useState<WebPushState | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  useEffect(() => { void webPushState().then(setState); }, []);
+  if (state === null || state === 'unsupported') return null;
+  return (
+    <Card>
+      <SectionTitle>Notifications on this {isIos() ? 'iPhone' : 'device'}</SectionTitle>
+      {state === 'on' ? (
+        <>
+          <p className="flex items-center gap-2 text-[14px] text-ok font-semibold"><CheckCircle2 className="size-5" aria-hidden />On — you'll be notified even when E-CFunds is closed.</p>
+          <Button variant="soft" className="w-full mt-4" busy={busy} onClick={async () => { setBusy(true); await webPushOff(); setState(await webPushState()); setBusy(false); }}>
+            <BellOff className="size-5" />Turn off on this device
+          </Button>
+        </>
+      ) : state === 'install-first' ? (
+        <p className="text-[14px] text-muted">On iPhone, notifications work from the Home Screen app. Add E-CFunds to your Home Screen first (see <b>Install the app</b>), open it from there, then come back here.</p>
+      ) : state === 'blocked' ? (
+        <p className="text-[14px] text-muted">Blocked for this site. To allow them: click the <b>🔒 lock</b> (or settings icon) left of the address → <b>Notifications → Allow</b>, then reload.{isIos() ? ' On iPhone: Settings → Notifications → E-CFunds → Allow.' : ''}</p>
+      ) : (
+        <>
+          <p className="text-[14px] text-muted -mt-1 mb-4">Get payments, requests, messages and announcements as notifications, even when E-CFunds is closed.</p>
+          <Button className="w-full" busy={busy} onClick={async () => {
+            setBusy(true); setErr('');
+            try { setState(await webPushOn()); } catch (e) { setErr(errorText(e)); }
+            setBusy(false);
+          }}><BellRing className="size-5" />Turn on notifications</Button>
+        </>
+      )}
+      {err && <div className="mt-3"><Alert>{err}</Alert></div>}
     </Card>
   );
 }

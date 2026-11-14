@@ -60,3 +60,36 @@ Update it every session: tick done items, add new ones.
 - [x] Created repo `ramosneil/E-CFunds` (made PUBLIC by Neil on 2026-11-13 — anyone can read the code; never commit keys or student data)
 - [x] Gave Claude's GitHub App access to the repo
 - [x] Created a new Gemini key
+
+## Session 6 — school web address + own email sender (Neil + OMSC IT)
+Claude already registered `ecfunds.omsc.edu.ph` in Vercel (2026-11-14). The letter for IT is `docs/it-request.md`.
+
+### A. Make the Resend account (about 10 minutes) — do this first, so IT gets one request
+1. Open **https://resend.com** → **Sign up** → **Continue with Google** (use the SAS/your Gmail).
+2. Left menu → **Domains** → **Add Domain**.
+3. Domain: `ecfunds.omsc.edu.ph`. Region: pick the one closest to the Philippines (Tokyo, if listed). → **Add**.
+4. Resend shows a table of DNS records (usually 1 **MX** and 2 **TXT**). Leave that page open.
+5. Open `docs/it-request.md` (in VS Code or Notepad). In section **2. Email sending**, replace the placeholder row
+   with each record: **Type**, **Name**, **Value**, and **Priority** (only the MX has one). Copy with Resend's copy
+   buttons — one wrong letter breaks it. Save the file.
+6. Tell Claude "Resend records added" — Claude checks the letter before you send it.
+
+### B. Send the letter to OMSC IT
+1. Copy the part of `docs/it-request.md` between the two lines into an email to the IT / MIS office.
+2. When IT replies that it's done, tell Claude "IT done". Claude checks the website records and switches the app.
+
+### C. After IT is done (Claude tells you when)
+1. **Resend** → Domains → `ecfunds.omsc.edu.ph` → **Verify DNS Records** → all should turn green ("Verified").
+2. **Resend** → **API Keys** → **Create API Key** → Name `E-CFunds Supabase`, Permission **Sending access**,
+   Domain `ecfunds.omsc.edu.ph` → **Add** → **Copy** the key (it's shown only once). Don't paste it in chat.
+3. **Supabase** → project `e-cfunds` → **Authentication** → **Emails** (or Settings) → **SMTP Settings** →
+   turn on **Enable custom SMTP** and fill in:
+   - Sender email: `no-reply@ecfunds.omsc.edu.ph` · Sender name: `E-CFunds`
+   - Host: `smtp.resend.com` · Port: `465` · Username: `resend` · Password: paste the API key
+   → **Save**.
+4. **Supabase** → **Authentication** → **URL Configuration**:
+   - Site URL: `https://ecfunds.omsc.edu.ph`
+   - Redirect URLs → **Add URL**: `https://ecfunds.omsc.edu.ph/**` (keep all the old ones) → **Save**.
+5. Email templates: Claude put ready designs in `docs/email-templates/` — steps are in that folder's README.
+6. Test: on the new address, **Forgot password?** with your email → the email should come from
+   `no-reply@ecfunds.omsc.edu.ph`. Tell Claude what you see.

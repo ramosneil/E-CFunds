@@ -45,6 +45,7 @@ export default defineConfig({
         globIgnores: ['**/jspdf*', '**/html2canvas*', '**/purify*', '**/index.es-*', '**/fonts/**'],
         navigateFallback: '/index.html',
         cleanupOutdatedCaches: true,
+        importScripts: ['push-sw.js'],   // Web Push: show notifications + open the right page on tap (public/push-sw.js)
         runtimeCaching: [
           { // Google Fonts (UI text): keep a copy so the app looks right offline.
             urlPattern: ({ url }) => url.origin === 'https://fonts.googleapis.com' || url.origin === 'https://fonts.gstatic.com',
