@@ -21,7 +21,9 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 ## Status (updated 2026-11-14, end of session 6)
 - **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
   student on the roster. Test data was wiped before launch.
-- Database: **26 migrations** live (last `20261114110000_web_push`).
+- Database: **27 migrations** live (last `20261114130000_expense_categories`).
+- **"Where the money goes" (transparency) live 2026-11-14:** per-org charts + approved expenses for every role;
+  numbers checked against the live ledger; not yet seen signed in as student/treasurer.
 - Android: latest APK **v1.1.1 = build 10**; `ota.json` minNativeBuild = 10.
 - **Confirmed working on Neil's phone:** push notifications with the app closed, app self-update end to end
   (download → reopen → "E-CFunds was updated"), Back button, full screen, Delete conversation, Add member (adds only),
@@ -63,7 +65,9 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 ## Roles & sign-in
 - **SAS Admin**: everything; approves accounts and money requests; orgs, accredited list, school year, announcements.
 - **Treasurer**: one per org/club; members, fees, requests, messages with SAS.
-- **Student**: own dues + every org's totals only (never other students' names or the ledger).
+- **Student**: own dues + every org's totals + "where the money goes" (charts + SAS-approved expenses: date,
+  purpose, category, amount). Never: other students' names, receipts, the "receipt checked by SAS" mark (staff only),
+  remit/release lines, the ledger. Rule + categories: `docs/business-rules.md` "Transparency".
 - Self-register → SAS approves (students must match a roster Student ID). Email/password, Google (web + app), or
   Student ID + password (`student-login`, lockout 5 tries / 15 min). First admin via `private.bootstrap_admins`.
 - Passwords: 8+ chars with upper, lower, number, symbol (meter + checklist, eye icon) — also set in Supabase Auth.
@@ -77,7 +81,13 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   then record when paid; ⋮ = undo payment), requests (waiting/done groups, File again on rejected).
 - Student: my dues (labelled by semester), reports. Everyone: My account (sign out lives here, with a confirm),
   "Ask E-CFunds" assistant (Gemini via `chat`, RLS-scoped) — ✨ in the phone top bar, floating button on computers.
+- **Where the money goes** (migration 27): `src/components/finance/FinancePanel.tsx` (hand-built SVG per the dataviz
+  skill; tokens `--chart-in` blue / `--chart-out` orange, validated light+dark; tooltip + "Show as table") fed by
+  `get_entity_finance` / `get_school_finance` (`useEntityFinance` / `useSchoolFinance`). Shown on `/reports/:id`
+  (students + treasurers), student Home + SAS Dashboard (school-wide), treasurer Home, SAS org detail, PDF report.
+  Expenses need a category (form + Approvals, SAS may change it).
 - Exports: org report PDF (charts, OMSC letterhead, Inter font for ₱) + CSVs, school summary, members, accredited.
+- iPhone: Home Screen web app (no App Store); printable guide `docs/iphone-install-guide.html`.
 - **Live screens:** data-free ticks in `live_changes` → open screens re-fetch within ~0.5 s (`src/lib/live.ts`).
 - **Notifications** (migrations 19–20, 22–23, 26; events per role in `docs/database.md`): bell + pop-up + soft chime
   (mute per device); phone notifications; **push when the app is closed** — Android via FCM, browsers + iPhone Home
