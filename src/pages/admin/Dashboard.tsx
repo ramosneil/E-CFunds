@@ -49,6 +49,7 @@ export function AdminDashboard() {
         action={<ExportMenu options={[
           { label: 'School summary', kind: 'pdf', run: async () => (await exportsLib()).schoolSummary('pdf', year.data!) },
           { label: 'School summary', kind: 'csv', run: async () => (await exportsLib()).schoolSummary('csv', year.data!) },
+          { label: 'Full backup (all data)', kind: 'xlsx', run: async () => (await import('../../lib/export/backup')).fullBackup() },
         ]} />} />
 
       {/* Phone: total → waiting for you → numbers → orgs. Desktop: total | waiting, then numbers and the full-width table. */}

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Download, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
 import { errorText } from '../lib/supabase';
 
-export type ExportOption = { label: string; kind: 'pdf' | 'csv'; run: () => Promise<void> };
+export type ExportOption = { label: string; kind: 'pdf' | 'csv' | 'xlsx'; run: () => Promise<void> };
 
 /** "Export" button with a small menu. The export code (and jsPDF) loads only when an option is picked. */
 export function ExportMenu({ options, label = 'Export' }: { options: ExportOption[]; label?: string }) {
@@ -31,7 +31,7 @@ export function ExportMenu({ options, label = 'Export' }: { options: ExportOptio
         {busy ? 'Preparing…' : label}
       </button>
       {open && (
-        <div role="menu" className="absolute right-0 z-40 mt-2 w-64 rounded-[16px] border border-line bg-surface shadow-xl p-1.5">
+        <div role="menu" className="absolute right-0 z-40 mt-2 w-72 rounded-[16px] border border-line bg-surface shadow-xl p-1.5">
           {options.map((o) => (
             <button key={o.label} role="menuitem" type="button" onClick={() => pick(o)}
               className="w-full flex items-center gap-3 px-3 h-11 rounded-[12px] text-left text-[14px] font-semibold hover:bg-surface2 cursor-pointer">
