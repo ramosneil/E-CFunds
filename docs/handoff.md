@@ -93,3 +93,7 @@ Claude already registered `ecfunds.omsc.edu.ph` in Vercel (2026-11-14). The lett
 5. Email templates: Claude put ready designs in `docs/email-templates/` — steps are in that folder's README.
 6. Test: on the new address, **Forgot password?** with your email → the email should come from
    `no-reply@ecfunds.omsc.edu.ph`. Tell Claude what you see.
+- [x] 2026-11-14: Claude added `ecfunds.omsc.edu.ph` to Neil's Resend account (Tokyo, tracking off), copied the
+      DNS records into `docs/it-request.md`, and saved the letter as a **Gmail draft** (no recipient — Neil doesn't
+      know the IT office address yet). [ ] Neil: find the IT/MIS email → Gmail → Drafts → "DNS records for E-CFunds…"
+      → add the address in **To** → Send. Then tell Claude "IT done" when they reply.

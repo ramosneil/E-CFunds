@@ -257,3 +257,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - Neil confirmed "Where the money goes" on his phone ("Looks right").
 - Bug (Neil's phone): 'Phone notifications' card missing in My account while push worked (admin android device registered 20:11). notifyPermission now times out after 3 s and falls back to the push plugin's permission; the card always shows (Checking… / settings hint).
 - Neil confirmed: My account shows 'Phone notifications: On' after the fix.
+- Resend domain added by Claude via Neil's Chrome (Tokyo); IT letter filled (CNAME web + DKIM TXT + 2 CNAME SPF + _dmarc.ecfunds; MX left out); saved as Gmail draft (recipient unknown).
