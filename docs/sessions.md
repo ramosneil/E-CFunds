@@ -199,3 +199,12 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - Only clubs add students (migration 25): add_member guard + RLS insert rules (roster, memberships) limited to admin or
   club treasurer; rehearsed (org refused 3 ways, club add → SSG+course orgs, org can still record). Members page hides
   Add member for organizations + explains; assistant help text updated (chat redeployed via CLI).
+- Design tools: installed the Claude CLI (2.1.316) and, with it, plugins UI Design Review, playwright, Mobile App
+  Design (iOS), Mobile Design System; Supabase + Figma connectors connected; GitHub plugin needs the Windows user
+  variable GITHUB_PERSONAL_ACCESS_TOKEN (fine-grained, E-CFunds only, expires 2027-02-12).
+- UI review of treasurer Members (Neil's phone screenshot, SSG, dark) → all 9 fixes: Paid chip is a label + 44 px ⋮
+  button for Undo; page bottom space so the Ask button never covers the last row (all pages); "From course" tag only
+  on club pages; selected filter tab = solid blue (all Segmented controls); clearer org note; ₱ collected / to collect
+  under the bar; shorter subtitle; sign-out moved off the phone header into My account + "Sign out?" confirm (also
+  desktop sidebar); Android status bar hidden again on the next tap after a swipe-down (Android keeps it otherwise).
+  Checked with sample data (light/dark, phone/desktop); not yet seen signed in or on the phone.

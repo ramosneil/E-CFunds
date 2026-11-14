@@ -1,6 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Info, Search, UserPlus, Users } from 'lucide-react';
+import { Info, MoreVertical, Search, UserPlus, Users } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { useCurrentYear, useEntities, useSemesters } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
@@ -72,21 +72,30 @@ export function Members() {
   if (!year.data) return <><PageHeader title="Members" /><NoYear /></>;
   const all = members.data ?? [];
   const paid = all.filter((m) => m.is_paid).length;
+  const collected = all.filter((m) => m.is_paid).reduce((t, m) => t + Number(m.amount_due), 0);
+  const toCollect = all.filter((m) => !m.is_paid).reduce((t, m) => t + Number(m.amount_due), 0);
 
   return (
     <>
-      <PageHeader title="Members" sub={entity ? `${entity.short_name} · fee ${peso(entity.dues_amount)} ${perSemester ? `per semester${sem ? ` · ${sem.term === 1 ? '1st' : '2nd'} semester` : ''}` : 'per school year'}` : undefined}
+      <PageHeader title="Members" sub={entity ? `${entity.short_name} · ${peso(entity.dues_amount)} ${perSemester ? (sem ? `· ${sem.term === 1 ? '1st' : '2nd'} semester` : 'per semester') : 'per school year'}` : undefined}
         action={<div className="flex items-center gap-2">
           {entity && <ExportMenu label="CSV" options={[{ label: 'Members & dues', kind: 'csv', run: async () => (await exportsLib()).membersCsv(entity, year.data!) }]} />}
           {isClub && <Button aria-label="Add member" onClick={() => setAdding(true)}><UserPlus className="size-5" /><span className="hidden sm:inline">Add member</span></Button>}
         </div>} />
-      <Card className="mb-4"><DuesBar paid={paid} members={all.length} /></Card>
+      <Card className="mb-4">
+        <DuesBar paid={paid} members={all.length} />
+        {all.length > 0 && (
+          <p className="text-[13px] text-muted mt-1">
+            <b className="money text-ok">{peso(collected)}</b> collected · <b className="money text-ink">{peso(toCollect)}</b> to collect
+          </p>
+        )}
+      </Card>
       {entity && !isClub && (
         <div className="mb-4 rounded-[16px] bg-primary-soft text-primary p-4 flex gap-3 text-[14px]">
           <Info className="size-5 shrink-0" aria-hidden />
           <p>{entity.is_school_wide
-            ? 'Every student is listed here automatically when a club adds them.'
-            : 'Students are listed here automatically by their course when a club adds them.'} Record each fee when it’s paid.</p>
+            ? `Students join ${entity.short_name} automatically when a club adds them.`
+            : `Students join ${entity.short_name} automatically, by their course, when a club adds them.`} Record each fee when it’s paid.</p>
         </div>
       )}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
@@ -110,14 +119,21 @@ export function Members() {
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold truncate flex items-center gap-2">
                     <span className="truncate">{m.student?.full_name}</span>
-                    {m.via_course && <span className="shrink-0 text-[11px] font-semibold px-2 h-5 rounded-full inline-flex items-center bg-primary-soft text-primary" title="Added automatically by the student's course">From course</span>}
+                    {isClub && m.via_course && <span className="shrink-0 text-[11px] font-semibold px-2 h-5 rounded-full inline-flex items-center bg-primary-soft text-primary" title="Added automatically by the student's course">From course</span>}
                     {m.carried_over && !m.is_paid && <span className="shrink-0 text-[11px] font-semibold px-2 h-5 rounded-full inline-flex items-center bg-warn-soft text-warn" title="Member last semester. Record the fee if they stay; if they join another club, this listing is removed.">Carried over</span>}
                   </p>
                   <p className="text-[13px] text-muted truncate">{m.student?.student_no}{m.student?.course ? ` · ${m.student.course}` : ''}{m.student?.year_level ? ` ${m.student.year_level}` : ''}{m.is_paid ? ` · paid ${date(m.paid_at)}` : ''}</p>
                 </div>
                 <span className="money font-semibold hidden sm:block">{peso(m.amount_due)}</span>
                 {m.is_paid ? (
-                  <button onClick={() => undo(m.id, m.student?.full_name ?? '')} disabled={busy === m.id} className="cursor-pointer" title="Undo payment"><Chip tone="ok">Paid</Chip></button>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Chip tone="ok">Paid</Chip>
+                    <button onClick={() => undo(m.id, m.student?.full_name ?? '')} disabled={busy === m.id}
+                      aria-label={`Undo ${m.student?.full_name ?? 'this member'}'s payment`} title="Undo payment"
+                      className="size-11 -mr-2 grid place-items-center rounded-full text-muted hover:bg-surface2 hover:text-ink cursor-pointer disabled:opacity-50">
+                      <MoreVertical className="size-5" aria-hidden />
+                    </button>
+                  </div>
                 ) : (
                   <Button variant="gold" className="h-10 px-4 text-[14px]" busy={busy === m.id} onClick={() => pay(m.id)}>Record {peso(m.amount_due)}</Button>
                 )}

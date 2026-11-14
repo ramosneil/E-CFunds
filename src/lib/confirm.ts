@@ -37,3 +37,13 @@ export const promptAsk = async (a: Ask & { input: NonNullable<Ask['input']> }) =
 };
 /** Show a message with OK. */
 export const alertAsk = async (title: string, body?: string) => { await open({ title, body, confirm: 'OK', alertOnly: true }); };
+
+/** Sign out after a quick "Are you sure?", so a stray tap doesn't sign anyone out. */
+export async function askSignOut(signOut: () => unknown) {
+  const ok = await confirmAsk({
+    title: 'Sign out of E-CFunds?',
+    body: 'You’ll need your password or Google to sign in again. This device stops getting notifications until then.',
+    confirm: 'Sign out', tone: 'bad',
+  });
+  if (ok) await signOut();
+}

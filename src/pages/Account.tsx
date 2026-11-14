@@ -1,7 +1,8 @@
 import { useEffect, useState, useSyncExternalStore, type FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import { BellRing, CheckCircle2, Download, IdCard, KeyRound, RefreshCw, Smartphone } from 'lucide-react';
+import { BellRing, CheckCircle2, Download, IdCard, KeyRound, LogOut, RefreshCw, Smartphone } from 'lucide-react';
+import { askSignOut } from '../lib/confirm';
 import { applyReady, checkForUpdate, otaState } from '../lib/ota';
 import { notifyPermission, requestNotify, type PhonePermission } from '../lib/phone';
 import { install } from '../lib/install';
@@ -16,7 +17,7 @@ import { Alert, Button, Card, Field, PageHeader, SectionTitle } from '../compone
 
 /** My account: who I am, plus set/change password (lets Google users use Student ID sign-in too). */
 export function Account() {
-  const { profile, session } = useAuth();
+  const { profile, session, signOut } = useAuth();
   const entities = useEntities();
   const student = useQuery({
     queryKey: ['my-student', profile?.student_id],
@@ -57,6 +58,9 @@ export function Account() {
         {isNative && <PhoneNotifyCard />}
         {isNative ? <AppUpdateCard /> : <InstallCard />}
       </div>
+      <Button variant="soft" className="mt-6 w-full sm:w-auto sm:px-6 h-12 text-bad" onClick={() => void askSignOut(signOut)}>
+        <LogOut className="size-5" aria-hidden />Sign out
+      </Button>
       <p className="mt-6 text-[13px] text-muted"><Link to="/privacy" className="text-primary font-semibold">Privacy notice</Link> · what E-CFunds keeps and who can see it</p>
     </>
   );

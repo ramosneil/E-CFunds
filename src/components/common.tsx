@@ -76,7 +76,7 @@ export function Segmented<T extends string>({ value, onChange, options }: { valu
     <div className="grid bg-surface2 rounded-[14px] p-1" style={{ gridTemplateColumns: `repeat(${options.length}, 1fr)` }} role="radiogroup">
       {options.map(([v, label]) => (
         <button key={v} type="button" role="radio" aria-checked={value === v} onClick={() => onChange(v)}
-          className={`h-10 rounded-[11px] font-semibold text-[14px] transition cursor-pointer ${value === v ? 'bg-surface shadow-sm text-ink' : 'text-muted'}`}>{label}</button>
+          className={`h-10 rounded-[11px] font-semibold text-[14px] transition cursor-pointer ${value === v ? 'bg-primary text-on-primary shadow-sm' : 'text-muted hover:text-ink'}`}>{label}</button>
       ))}
     </div>
   );
