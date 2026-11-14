@@ -21,7 +21,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 ## Status (updated 2026-11-14, end of session 6)
 - **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
   student on the roster. Test data was wiped before launch.
-- Database: **25 migrations** live (last `20261114090000_clubs_only_add`).
+- Database: **26 migrations** live (last `20261114110000_web_push`).
 - Android: latest APK **v1.1.1 = build 10**; `ota.json` minNativeBuild = 10.
 - **Confirmed working on Neil's phone:** push notifications with the app closed, app self-update end to end
   (download → reopen → "E-CFunds was updated"), Back button, full screen, Delete conversation, Add member (adds only),
@@ -30,8 +30,13 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Design tools on Neil's PC: plugins UI Design Review, playwright, Mobile App Design (iOS), Mobile Design System
   (installed with the Claude CLI); Supabase + Figma connectors; GitHub plugin via the Windows user variable
   GITHUB_PERSONAL_ACCESS_TOKEN (expires 2027-02-12).
-- Open items: none. (Supabase access token "E-CFunds deploy" revoked 2026-11-14 and removed from `.env`.)
-- Ideas not started: browser (web) push, custom domain, own email sender (SMTP), more course rules, iPhone app.
+- **Website notifications (Web Push) + iPhone web app: live 2026-11-14, server side tested; not yet received on a
+  real browser/iPhone** (Neil to test: Chrome → My account → Turn on; iPhone → Add to Home Screen first).
+- **In progress (waiting on people):** web address `ecfunds.omsc.edu.ph` (added to Vercel; OMSC DNS is on
+  Cloudflare — letter for IT: `docs/it-request.md`) and own email sender via Resend (Neil's steps:
+  `docs/handoff.md` session 6). When IT is done: switch LIVE_URL, OTA SITE, CORS, Vercel primary domain (keep `/ota/*`
+  on vercel.app for old apps), Neil sets Supabase Auth URLs + SMTP, email templates in `docs/email-templates/`.
+- Ideas not started: more course rules, App Store iPhone app.
 
 ## Memberships & fees (migrations 15–17, 24)
 - **Organizations are mandatory by course** (tables `courses`, `course_orgs`; SAS can change them):
@@ -74,8 +79,10 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   "Ask E-CFunds" assistant (Gemini via `chat`, RLS-scoped) — ✨ in the phone top bar, floating button on computers.
 - Exports: org report PDF (charts, OMSC letterhead, Inter font for ₱) + CSVs, school summary, members, accredited.
 - **Live screens:** data-free ticks in `live_changes` → open screens re-fetch within ~0.5 s (`src/lib/live.ts`).
-- **Notifications** (migrations 19–20, 22–23; events per role in `docs/database.md`): bell + pop-up + soft chime
-  (mute per device); phone notifications; **push when the app is closed** (FCM). Pieces: `notifications` table
+- **Notifications** (migrations 19–20, 22–23, 26; events per role in `docs/database.md`): bell + pop-up + soft chime
+  (mute per device); phone notifications; **push when the app is closed** — Android via FCM, browsers + iPhone Home
+  Screen app via Web Push (`src/lib/webpush.ts`, `public/push-sw.js`, VAPID key pair only in `private.push_config`
+  — never regenerate; My account card + one-time banner `WebPushBanner.tsx`). Pieces: `notifications` table
   (Realtime) → `src/lib/notifications.ts`; `src/lib/phone.ts` (local notifications); `src/lib/push.ts` (register
   after sign-in, unregister on sign-out); pg_net → Edge Function `push` (secret in `private.push_config`).
 - **App updates:** website "Update available → Reload"; Android self-updates (`src/lib/ota.ts`,
