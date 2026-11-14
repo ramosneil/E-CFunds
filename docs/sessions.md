@@ -227,3 +227,9 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   kept); rejected → "File again" (form pre-filled with kind, amount, description); 📎 on rows with a receipt/proof;
   request icons match Home everywhere (Landmark remit, HandCoins release; admin org Release button too).
 - Neil confirmed the treasurer Requests fixes on his phone ("Looks right"). Treasurer pages reviewed: Members, Home, Requests.
+- UI review of SAS Admin Dashboard (done by Claude in the browser pane, signed in as Neil's SAS admin, view only) →
+  7 fixes: phones get a per-org list (name + total + cash/saved + dues; no sideways table); "Waiting for you" right
+  after the total (desktop: beside it), rows tap through to Approvals; "N accounts to approve" (opens
+  /approvals?tab=accounts); tiles = Money requests, Accounts to approve, Collected this year, Spent this year (cash/
+  saved tiles repeated the card); table full width on tablet/desktop, fits at 1440 (was 22 px too wide); orgs with
+  pending requests first; Ask = icon only under 360 px. Verified live after deploy (phone light/dark, 1440, 320).
