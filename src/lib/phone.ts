@@ -35,11 +35,23 @@ function plugin() {
 
 export type PhonePermission = 'granted' | 'denied' | 'prompt' | 'unavailable';
 
+const map = (s: string | undefined): PhonePermission => (s === 'granted' ? 'granted' : s === 'denied' ? 'denied' : 'prompt');
+/** Give up on a plugin call that never answers (seen on Neil's phone, 2026-11-14: the card silently disappeared). */
+const within = <T,>(p: Promise<T>, ms = 3000) => Promise.race([p, new Promise<never>((_, no) => setTimeout(() => no(new Error('timeout')), ms))]);
+
+/** Android's "show notifications" permission: local-notifications plugin first, else the push plugin (same
+ *  Android permission), so the My account card always has an answer. */
 export async function notifyPermission(): Promise<PhonePermission> {
-  const p = await plugin();
-  if (!p) return 'unavailable';
-  const s = (await p.checkPermissions()).display;
-  return s === 'granted' ? 'granted' : s === 'denied' ? 'denied' : 'prompt';
+  if (!isNative) return 'unavailable';
+  try {
+    const p = await within(plugin());
+    if (p) return map((await within(p.checkPermissions())).display);
+  } catch (e) { console.warn('[phone] local permission check', e); }
+  try {
+    if (!Capacitor.isPluginAvailable('PushNotifications')) return 'unavailable';
+    const { PushNotifications } = await import('@capacitor/push-notifications');
+    return map((await within(PushNotifications.checkPermissions())).receive);
+  } catch (e) { console.warn('[phone] push permission check', e); return 'unavailable'; }
 }
 
 /** Ask once after sign-in (Android 13+ shows "Allow E-CFunds to send notifications?"). */
@@ -48,10 +60,16 @@ export async function askNotifyOnce() {
   await requestNotify();
 }
 export async function requestNotify(): Promise<PhonePermission> {
-  const p = await plugin();
-  if (!p) return 'unavailable';
-  const s = (await p.requestPermissions()).display;
-  return s === 'granted' ? 'granted' : s === 'denied' ? 'denied' : 'prompt';
+  if (!isNative) return 'unavailable';
+  try {
+    const p = await within(plugin());
+    if (p) return map((await p.requestPermissions()).display);   // no timeout: the person is answering Android's question
+  } catch (e) { console.warn('[phone] local permission request', e); }
+  try {
+    if (!Capacitor.isPluginAvailable('PushNotifications')) return 'unavailable';
+    const { PushNotifications } = await import('@capacitor/push-notifications');
+    return map((await PushNotifications.requestPermissions()).receive);
+  } catch (e) { console.warn('[phone] push permission request', e); return 'unavailable'; }
 }
 
 /** Post a phone notification (only when E-CFunds isn't on screen). */

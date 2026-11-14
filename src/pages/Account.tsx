@@ -208,12 +208,15 @@ function WebNotifyCard() {
 /** Android app: phone notifications on/off (Android asks for permission; if refused, it must be allowed in Settings). */
 function PhoneNotifyCard() {
   const [perm, setPerm] = useState<PhonePermission | null>(null);
-  useEffect(() => { void notifyPermission().then(setPerm); }, []);
-  if (perm === null || perm === 'unavailable') return null;
+  useEffect(() => { void notifyPermission().then(setPerm, () => setPerm('unavailable')); }, []);
   return (
     <Card>
       <SectionTitle>Phone notifications</SectionTitle>
-      {perm === 'granted' ? (
+      {perm === null ? (
+        <p className="text-[14px] text-muted">Checking…</p>
+      ) : perm === 'unavailable' ? (
+        <p className="text-[14px] text-muted">Couldn't read the setting on this phone. To check: phone <b>Settings → Apps → E-CFunds → Notifications</b> → make sure they're allowed.</p>
+      ) : perm === 'granted' ? (
         <p className="flex items-center gap-2 text-[14px] text-ok font-semibold"><CheckCircle2 className="size-5" aria-hidden />On — E-CFunds can notify you on this phone.</p>
       ) : perm === 'denied' ? (
         <p className="text-[14px] text-muted">Off. To turn them on: phone <b>Settings → Apps → E-CFunds → Notifications</b> → allow.</p>
