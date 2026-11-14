@@ -44,6 +44,10 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Claude in Chrome works on Neil's PC (Gmail, Resend, Vercel signed in). Never sign in for him; ask before sending,
   deleting or changing anything; never decide security prompts (e.g. 2FA) for him; its filter hides long `=`/`;`
   values — use the site's Copy button + clipboard, never disguise text.
+- Vercel account has **2FA** (authenticator app on Neil's phone, 2026-11-14): new sign-ins need his 6-digit code;
+  recovery codes are with Neil — never ask for them.
+- Open items: none. Not yet seen: a browser push notification actually arriving; the iPhone Home Screen app on a
+  real iPhone.
 - Ideas not started: more course rules, App Store iPhone app, school web address/own email sender (cancelled once).
 
 ## Memberships & fees (migrations 15–17, 24)
