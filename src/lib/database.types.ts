@@ -32,6 +32,10 @@ export type Database = {
         Update: { course?: string; entity_id?: number };
         Relationships: [];
       };
+      audit_log: {
+        Row: { id: number; table_name: string; action: string; row_pk: string | null; before_row: Json | null; after_row: Json | null; actor: string | null; at: string };
+        Insert: never; Update: never; Relationships: [];
+      };
       accredited_entries: {
         Row: {
           academic_year: string | null; accredited_on: string | null; adviser: string | null;
@@ -177,6 +181,7 @@ export type Database = {
       cancel_request: { Args: { p_request_id: number }; Returns: undefined };
       close_school_year: { Args: { p_entity_id: number; p_school_year_id: number }; Returns: number };
       disable_account: { Args: { p_profile_id: string; p_remarks?: string }; Returns: undefined };
+      enable_account: { Args: { p_profile_id: string; p_remarks?: string }; Returns: undefined };
       file_request: {
         Args: { p_amount: number; p_attachment_path?: string; p_description: string; p_entity_id: number; p_kind: E['request_kind']; p_category?: E['expense_category'] };
         Returns: number;

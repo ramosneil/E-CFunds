@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Inbox, Paperclip, UserCheck } from 'lucide-react';
+import { Inbox, Paperclip, Search, UserCheck } from 'lucide-react';
 import { useCurrentYear, useEntities, useEntityReport, useRequests } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
 import { CATEGORIES, categoryLabel, date, kindLabel, peso } from '../../lib/format';
@@ -9,6 +9,7 @@ import type { Enum, Row } from '../../lib/database.types';
 import { Alert, Button, Card, Chip, Empty, EntityLogo, Field, Input, PageHeader, Select, Spinner, StatusChip } from '../../components/ui';
 import { IfApproved, RequestRow, Segmented } from '../../components/common';
 import { confirmAsk, promptAsk } from '../../lib/confirm';
+import { useAuth } from '../../lib/auth';
 
 export function Approvals() {
   const [params] = useSearchParams();   // the Dashboard's "accounts to approve" link opens ?tab=accounts
@@ -151,22 +152,86 @@ function AccountQueue() {
         {pending.length ? pending.map((p) => <AccountCard key={p.id} p={p} />)
           : <Card><Empty icon={<UserCheck className="size-6" />} title="No accounts waiting">People who sign up appear here for approval.</Empty></Card>}
       </div>
-      <Card>
-        <h2 className="font-display text-[17px] font-bold mb-2">All accounts</h2>
-        <ul className="divide-y divide-line">
-          {others.map((p) => (
-            <li key={p.id} className="py-3 flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="font-semibold truncate">{p.full_name || p.email}</p>
-                <p className="text-[13px] text-muted truncate">{p.role === 'treasurer' ? `Treasurer · ${name(p.entity_id)}` : p.role === 'admin' ? 'SAS Admin' : p.role === 'student' ? 'Student' : p.email}</p>
-              </div>
-              <StatusChip status={p.status} />
-            </li>
-          ))}
-          {!others.length && <li className="py-4 text-muted text-[14px]">Nobody yet.</li>}
-        </ul>
-      </Card>
+      <AllAccounts others={others} name={name} />
     </div>
+  );
+}
+
+/** Every account that isn't waiting: search, filter by role, and disable / enable (SAS). */
+function AllAccounts({ others, name }: { others: Row<'profiles'>[]; name: (id: number | null) => string }) {
+  const qc = useQueryClient();
+  const { session } = useAuth();
+  const [q, setQ] = useState('');
+  const [role, setRole] = useState<'all' | 'treasurer' | 'student' | 'admin'>('all');
+  const [busy, setBusy] = useState<string | null>(null);
+  const [err, setErr] = useState('');
+  const studentNos = useQuery({
+    queryKey: ['students', 'numbers'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('students').select('id, student_no');
+      if (error) throw error;
+      return new Map(data.map((s) => [s.id, s.student_no]));
+    },
+  });
+  const s = q.trim().toLowerCase();
+  const list = others.filter((p) => (role === 'all' || p.role === role)
+    && (!s || [p.full_name, p.email, name(p.entity_id), p.student_id ? studentNos.data?.get(p.student_id) : ''].some((v) => (v ?? '').toLowerCase().includes(s))));
+
+  async function disable(p: Row<'profiles'>) {
+    const reason = await promptAsk({
+      title: `Disable ${p.full_name || p.email}?`, confirm: 'Disable', tone: 'bad',
+      body: 'They can no longer sign in, and their phone stops getting notifications. You can enable the account again later.',
+      input: { label: 'Reason', placeholder: p.role === 'treasurer' ? 'e.g. Term ended' : 'e.g. Graduated', minLength: 3 },
+    });
+    if (!reason) return;
+    setBusy(p.id); setErr('');
+    const { error } = await supabase.rpc('disable_account', { p_profile_id: p.id, p_remarks: reason.trim() });
+    setBusy(null);
+    if (error) setErr(errorText(error)); else void qc.invalidateQueries();
+  }
+  async function enable(p: Row<'profiles'>) {
+    if (!(await confirmAsk({ title: `Enable ${p.full_name || p.email} again?`, body: 'They can sign in again with the same role.', confirm: 'Enable', tone: 'primary' }))) return;
+    setBusy(p.id); setErr('');
+    const { error } = await supabase.rpc('enable_account', { p_profile_id: p.id });
+    setBusy(null);
+    if (error) setErr(errorText(error)); else void qc.invalidateQueries();
+  }
+
+  return (
+    <Card>
+      <h2 className="font-display text-[17px] font-bold mb-3">All accounts · {others.length}</h2>
+      <div className="relative mb-2">
+        <Search className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden />
+        <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, email, org or Student ID" aria-label="Search accounts"
+          className="w-full h-11 pl-9 pr-3 rounded-[12px] bg-surface2 border border-transparent focus:border-primary outline-none text-[14px]" />
+      </div>
+      <div className="mb-2"><Segmented value={role} onChange={setRole} options={[['all', 'All'], ['treasurer', 'Treasurers'], ['student', 'Students'], ['admin', 'SAS']]} /></div>
+      {err && <div className="my-2"><Alert>{err}</Alert></div>}
+      <ul className="divide-y divide-line">
+        {list.map((p) => (
+          <li key={p.id} className="py-3 flex items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold truncate">{p.full_name || p.email}</p>
+              <p className="text-[13px] text-muted truncate">
+                {p.role === 'treasurer' ? `Treasurer · ${name(p.entity_id)}` : p.role === 'admin' ? 'SAS Admin'
+                  : p.role === 'student' ? `Student${p.student_id && studentNos.data?.get(p.student_id) ? ` · ${studentNos.data.get(p.student_id)}` : ''}` : p.email}
+              </p>
+              {p.status === 'disabled' && p.review_remarks && <p className="text-[12.5px] text-muted truncate">Reason: {p.review_remarks}</p>}
+            </div>
+            <StatusChip status={p.status} />
+            {p.status === 'approved' && p.id !== session?.user.id && (
+              <button onClick={() => disable(p)} disabled={busy === p.id}
+                className="h-11 px-3 rounded-[12px] border border-line text-bad font-semibold text-[13px] hover:bg-bad-soft cursor-pointer disabled:opacity-50">Disable</button>
+            )}
+            {p.status === 'disabled' && (
+              <button onClick={() => enable(p)} disabled={busy === p.id}
+                className="h-11 px-3 rounded-[12px] bg-primary-soft text-primary font-semibold text-[13px] hover:brightness-95 cursor-pointer disabled:opacity-50">Enable</button>
+            )}
+          </li>
+        ))}
+        {!list.length && <li className="py-4 text-muted text-[14px]">{others.length ? 'No account matches.' : 'Nobody yet.'}</li>}
+      </ul>
+    </Card>
   );
 }
 

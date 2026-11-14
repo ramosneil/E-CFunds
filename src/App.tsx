@@ -22,6 +22,7 @@ const Approvals = page(() => import('./pages/admin/Approvals'), 'Approvals');
 const Orgs = page(() => import('./pages/admin/Orgs'), 'Orgs');
 const Accredited = page(() => import('./pages/admin/Accredited'), 'Accredited');
 const Calendar = page(() => import('./pages/admin/Calendar'), 'Calendar');
+const ActivityLog = page(() => import('./pages/admin/ActivityLog'), 'ActivityLog');
 const EntityDetail = page(() => import('./pages/admin/EntityDetail'), 'EntityDetail');
 const TreasurerHome = page(() => import('./pages/treasurer/Home'), 'TreasurerHome');
 const Members = page(() => import('./pages/treasurer/Members'), 'Members');
@@ -35,7 +36,7 @@ const Privacy = page(() => import('./pages/Privacy'), 'Privacy');
 const Terms = page(() => import('./pages/Terms'), 'Terms');
 
 const ROLE_PAGES = {
-  admin: [AdminDashboard, Approvals, Orgs, EntityDetail, Messages, Accredited, Calendar, Account],
+  admin: [AdminDashboard, Approvals, Orgs, EntityDetail, Messages, Accredited, Calendar, ActivityLog, Account],
   treasurer: [TreasurerHome, Members, Requests, Messages, Reports, ReportDetail, Account],
   student: [StudentHome, Reports, ReportDetail, Account],
 } as const;
@@ -119,6 +120,7 @@ function Gate() {
           <Route path="orgs/:id" element={<EntityDetail />} />
           <Route path="accredited" element={<Accredited />} />
           <Route path="calendar" element={<Calendar />} />
+          <Route path="activity" element={<ActivityLog />} />
           <Route path="messages" element={<Messages />} />
           <Route path="messages/:key" element={<Messages />} />
         </>}
