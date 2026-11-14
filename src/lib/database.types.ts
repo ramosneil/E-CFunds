@@ -165,6 +165,10 @@ export type Database = {
         Row: { id: number; budget_id: number; item: string; qty: number; unit_cost: number };
         Insert: never; Update: never; Relationships: [];
       };
+      dues_reminders: {
+        Row: { id: number; entity_id: number; sent_on: string; sent_at: string; sent_by: string | null; students: number };
+        Insert: never; Update: never; Relationships: [];
+      };
       year_closures: {
         Row: { closed_at: string; closed_by: string | null; closing_total: number; entity_id: number; school_year_id: number };
         Insert: never; Update: never; Relationships: [];
@@ -210,6 +214,7 @@ export type Database = {
       disable_account: { Args: { p_profile_id: string; p_remarks?: string }; Returns: undefined };
       enable_account: { Args: { p_profile_id: string; p_remarks?: string }; Returns: undefined };
       import_students: { Args: { p_rows: Json }; Returns: Json };
+      remind_unpaid: { Args: { p_entity_id: number }; Returns: number };
       file_request: {
         Args: { p_amount: number; p_attachment_path?: string; p_description: string; p_entity_id: number; p_kind: E['request_kind']; p_category?: E['expense_category']; p_budget_id?: number };
         Returns: number;

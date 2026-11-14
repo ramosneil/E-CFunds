@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { BadgeCheck, Banknote, Bell, CalendarRange, CheckCheck, FileText, Megaphone, MessageSquare, Receipt, RefreshCw, Tag, UserPlus, Users, Volume2, VolumeX, Wallet, X } from 'lucide-react';
+import { BadgeCheck, Banknote, Bell, BellRing, CalendarRange, CheckCheck, FileText, Megaphone, MessageSquare, Receipt, RefreshCw, Tag, UserPlus, Users, Volume2, VolumeX, Wallet, X } from 'lucide-react';
 import { ago, display, markAllRead, markRead, useNotifications, type Note } from '../lib/notifications';
 import { isMuted, setMuted, chime } from '../lib/chime';
 
 const ICON = {
   request: FileText, request_decision: CheckCheck, payment: Banknote, account: UserPlus, message: MessageSquare,
   receipt: Receipt, fees: Wallet, account_decision: BadgeCheck, announcement: Megaphone, members: Users,
-  semester: CalendarRange, fee_change: Tag, app_update: RefreshCw,
+  semester: CalendarRange, fee_change: Tag, app_update: RefreshCw, dues_reminder: BellRing,
 };
 
 /** Bell with unread count; opens the list (dropdown on desktop, sheet on phones). */

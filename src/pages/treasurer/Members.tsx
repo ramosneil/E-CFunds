@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router';
-import { Info, MoreVertical, Search, UserPlus, Users } from 'lucide-react';
+import { BellRing, Info, MoreVertical, Search, UserPlus, Users } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { useCurrentYear, useEntities, useSemesters } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
@@ -9,7 +9,8 @@ import { date, normStudentNo, peso } from '../../lib/format';
 import { Alert, Button, Card, Chip, DuesBar, Empty, Field, Input, PageHeader, Select, Sheet, Spinner } from '../../components/ui';
 import { NoYear, Segmented } from '../../components/common';
 import { ExportMenu, exportsLib } from '../../components/ExportMenu';
-import { promptAsk } from '../../lib/confirm';
+import { confirmAsk, promptAsk } from '../../lib/confirm';
+import { toast } from '../../lib/toast';
 
 export function Members() {
   const { profile } = useAuth();
@@ -59,6 +60,30 @@ export function Members() {
     },
   });
 
+  // Last "Remind unpaid" for this org/club (button: max once a day; a weekly automatic one goes out on Mondays).
+  const lastReminder = useQuery({
+    queryKey: ['dues-reminders', entityId],
+    enabled: !!entityId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('dues_reminders').select('sent_at, sent_on, sent_by, students')
+        .eq('entity_id', entityId).order('sent_at', { ascending: false }).limit(1).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+  const [reminding, setReminding] = useState(false);
+  async function remind(unpaid: number) {
+    if (!(await confirmAsk({ title: `Remind ${unpaid} unpaid member${unpaid === 1 ? '' : 's'}?`,
+      body: 'Each student with an E-CFunds account gets a note with the amount they still owe. You can send one reminder a day; an automatic one also goes out every Monday.',
+      confirm: 'Send reminder', tone: 'primary' }))) return;
+    setReminding(true); setErr('');
+    const { data, error } = await supabase.rpc('remind_unpaid', { p_entity_id: entityId });
+    setReminding(false);
+    if (error) { setErr(errorText(error)); return; }
+    void qc.invalidateQueries({ queryKey: ['dues-reminders', entityId] });
+    toast({ title: 'Reminder sent', body: data ? `${data} student${data === 1 ? '' : 's'} with an account were reminded.` : 'None of the unpaid members has an E-CFunds account yet.', tone: 'ok', silent: true });
+  }
+
   const rows = useMemo(() => {
     const s = q.trim().toLowerCase();
     return (members.data ?? []).filter((m) =>
@@ -106,6 +131,21 @@ export function Members() {
             <b className="money text-ok">{peso(collected)}</b> collected · <b className="money text-ink">{peso(toCollect)}</b> to collect
           </p>
         )}
+        {all.length - paid > 0 && (() => {
+          const last = lastReminder.data;
+          const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila' }).format(new Date());
+          const sentToday = last?.sent_on === today;
+          return (
+            <div className="mt-3 pt-3 border-t border-line flex flex-wrap items-center gap-x-3 gap-y-2">
+              <Button variant="soft" className="h-11 px-4 text-[14px]" busy={reminding} disabled={sentToday} onClick={() => remind(all.length - paid)}>
+                <BellRing className="size-4" aria-hidden />Remind unpaid · {all.length - paid}
+              </Button>
+              <span className="text-[13px] text-muted">
+                {last ? `${sentToday ? 'Sent today' : `Last sent ${date(last.sent_at)}`}${last.sent_by ? '' : ' (automatic)'} · ${last.students} reminded` : 'An automatic reminder also goes out every Monday.'}
+              </span>
+            </div>
+          );
+        })()}
       </Card>
       {entity && !isClub && (
         <div className="mb-4 rounded-[16px] bg-primary-soft text-primary p-4 flex gap-3 text-[14px]">
