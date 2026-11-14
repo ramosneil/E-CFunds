@@ -21,7 +21,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 ## Status (updated 2026-11-14, end of session 5)
 - **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
   student on the roster. Test data was wiped before launch.
-- Database: **24 migrations** live (last `20261114070000_add_member_unpaid`).
+- Database: **25 migrations** live (last `20261114090000_clubs_only_add`).
 - Android: latest APK **v1.1.1 = build 10**; `ota.json` minNativeBuild = 10.
 - **Confirmed working on Neil's phone:** push notifications with the app closed, app self-update end to end
   (download → reopen → "E-CFunds was updated"), Back button, full screen, Delete conversation, Add member (adds only).
@@ -31,10 +31,11 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 ## Memberships & fees (migrations 15–17, 24)
 - **Organizations are mandatory by course** (tables `courses`, `course_orgs`; SAS can change them):
   BSIT → SSG, PADC, LSC · BEED → SSG, YMO, LSC · BSBA OM → SSG, LSC, JOES · BSBA FM → SSG, LSC, JFMS ·
-  other course / no course → SSG only (+ max 1 organization added by hand).
+  other course / no course → SSG only.
 - **SSG = every student on campus**, every semester.
-- Whoever adds the student (any org or club treasurer, `add_member`), they're enrolled in SSG + course orgs.
-  A course student can't join an organization outside their course.
+- **Only clubs add students** (migration 25; enforced in `add_member` + RLS). The student is then enrolled in SSG
+  + their course orgs automatically. Organization treasurers see their list and record/undo payments only.
+  Students who don't join a club aren't tracked (Neil's choice).
 - **Fees are per semester** for every org and club; each treasurer sets their own amount.
 - **Add member adds only** (migration 24): the student starts "To collect" in every org/club they're in; the
   treasurer decides paid/unpaid (Record ₱X right after adding — "They paid" — or later; undo = reversal).

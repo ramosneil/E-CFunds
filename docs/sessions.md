@@ -196,3 +196,6 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - Self-update bug: ota.ts accepted only bundle status 'success', but a fresh download is 'pending' → every update
   rejected ("not usable"). Fixed; v1.1.1 (build 10); minNativeBuild=10 so older apps show "Update the app".
 - End-to-end self-update CONFIRMED on Neil's phone (v1.1.1 → 7955193 by itself: download, reopen, "updated").
+- Only clubs add students (migration 25): add_member guard + RLS insert rules (roster, memberships) limited to admin or
+  club treasurer; rehearsed (org refused 3 ways, club add → SSG+course orgs, org can still record). Members page hides
+  Add member for organizations + explains; assistant help text updated (chat redeployed via CLI).

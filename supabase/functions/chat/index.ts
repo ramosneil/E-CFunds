@@ -107,7 +107,7 @@ async function context(db: SupabaseClient, role: string, entityId: number | null
 
 const HELP = `App help (where things are):
 - Everyone: "My account" (person icon / name card) sets or changes the password; students can then sign in with their Student ID.
-- Treasurer: Home shows the fund; Members → Add member / Record payment; Requests → New → Remit, Release or Expense (expense needs a receipt photo); Messages talks to SAS; Export menu on Home gives the PDF report and CSVs.
+- Treasurer: Home shows the fund; Members → Record payment (club treasurers also Add member; organizations get members automatically from each student's course when a club adds them); Requests → New → Remit, Release or Expense (expense needs a receipt photo); Messages talks to SAS; Export menu on Home gives the PDF report and CSVs.
 - Admin: Approvals approves money requests and accounts; Orgs & clubs edits dues and logos; an org's page has its ledger and "Release"; School year (in "More" on phones) opens or edits the year; Dashboard → Export for the school summary.
 - Students: Home shows your dues; Reports shows every org's totals (no names).`;
 

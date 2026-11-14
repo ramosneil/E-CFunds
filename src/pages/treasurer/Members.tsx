@@ -1,6 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Search, UserPlus, Users } from 'lucide-react';
+import { Info, Search, UserPlus, Users } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { useCurrentYear, useEntities, useSemesters } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
@@ -18,6 +18,7 @@ export function Members() {
   const entity = entities.data?.find((e) => e.id === entityId);
   const sems = useSemesters(year.data?.id);
   const perSemester = entity?.dues_period === 'semester';
+  const isClub = entity?.category === 'club';   // only clubs add students; organizations get them by course
   const sem = sems.data?.find((s) => s.is_current);
   const qc = useQueryClient();
   const [q, setQ] = useState('');
@@ -77,9 +78,17 @@ export function Members() {
       <PageHeader title="Members" sub={entity ? `${entity.short_name} · fee ${peso(entity.dues_amount)} ${perSemester ? `per semester${sem ? ` · ${sem.term === 1 ? '1st' : '2nd'} semester` : ''}` : 'per school year'}` : undefined}
         action={<div className="flex items-center gap-2">
           {entity && <ExportMenu label="CSV" options={[{ label: 'Members & dues', kind: 'csv', run: async () => (await exportsLib()).membersCsv(entity, year.data!) }]} />}
-          <Button aria-label="Add member" onClick={() => setAdding(true)}><UserPlus className="size-5" /><span className="hidden sm:inline">Add member</span></Button>
+          {isClub && <Button aria-label="Add member" onClick={() => setAdding(true)}><UserPlus className="size-5" /><span className="hidden sm:inline">Add member</span></Button>}
         </div>} />
       <Card className="mb-4"><DuesBar paid={paid} members={all.length} /></Card>
+      {entity && !isClub && (
+        <div className="mb-4 rounded-[16px] bg-primary-soft text-primary p-4 flex gap-3 text-[14px]">
+          <Info className="size-5 shrink-0" aria-hidden />
+          <p>{entity.is_school_wide
+            ? 'Every student is listed here automatically when a club adds them.'
+            : 'Students are listed here automatically by their course when a club adds them.'} Record each fee when it’s paid.</p>
+        </div>
+      )}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1">
           <Search className="size-5 absolute left-4 top-1/2 -translate-y-1/2 text-muted" aria-hidden />
@@ -90,7 +99,9 @@ export function Members() {
       {perSemester && sems.isSuccess && !sem && <div className="mb-3"><Alert tone="warn">SAS hasn’t set the current semester yet, so members can’t be added. Ask SAS to open it on the School year page.</Alert></div>}
       {err && <div className="mb-3"><Alert>{err}</Alert></div>}
       {members.isLoading ? <Spinner /> : !all.length ? (
-        <Card><Empty icon={<Users className="size-6" />} title="No members yet this semester">Add a student when they pay: adding records their fee. Students of your course organizations also appear here automatically, to collect.</Empty></Card>
+        <Card><Empty icon={<Users className="size-6" />} title="No members yet this semester">{isClub
+          ? 'Add students who join your club. They start as to collect; record the fee when they pay.'
+          : 'Members appear here automatically: when a club adds a student, they join SSG and their course organizations.'}</Empty></Card>
       ) : (
         <Card className="p-0">
           <ul className="divide-y divide-line">
@@ -116,7 +127,7 @@ export function Members() {
           </ul>
         </Card>
       )}
-      {adding && entity && <AddMember onClose={() => setAdding(false)} entityId={entityId} dues={Number(entity.dues_amount)} perSemester={entity.dues_period === 'semester'} />}
+      {adding && entity && isClub && <AddMember onClose={() => setAdding(false)} entityId={entityId} dues={Number(entity.dues_amount)} perSemester={entity.dues_period === 'semester'} />}
     </>
   );
 }
