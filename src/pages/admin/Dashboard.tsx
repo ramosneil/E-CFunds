@@ -49,7 +49,7 @@ export function AdminDashboard() {
                     <th className="micro px-3 py-2 font-semibold text-right">Cash</th>
                     <th className="micro px-3 py-2 font-semibold text-right">Saved</th>
                     <th className="micro px-3 py-2 font-semibold text-right">Total</th>
-                    <th className="micro px-5 py-2 font-semibold w-40">Dues</th>
+                    <th className="micro px-5 py-2 font-semibold w-40">Dues · this semester</th>
                   </tr>
                 </thead>
                 <tbody>

@@ -48,12 +48,17 @@ export function useEntities() {
   });
 }
 
+/** Money is for the whole school year; members / paid_members are for the CURRENT semester (fees are per semester —
+ *  without a semester the database adds every semester's list, which would double the counts in the 2nd semester).
+ *  Organizations/clubs with yearly fees have no semester on their memberships, so they are always counted. */
 export function useEntityReport(yearId: number | undefined) {
+  const sems = useSemesters(yearId);
+  const semId = sems.data?.find((s) => s.is_current)?.id;
   return useQuery({
-    queryKey: ['report', yearId],
-    enabled: !!yearId,
+    queryKey: ['report', yearId, semId ?? null],
+    enabled: !!yearId && !sems.isLoading,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_entity_report', { p_school_year_id: yearId! });
+      const { data, error } = await supabase.rpc('get_entity_report', { p_school_year_id: yearId!, ...(semId ? { p_semester_id: semId } : {}) });
       if (error) throw error;
       return data;
     },

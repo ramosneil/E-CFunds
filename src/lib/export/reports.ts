@@ -38,7 +38,11 @@ function dSaved(l: Ledger) {
 const signed = (n: number) => (n === 0 ? '—' : peso(n, { sign: true }));
 
 async function reportRow(yearId: number, entityId?: number): Promise<EntityReport[]> {
-  const rows = await must(supabase.rpc('get_entity_report', { p_school_year_id: yearId }));
+  // Member counts for the current semester (same as the screens); money stays for the whole school year.
+  const { data: sems, error } = await supabase.from('semesters').select('*').eq('school_year_id', yearId);
+  if (error) throw new Error(error.message);
+  const semId = sems.find((s) => s.is_current)?.id;
+  const rows = await must(supabase.rpc('get_entity_report', { p_school_year_id: yearId, ...(semId ? { p_semester_id: semId } : {}) }));
   return entityId ? rows.filter((r) => r.entity_id === entityId) : rows;
 }
 async function ledgerOf(entityId: number, yearId: number): Promise<Ledger[]> {

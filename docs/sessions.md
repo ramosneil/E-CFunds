@@ -216,3 +216,8 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   fund card on phones (Requests now on the first screen; Ask button no longer over an action); clearer icons
   (Landmark = remit to SAS, HandCoins = ask for release); fund card's decorative circle removed (all fund cards).
   Admin Dashboard/EntityDetail still show year-wide dues counts (same issue) — not changed yet.
+- Neil: status bar is hidden when looking at the phone (his screenshots add it) — no fix needed.
+- Dues counts everywhere now use the CURRENT semester: useEntityReport passes p_semester_id (filters memberships
+  only; money stays year-wide — checked live as admin in a rolled-back transaction: money identical for all 10
+  orgs/clubs). Fixes admin Dashboard ("Dues · this semester"), org detail, Approvals, student Reports, treasurer
+  Requests, and the PDF/CSV exports (reportRow).

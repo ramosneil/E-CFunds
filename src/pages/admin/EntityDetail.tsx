@@ -102,7 +102,7 @@ export function EntityDetail() {
             </Card>
             <div className="space-y-4">
               <Card>
-                <h2 className="font-display text-[17px] font-bold mb-3">Dues</h2>
+                <h2 className="font-display text-[17px] font-bold mb-3">Dues · this semester</h2>
                 <DuesBar paid={r.paid_members} members={r.members} />
               </Card>
               <Card>
