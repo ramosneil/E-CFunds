@@ -36,6 +36,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   check Windows → Settings → System → Notifications → Google Chrome (it was off on Neil's PC). iPhone not tested yet.
 - Android push shows nothing although FCM accepts (`sent` counts it)? Phone side: Settings → Apps → E-CFunds →
   Notifications (allow, pop-up) + Battery (allow background activity, auto launch). Oppo/Realme force-stop swiped apps.
+  With those settings Neil's phone gets pushes even with the app swiped away (confirmed 2026-11-14).
 - **Phone notifications card** (My account, Android): `notifyPermission` times out after 3 s and falls back to the
   push plugin's permission; the card never hides (fixed + confirmed "On" on Neil's phone, 2026-11-14).
 - **Web address stays `e-cfunds.vercel.app`; email stays Supabase's built-in sender** — Neil cancelled the school

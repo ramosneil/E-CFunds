@@ -262,3 +262,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - Neil set up Vercel 2FA; Claude removed ecfunds.omsc.edu.ph from the Vercel project (connector confirms only e-cfunds.vercel.app; site + OTA manifest 200).
 - Website notifications CONFIRMED on Neil's PC (Chrome): first test was dropped because Windows had Chrome notifications off (Settings → System → Notifications → Google Chrome); Neil turned it on; push 'sent: 2' (Chrome + Android) and it popped up. Test rows deleted.
 - Android push re-confirmed for SAS admin after phone settings (ColorOS-style phone: allow notifications + pop-up, battery 'allow background activity' + auto launch). Before that, tests were accepted by FCM ('sent: 2') but the phone showed nothing — swiping the app away force-stops it on these phones. Test rows deleted.
+- Android push confirmed even with E-CFunds swiped away (after Neil allowed background activity + auto launch). Test row deleted.
