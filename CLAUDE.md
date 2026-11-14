@@ -50,8 +50,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Claude in Chrome on Neil's PC (signed in as SAS admin): never sign in for him; ask before sending/deleting/changing;
   never decide security prompts (2FA); long `=`/`;` values are filtered — use Copy + clipboard, never disguise text.
 - Vercel has **2FA** (Neil's phone): new sign-ins need his code; never ask for recovery codes.
-- Open items: Neil's phone check of session 7 (handoff). Not yet seen: the iPhone Home Screen app on a real iPhone.
-- Next: design pass. Ideas: more course rules, App Store iPhone app, Calendar card of closed orgs.
+- Open: Neil's phone check + Financial Report setup (handoff). Next: design pass. Unseen: iPhone Home Screen app.
 
 ## Memberships & fees (migrations 15–17, 24)
 - **Organizations are mandatory by course** (tables `courses`, `course_orgs`; SAS can change them):
