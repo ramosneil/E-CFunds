@@ -210,3 +210,9 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   Checked with sample data (light/dark, phone/desktop); not yet seen signed in or on the phone.
 - Neil confirmed the Members page fixes on his phone ("Looks right").
 - Neil revoked the Supabase access token "E-CFunds deploy"; line removed from .env; Edge Functions now deploy through the Supabase connector.
+- UI review of treasurer Home (Neil's light+dark phone screenshots) → 6 fixes: dues card counts the CURRENT
+  SEMESTER only (get_entity_report without a semester adds every semester → would double in the 2nd semester) +
+  "₱X to collect", taps through to Members "To collect" (?show=unpaid); 4 actions compact (64 px) right under the
+  fund card on phones (Requests now on the first screen; Ask button no longer over an action); clearer icons
+  (Landmark = remit to SAS, HandCoins = ask for release); fund card's decorative circle removed (all fund cards).
+  Admin Dashboard/EntityDetail still show year-wide dues counts (same issue) — not changed yet.

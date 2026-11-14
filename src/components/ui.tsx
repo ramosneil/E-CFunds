@@ -124,7 +124,6 @@ export function PocketBar({ cash, saved, onHero }: { cash: number; saved: number
 export function HeroCard({ label, total, cash, saved, foot }: { label: string; total: number; cash: number; saved: number; foot?: ReactNode }) {
   return (
     <section className="rounded-[24px] p-5 sm:p-6 text-white bg-hero relative overflow-hidden">
-      <div aria-hidden className="absolute -right-16 -top-16 size-56 rounded-full bg-white/5" />
       <p className="micro text-hero-muted">{label}</p>
       <p className="money font-display font-extrabold text-[34px] sm:text-[40px] leading-tight mt-1">{peso(total)}</p>
       <div className="mt-4"><PocketBar cash={cash} saved={saved} onHero /></div>

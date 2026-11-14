@@ -1,5 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router';
 import { Info, MoreVertical, Search, UserPlus, Users } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { useCurrentYear, useEntities, useSemesters } from '../../lib/data';
@@ -22,7 +23,11 @@ export function Members() {
   const sem = sems.data?.find((s) => s.is_current);
   const qc = useQueryClient();
   const [q, setQ] = useState('');
-  const [show, setShow] = useState<'all' | 'unpaid' | 'paid'>('all');
+  const [params] = useSearchParams();   // Home's Dues card and "Record payment" open the "To collect" list
+  const [show, setShow] = useState<'all' | 'unpaid' | 'paid'>(() => {
+    const s = params.get('show');
+    return s === 'unpaid' || s === 'paid' ? s : 'all';
+  });
   const [adding, setAdding] = useState(false);
   const [busy, setBusy] = useState<number | null>(null);
   const [err, setErr] = useState('');
