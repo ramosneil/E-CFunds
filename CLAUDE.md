@@ -32,8 +32,8 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Design tools on Neil's PC: plugins UI Design Review, playwright, Mobile App Design (iOS), Mobile Design System
   (installed with the Claude CLI); Supabase + Figma connectors; GitHub plugin via the Windows user variable
   GITHUB_PERSONAL_ACCESS_TOKEN (expires 2027-02-12).
-- **Website notifications (Web Push) + iPhone web app: live 2026-11-14.** Server side tested; Neil subscribed a
-  browser (web row in `push_devices`); a received browser notification not yet confirmed; no iPhone test yet.
+- **Website notifications (Web Push): confirmed on Neil's PC (Chrome), 2026-11-14.** If a browser shows nothing,
+  check Windows → Settings → System → Notifications → Google Chrome (it was off on Neil's PC). iPhone not tested yet.
 - **Phone notifications card** (My account, Android): `notifyPermission` times out after 3 s and falls back to the
   push plugin's permission; the card never hides (fixed + confirmed "On" on Neil's phone, 2026-11-14).
 - **Web address stays `e-cfunds.vercel.app`; email stays Supabase's built-in sender** — Neil cancelled the school
@@ -46,8 +46,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   values — use the site's Copy button + clipboard, never disguise text.
 - Vercel account has **2FA** (authenticator app on Neil's phone, 2026-11-14): new sign-ins need his 6-digit code;
   recovery codes are with Neil — never ask for them.
-- Open items: none. Not yet seen: a browser push notification actually arriving; the iPhone Home Screen app on a
-  real iPhone.
+- Open items: none. Not yet seen: the iPhone Home Screen app on a real iPhone.
 - Ideas not started: more course rules, App Store iPhone app, school web address/own email sender (cancelled once).
 
 ## Memberships & fees (migrations 15–17, 24)
