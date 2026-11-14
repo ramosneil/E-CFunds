@@ -275,3 +275,8 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   workbook (live: 16 sheets, captured in-page, nothing downloaded).
 - Not clicked live (real data): import, budget/liquidation decisions, Remind unpaid. Treasurer + student screens were
   checked with sample-data previews only → Neil to check on his phone (handoff).
+- Automated **Financial Report** (Neil's SAS form sample): migrations 34–36, `get_financial_report`, expense item lines,
+  signatories + report settings, Folio PDF (`src/lib/export/financialReport.ts`) matching the sample; sheet on treasurer
+  Home + SAS org page. Rehearsal: totals = `get_entity_report` for all 10 orgs; caught 2 bugs (subtotal ×lines,
+  settings wipe). Live: first call failed on pg_safeupdate (migration 36 fixed); then Sports Club report generated
+  in Neil's Chrome as SAS (captured in page, nothing saved).

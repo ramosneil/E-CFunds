@@ -21,7 +21,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 ## Status (updated 2026-11-15, end of session 7)
 - **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
   student on the roster. Test data was wiped before launch.
-- Database: **33 migrations** live (last `20261115080000_reminders_cron`). pg_cron on (2 jobs, see Features).
+- Database: **36 migrations** live (last `20261115110000_financial_report_safeupdate`). pg_cron on (2 jobs).
 - **Session 7 = "finish the functionality" batch, all live** (design pass comes next, Neil's order). Treasurer/student
   screens of it were checked with sample data only → Neil's phone check is in `docs/handoff.md` (Session 7).
 - **"Where the money goes" (transparency) live 2026-11-14:** per-org charts + approved expenses for every role;
@@ -49,10 +49,9 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   Optional: `docs/email-templates/` work with the built-in sender.
 - Claude in Chrome on Neil's PC (signed in as SAS admin): never sign in for him; ask before sending/deleting/changing;
   never decide security prompts (2FA); long `=`/`;` values are filtered — use Copy + clipboard, never disguise text.
-- Vercel account has **2FA** (authenticator app on Neil's phone, 2026-11-14): new sign-ins need his 6-digit code;
-  recovery codes are with Neil — never ask for them.
+- Vercel has **2FA** (Neil's phone): new sign-ins need his code; never ask for recovery codes.
 - Open items: Neil's phone check of session 7 (handoff). Not yet seen: the iPhone Home Screen app on a real iPhone.
-- Ideas not started: design pass (next), more course rules, App Store iPhone app, Calendar card of closed orgs.
+- Next: design pass. Ideas: more course rules, App Store iPhone app, Calendar card of closed orgs.
 
 ## Memberships & fees (migrations 15–17, 24)
 - **Organizations are mandatory by course** (tables `courses`, `course_orgs`; SAS can change them):
@@ -110,6 +109,9 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
     role, RLS decides); Members row link, student "View receipt". Label "Payment receipt" (not a BIR OR).
   - **Budgets** (`src/components/budgets.tsx`): Requests → Budgets tab, Approvals → Budgets, org page budget vs
     actual. Releases need an approved budget; overdue liquidation (activity + 15 days) blocks releases.
+  - **Financial Report (SAS form, Folio PDF)**: `get_financial_report` + `src/lib/export/financialReport.ts` +
+    `FinancialReportSheet.tsx` (treasurer Home, SAS org page); expense item lines (`ItemRows.tsx`); signatories +
+    `report_settings` (School year page). Rules: business-rules "Financial Report".
   - **Reminders:** Members "Remind unpaid" (1/day/org). pg_cron (UTC): `weekly-dues-reminders` Mon 00:00 = 8 AM
     Manila, `daily-budget-reminders` daily 00:00 (`select * from cron.job`).
 - iPhone: Home Screen web app (no App Store); printable guide `docs/iphone-install-guide.html`.
@@ -175,6 +177,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   and GOOGLE_SERVICES_JSON (Firebase; release builds fail without it). Push code requires build ≥ 9
   (`PUSH_MIN_BUILD` in `src/lib/push.ts`).
 - **Icons/splash:** `node scripts/make-app-assets.mjs` → `npx capacitor-assets generate --android`.
+- **API calls run with pg_safeupdate:** DELETE/UPDATE without WHERE fails live but not in the direct rehearsal.
 - Testing two roles at once: localhost:3000 vs 127.0.0.1:3000. On e-cfunds.vercel.app the browser pane DOES run the
   service worker, so after a deploy it shows the old build until "Update available → Reload" (or SKIP_WAITING).
   Desktop app: `/mcp` sign-in dialogs don't open — use connectors (claude.ai/settings/connectors) or tokens.

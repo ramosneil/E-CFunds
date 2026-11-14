@@ -250,3 +250,21 @@ None. Both §10 questions were answered in session 3 and moved to §8.
 - **Unpaid-dues reminders:** treasurer (own org) or SAS presses "Remind unpaid" — max once per Manila day per org;
   plus an automatic one every **Monday 8:00 AM** (pg_cron). Only students with an account get it (their own amount).
 - **Backup:** SAS Dashboard → Export → Full backup: one Excel workbook, a sheet per table (not the activity log).
+
+## Financial Report — the SAS form, automated (Neil, 2026-11-15; migrations 34–36)
+- Every org/club's **Financial Report** (Neil's sample `FR as of 9.15.25.xlsx`) is generated from what was recorded:
+  previous fund, collected membership fees (paid × rate, remaining unpaid), expenses **one table per activity**
+  (Particular · Unit · Quantity · Unit price · Total) with subtotals, grand total, remaining fund, cash on hand /
+  saved with SAS, cash breakdown, signatories. PDF on **Folio (8.5 × 13 in)** like the paper form.
+- Period: one semester or the whole school year, **as of** a date. Previous fund = everything before the period.
+- Activity = the expense's budget title; an expense with no budget is its own table titled with its description.
+- **Expenses list their receipt items** (particular, unit, qty, unit price); the amount is the items' total.
+  Older expenses without items print as one line.
+- **No IGP line** (Neil): collection = membership fees only. SAS corrections show as one "Adjustments" line so the
+  totals always add up.
+- **Cash breakdown:** the treasurer types the count (₱1000…₱20 bills + coins) at download; the app says if it differs
+  from the cash on hand on record. Not stored. Can be left blank to fill in by hand.
+- **Signatories:** org head (Mayor/President/Governor), auditor, adviser — saved once per school year by the treasurer
+  (or SAS). SSG's own entries supply the SSG Auditor and Governor on every other org's report. Treasurer = the account
+  name. SAS Coordinator + header lines: SAS, on the School year page.
+- Who: the org's treasurer and SAS. Not students (they keep Reports/charts).

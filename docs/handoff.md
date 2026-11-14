@@ -80,3 +80,11 @@ Nothing to install or sign in to. When you have time, as the **treasurer** and *
    Check the preview (it lists any bad lines) before pressing Import.
 5. Heads-up: **every Monday 8:00 AM** an automatic unpaid-dues reminder goes out to students with an account
    (the first one is tomorrow, Mon Nov 16). Say if you want it off.
+
+## Financial Report — one-time setup (2026-11-15)
+1. **SAS → School year →** bottom card "Financial report — header & SAS Coordinator": type the SAS Coordinator's
+   name (e.g. Cristina A. Caponpon, PhD) → Save. Check the website / email / phone lines.
+2. **Each treasurer → Home → Financial report →** fill Mayor (or President/Governor), Auditor, Adviser once — they are
+   saved for the school year. The **SSG treasurer** must do this too: SSG's Governor + Auditor print on every report.
+3. From now on, expenses ask for the receipt's items — that's what fills the report's tables.
+4. Try one: Home → Financial report → type the cash count → Download PDF. Compare with the old Excel form.

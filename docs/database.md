@@ -129,3 +129,14 @@ prevents two approvals racing past a limit.
 - **33 `reminders_cron`:** `dues_reminders` log (unique entity + day) ; `remind_unpaid(entity)` (own treasurer or SAS);
   `private.remind_unpaid_all()`; notification kind `dues_reminder`. **pg_cron** jobs (UTC): `weekly-dues-reminders`
   `0 0 * * 1` (Mon 8 AM Manila), `daily-budget-reminders` `0 0 * * *`. See them: `select * from cron.job`.
+
+## Financial Report (migrations 34–36, 2026-11-15)
+- `expense_items` (request_id, line_no, particular, unit, qty, unit_price); `file_request(…, p_budget_id, p_items jsonb)`
+  — for expenses the amount becomes Σ qty × unit_price (≤ 30 lines). RLS follows the request.
+- `signatories` (entity, school year: head_title, head_name, auditor_name, adviser_name) — readable by all signed-in
+  users; `save_signatories(entity, …)` own treasurer or SAS. `report_settings` (one row: header lines, website, email,
+  phone, coordinator) — `save_report_settings(jsonb)` SAS only (changes only the keys sent).
+- `get_financial_report(entity, semester_id?, as_of?)` → jsonb (SAS or own treasurer). Built from the ledger with
+  each reversal counted as the kind it reverses; checked equal to `get_entity_report` for every org.
+- **Gotcha (migration 36):** calls through the Supabase API run with `pg_safeupdate` — a `DELETE`/`UPDATE` without
+  `WHERE` fails there ("DELETE requires a WHERE clause") but NOT in the direct-connection rehearsal. Always add a WHERE.
