@@ -256,3 +256,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   Neil: students must not see the "receipt checked by SAS" mark (staff only). iPhone: printable docs/iphone-install-guide.html.
 - Neil confirmed "Where the money goes" on his phone ("Looks right").
 - Bug (Neil's phone): 'Phone notifications' card missing in My account while push worked (admin android device registered 20:11). notifyPermission now times out after 3 s and falls back to the push plugin's permission; the card always shows (Checking… / settings hint).
+- Neil confirmed: My account shows 'Phone notifications: On' after the fix.
