@@ -68,3 +68,15 @@ discarded, `docs/it-request.md` deleted (still in git history), push VAPID conta
 [x] Neil turned on Vercel 2FA (authenticator app); Claude then removed `ecfunds.omsc.edu.ph` from the Vercel project
     — only `e-cfunds.vercel.app` is left (2026-11-14).
 Optional, works with the built-in sender too: branded email templates in `docs/email-templates/`.
+
+## Session 7 — please check on your phone (2026-11-15)
+Nothing to install or sign in to. When you have time, as the **treasurer** and **student** accounts:
+1. **Student → Home → My dues →** a paid fee shows **View receipt** → open it → **Download PDF**.
+2. **Treasurer → Members:** paid rows show "Receipt SSG-2026-…". The card at the top has **Remind unpaid · N** —
+   press it only if you want the unpaid students to get a note (once a day).
+3. **Treasurer → Requests → Budgets → New budget:** try a small test budget (or tell Claude not to).
+   SAS approves it in **Approvals → Budgets**. A **release request now needs an approved budget**.
+4. **SAS → Students → Import:** download the Excel template, fill it with the registrar's list, upload.
+   Check the preview (it lists any bad lines) before pressing Import.
+5. Heads-up: **every Monday 8:00 AM** an automatic unpaid-dues reminder goes out to students with an account
+   (the first one is tomorrow, Mon Nov 16). Say if you want it off.

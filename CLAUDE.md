@@ -18,10 +18,12 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   migrations, notification events) · `docs/design-system.md` · `docs/handoff.md` (things only Neil can do) ·
   `docs/sessions.md` (what each session did) · `docs/working-rules.md` (Neil's rules in full).
 
-## Status (updated 2026-11-14, end of session 6)
+## Status (updated 2026-11-15, end of session 7)
 - **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
   student on the roster. Test data was wiped before launch.
-- Database: **27 migrations** live (last `20261114130000_expense_categories`).
+- Database: **33 migrations** live (last `20261115080000_reminders_cron`). pg_cron on (2 jobs, see Features).
+- **Session 7 = "finish the functionality" batch, all live** (design pass comes next, Neil's order). Treasurer/student
+  screens of it were checked with sample data only → Neil's phone check is in `docs/handoff.md` (Session 7).
 - **"Where the money goes" (transparency) live 2026-11-14:** per-org charts + approved expenses for every role;
   numbers checked against the live ledger; confirmed on Neil's phone.
 - Android: latest APK **v1.1.1 = build 10**; `ota.json` minNativeBuild = 10.
@@ -29,9 +31,8 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   (download → reopen → "E-CFunds was updated"), Back button, full screen, Delete conversation, Add member (adds only),
   UI-review fixes on every page (treasurer, SAS admin, student): semester dues everywhere, live amount checks,
   Approve/Reject confirm, Ask = ✨ in the phone top bar (floating only on computers).
-- Design tools on Neil's PC: plugins UI Design Review, playwright, Mobile App Design (iOS), Mobile Design System
-  (installed with the Claude CLI); Supabase + Figma connectors; GitHub plugin via the Windows user variable
-  GITHUB_PERSONAL_ACCESS_TOKEN (expires 2027-02-12).
+- Tools on Neil's PC: UI Design Review, playwright, Mobile App Design/System plugins; Supabase + Figma connectors;
+  GitHub plugin via Windows user variable GITHUB_PERSONAL_ACCESS_TOKEN (expires 2027-02-12).
 - **Notifications confirmed 2026-11-14:** Android phone (background AND swiped away) + Chrome on Neil's PC (site
   closed). iPhone Home Screen app not tested yet. When the push function says `sent: N` but nothing shows, it's the
   device: **Windows** → Settings → System → Notifications → Google Chrome (was off on Neil's PC); **Android** →
@@ -46,13 +47,12 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   IT draft discarded, `docs/it-request.md` removed (git history has it), VAPID contact = the vercel.app URL.
   Vercel project now has only `e-cfunds.vercel.app` (school domain removed after Neil turned on Vercel 2FA).
   Optional: `docs/email-templates/` work with the built-in sender.
-- Claude in Chrome works on Neil's PC (Gmail, Resend, Vercel signed in). Never sign in for him; ask before sending,
-  deleting or changing anything; never decide security prompts (e.g. 2FA) for him; its filter hides long `=`/`;`
-  values — use the site's Copy button + clipboard, never disguise text.
+- Claude in Chrome on Neil's PC (signed in as SAS admin): never sign in for him; ask before sending/deleting/changing;
+  never decide security prompts (2FA); long `=`/`;` values are filtered — use Copy + clipboard, never disguise text.
 - Vercel account has **2FA** (authenticator app on Neil's phone, 2026-11-14): new sign-ins need his 6-digit code;
   recovery codes are with Neil — never ask for them.
-- Open items: none. Not yet seen: the iPhone Home Screen app on a real iPhone.
-- Ideas not started: more course rules, App Store iPhone app, school web address/own email sender (cancelled once).
+- Open items: Neil's phone check of session 7 (handoff). Not yet seen: the iPhone Home Screen app on a real iPhone.
+- Ideas not started: design pass (next), more course rules, App Store iPhone app, Calendar card of closed orgs.
 
 ## Memberships & fees (migrations 15–17, 24)
 - **Organizations are mandatory by course** (tables `courses`, `course_orgs`; SAS can change them):
@@ -100,7 +100,18 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   `get_entity_finance` / `get_school_finance` (`useEntityFinance` / `useSchoolFinance`). Shown on `/reports/:id`
   (students + treasurers), student Home + SAS Dashboard (school-wide), treasurer Home, SAS org detail, PDF report.
   Expenses need a category (form + Approvals, SAS may change it).
-- Exports: org report PDF (charts, OMSC letterhead, Inter font for ₱) + CSVs, school summary, members, accredited.
+- Exports: org report PDF (charts, OMSC letterhead, Inter font for ₱) + CSVs, school summary, members, accredited;
+  SAS **Full backup** (Dashboard → Export → .xlsx, a sheet per table; `src/lib/export/backup.ts`).
+- **Session 7 features** (rules: `docs/business-rules.md` "Functionality batch"; DB: `docs/database.md` 28–33):
+  - SAS: Approvals → Accounts disable/enable · org page Corrections (Correct… = `reverse_entry`, adjustment) + Close
+    school year checklist (cash ₱0, no pending, budgets liquidated → disables the treasurer) · **Activity log** page
+    (`src/lib/activity.ts` sentences) · **Students** page + Excel/CSV import (`src/lib/roster.ts`, `import_students`).
+  - **Receipts** `ORG-YEAR-0001` by trigger on payment; void on undo, never reused; `/receipt/:no` page + PDF (any
+    role, RLS decides); Members row link, student "View receipt". Label "Payment receipt" (not a BIR OR).
+  - **Budgets** (`src/components/budgets.tsx`): Requests → Budgets tab, Approvals → Budgets, org page budget vs
+    actual. Releases need an approved budget; overdue liquidation (activity + 15 days) blocks releases.
+  - **Reminders:** Members "Remind unpaid" (1/day/org). pg_cron (UTC): `weekly-dues-reminders` Mon 00:00 = 8 AM
+    Manila, `daily-budget-reminders` daily 00:00 (`select * from cron.job`).
 - iPhone: Home Screen web app (no App Store); printable guide `docs/iphone-install-guide.html`.
 - **Live screens:** data-free ticks in `live_changes` → open screens re-fetch within ~0.5 s (`src/lib/live.ts`).
 - **Notifications** (migrations 19–20, 22–23, 26; events per role in `docs/database.md`): bell + pop-up + soft chime

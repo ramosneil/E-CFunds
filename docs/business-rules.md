@@ -113,9 +113,10 @@ counts of orgs and clubs, students, paid and unpaid dues, and pending requests.
    except the turnover rule in §4.5.
 
 ### 4.3 Release (saved with SAS → treasurer), budget-based
-1. The treasurer files a release request with a purpose or activity, the amount, and the budget attached.
-   SAS can also release directly without a request.
-2. **There is no fixed cap.** The amount depends on the budget requirement. It must be ≤ `available_to_release`.
+1. The treasurer files a release request that names an **approved activity budget** (§4.9). SAS can also release
+   directly without a request (optionally naming a budget).
+2. **There is no fixed cap.** It must be ≤ `available_to_release` and ≤ what is left of the budget. No release at all
+   (request or SAS direct) while the org/club has an **overdue liquidation**.
 3. SAS approves, which writes a `release` entry. Or SAS rejects with remarks.
    (Old system: a fixed lifetime cap of ₱5,000 that was checked against the wrong balance. Both are removed.)
 
@@ -126,10 +127,11 @@ counts of orgs and clubs, students, paid and unpaid dues, and pending requests.
 
 ### 4.5 Turnover / school-year close (officer term = 1 school year)
 1. Before closing, the outgoing treasurer must **remit all collected funds**: `cash_on_hand = ₱0`,
-   and there are no pending requests for that org/club.
+   there are no pending requests, and **every budget is liquidated** (or rejected/cancelled) for that org/club.
 2. SAS closes the year for the org/club. The next year's `previous_funds` is computed automatically
    (= `saved_with_sas`). No balance is typed in by hand.
-3. A new treasurer account is approved for the new officers. The old account loses its access.
+3. Closing **disables the outgoing treasurer's account automatically** (they get a note first; their devices stop
+   getting push). A new treasurer account is approved for the new officers.
 4. Semesters still exist, for semester dues and for per-semester reports.
 
 ### 4.6 Accounts
@@ -228,3 +230,23 @@ None. Both §10 questions were answered in session 3 and moved to §8.
 - Expense categories (treasurer picks one; SAS can change it when approving): Events & activities, Supplies &
   materials, Food & refreshments, Transportation, Printing & tarpaulins, Outreach & donations, Other. Expenses
   approved before 2026-11-14 count as Other. Treasurers see a note that the purpose text becomes public.
+
+## Functionality batch (Neil, 2026-11-15; migrations 28–33)
+- **Accounts:** SAS disables (reason) and enables accounts in Approvals → Accounts; one active treasurer per org.
+- **Corrections:** SAS reverses opening/expense/adjustment entries (reason) or adds an adjustment (pocket, ±, reason)
+  on the org page. Nothing is deleted. **Activity log** page = the audit log in plain sentences (SAS only).
+- **Receipts:** recording a payment issues a receipt `ORG-YEAR-0001` (per org/club + school year, e.g. SSG-2026-0001).
+  Undoing the payment **voids** it; the number is never reused; paying again gets a new number. Students see and
+  download their own (PDF); treasurers their org's; SAS all. Called "Payment receipt" (not a BIR Official Receipt).
+- **Student roster:** SAS Students page — search/filter/edit, mark inactive; **import** the registrar's Excel/CSV
+  (Student ID, Full name, Course, Year level). Matched by Student ID: new = added, existing = updated + active again.
+  All or nothing: any bad row → nothing imported, every bad line listed. Nobody is deleted by an import.
+- **§4.9 Budgets & liquidation:** treasurer files an activity budget (date + items) → SAS approves/rejects. Releases
+  name an approved budget and stay within it. Expenses may be tagged to a budget. **Liquidation due = activity date
+  + 15 days**; reminders on day 7 and on the due date; after that it is **overdue** → no releases for that org/club
+  until liquidated (treasurer + SAS notified). Treasurer submits the liquidation (activity report; spent = tagged
+  approved expenses); SAS approves (closed) or returns it (fix + resend, same due date). Unspent released cash stays
+  in cash on hand. Budgets can't be edited — cancel (if no money moved) and file again.
+- **Unpaid-dues reminders:** treasurer (own org) or SAS presses "Remind unpaid" — max once per Manila day per org;
+  plus an automatic one every **Monday 8:00 AM** (pg_cron). Only students with an account get it (their own amount).
+- **Backup:** SAS Dashboard → Export → Full backup: one Excel workbook, a sheet per table (not the activity log).

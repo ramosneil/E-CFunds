@@ -107,3 +107,25 @@ prevents two approvals racing past a limit.
 - TypeScript types: regenerate in Phase 5 with the Supabase connector (`generate_typescript_types`).
 - Dates (migration 12): the database runs on UTC; "today" is computed as Manila's day,
   `(now() at time zone 'Asia/Manila')::date`, in the ledger's default date and the accredited Expired check.
+
+## Functionality batch (migrations 28–33, 2026-11-15)
+- **28 `account_enable`:** `enable_account(profile, remarks?)` (SAS; refuses a 2nd active treasurer); `disable_account`
+  also deletes the person's `push_devices`.
+- **29 `turnover_rules`:** `close_school_year` refuses if already closed, notifies + disables the org's treasurer.
+- **30 `receipts`:** `receipts` (receipt_no unique, membership, student, entity, year, semester, amount, issued_at/by,
+  voided_at, void_reason) + `private.receipt_counters`. Trigger `receipt_on_payment` on `memberships.is_paid`:
+  false→true issues `private.next_receipt_no()`, true→false voids. Backfilled in paid order. RLS: SAS all, treasurer
+  own org, student own. Audited.
+- **31 `roster_import`:** `import_students(jsonb)` (SAS) → `{ok, added, updated, unchanged}` or `{ok:false, errors:[{row,
+  message}]}`; ≤ 5,000 rows; course must exist in `courses`, year 1–6.
+- **32 `budgets_liquidation`:** `budgets` (status pending → approved/rejected/cancelled → liquidation_submitted →
+  liquidated; `liquidation_due` = activity_date + 15; reminder flags) + `budget_items`; `budget_id` on `fund_requests`
+  and `ledger_entries`; view **`budget_status`** (security_invoker: + released, spent, pending_release, is_overdue).
+  RPCs: `file_budget(entity, title, purpose, date, items jsonb)`, `cancel_budget`, `review_budget(id, approve, remarks?)`,
+  `submit_liquidation(id, note)`, `review_liquidation(id, approve, remarks?)`. `file_request(…, p_budget_id)` and
+  `admin_release(…, p_budget_id)` gained the budget (old signatures dropped); `private.check_release` = overdue block +
+  budget left; `review_request` re-checks and copies `budget_id` to the ledger. `private.budget_reminders()` (daily).
+  `private.manila_today()`. Notifications trigger `notify_budget`.
+- **33 `reminders_cron`:** `dues_reminders` log (unique entity + day) ; `remind_unpaid(entity)` (own treasurer or SAS);
+  `private.remind_unpaid_all()`; notification kind `dues_reminder`. **pg_cron** jobs (UTC): `weekly-dues-reminders`
+  `0 0 * * 1` (Mon 8 AM Manila), `daily-budget-reminders` `0 0 * * *`. See them: `select * from cron.job`.

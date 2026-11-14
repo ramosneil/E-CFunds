@@ -264,3 +264,14 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - Android push re-confirmed for SAS admin after phone settings (ColorOS-style phone: allow notifications + pop-up, battery 'allow background activity' + auto launch). Before that, tests were accepted by FCM ('sent: 2') but the phone showed nothing — swiping the app away force-stops it on these phones. Test rows deleted.
 - Android push confirmed even with E-CFunds swiped away (after Neil allowed background activity + auto launch). Test row deleted.
 - UI review of Messages (live as admin in Neil's Chrome, view only; no messages exist yet) → 7 fixes: phones Enter = new line (Send button sends), update box moves to the top on Messages (body.chat-open), own-message delete = 44 px ⋮ beside the bubble (confirm kept), broadcasts in a private chat get a gold edge + 📢 label, 'No treasurer yet — nobody reads this' in the org list, shorter Announcement/All treasurers note, search box. Bubbles checked with sample data (light/dark, phone).
+
+## Session 7 — 2026-11-15: full functionality batch (before the design pass)
+- Neil: "scan the whole system… finish the full functionality first, then design." Plan approved: 9 features.
+- Built, rehearsed (rolled-back transaction, every role), applied, deployed, live-checked as SAS (view only):
+  1. Accounts: disable/enable + filters (migration 28). 2. SAS corrections: reverse + adjustment. 3. Close school year
+  card + auto-disable outgoing treasurer (29). 4. Activity log page. 5. Receipts ORG-YEAR-0001 + PDF, voids never reused
+  (30; live: SSG-2026-0001 opens). 6. Students page + Excel/CSV import (31; read-excel-file 9.3.14, write-excel-file
+  4.1.1). 7. Budgets + liquidation (32; 26 rehearsal checks). 8. Unpaid reminders + pg_cron (33). 9. Full backup
+  workbook (live: 16 sheets, captured in-page, nothing downloaded).
+- Not clicked live (real data): import, budget/liquidation decisions, Remind unpaid. Treasurer + student screens were
+  checked with sample-data previews only → Neil to check on his phone (handoff).
