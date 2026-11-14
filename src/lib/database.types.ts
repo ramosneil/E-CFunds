@@ -112,6 +112,19 @@ export type Database = {
           { foreignKeyName: 'memberships_entity_id_fkey'; columns: ['entity_id']; isOneToOne: false; referencedRelation: 'entities'; referencedColumns: ['id'] },
         ];
       };
+      receipts: {
+        Row: {
+          id: number; receipt_no: string; membership_id: number; student_id: number; entity_id: number; school_year_id: number;
+          semester_id: number | null; amount: number; issued_at: string; issued_by: string | null; voided_at: string | null; void_reason: string | null;
+        };
+        Insert: never; Update: never;
+        Relationships: [
+          { foreignKeyName: 'receipts_student_id_fkey'; columns: ['student_id']; isOneToOne: false; referencedRelation: 'students'; referencedColumns: ['id'] },
+          { foreignKeyName: 'receipts_entity_id_fkey'; columns: ['entity_id']; isOneToOne: false; referencedRelation: 'entities'; referencedColumns: ['id'] },
+          { foreignKeyName: 'receipts_school_year_id_fkey'; columns: ['school_year_id']; isOneToOne: false; referencedRelation: 'school_years'; referencedColumns: ['id'] },
+          { foreignKeyName: 'receipts_semester_id_fkey'; columns: ['semester_id']; isOneToOne: false; referencedRelation: 'semesters'; referencedColumns: ['id'] },
+        ];
+      };
       messages: {
         Row: { body: string; created_at: string; entity_id: number | null; id: number; read_at: string | null; sender_id: string };
         Insert: { body: string; entity_id?: number | null; sender_id: string };

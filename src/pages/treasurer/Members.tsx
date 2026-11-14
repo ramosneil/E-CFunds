@@ -1,6 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { Info, MoreVertical, Search, UserPlus, Users } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { useCurrentYear, useEntities, useSemesters } from '../../lib/data';
@@ -44,6 +44,18 @@ export function Members() {
       const { data, error } = await qy.order('created_at', { ascending: false });
       if (error) throw error;
       return data;
+    },
+  });
+
+  // Receipt number of each paid member (active receipts only; voided ones stay on the receipt page).
+  const receipts = useQuery({
+    queryKey: ['receipts', entityId, year.data?.id],
+    enabled: !!year.data && !!entityId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('receipts').select('membership_id, receipt_no')
+        .eq('entity_id', entityId).eq('school_year_id', year.data!.id).is('voided_at', null);
+      if (error) throw error;
+      return new Map(data.map((x) => [x.membership_id, x.receipt_no]));
     },
   });
 
@@ -128,6 +140,11 @@ export function Members() {
                     {m.carried_over && !m.is_paid && <span className="shrink-0 text-[11px] font-semibold px-2 h-5 rounded-full inline-flex items-center bg-warn-soft text-warn" title="Member last semester. Record the fee if they stay; if they join another club, this listing is removed.">Carried over</span>}
                   </p>
                   <p className="text-[13px] text-muted truncate">{m.student?.student_no}{m.student?.course ? ` · ${m.student.course}` : ''}{m.student?.year_level ? ` ${m.student.year_level}` : ''}{m.is_paid ? ` · paid ${date(m.paid_at)}` : ''}</p>
+                  {m.is_paid && receipts.data?.get(m.id) && (
+                    <Link to={`/receipt/${receipts.data.get(m.id)}`} className="inline-flex items-center min-h-8 text-[13px] font-semibold text-primary hover:underline money">
+                      Receipt {receipts.data.get(m.id)}
+                    </Link>
+                  )}
                 </div>
                 <span className="money font-semibold hidden sm:block">{peso(m.amount_due)}</span>
                 {m.is_paid ? (

@@ -28,6 +28,18 @@ export function StudentHome() {
     },
   });
 
+  // My receipts (RLS: a student reads only their own), keyed by membership.
+  const receipts = useQuery({
+    queryKey: ['my-receipts', profile?.student_id, year.data?.id],
+    enabled: !!profile?.student_id && !!year.data,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('receipts').select('membership_id, receipt_no')
+        .eq('school_year_id', year.data!.id).is('voided_at', null);
+      if (error) throw error;
+      return new Map(data.map((x) => [x.membership_id, x.receipt_no]));
+    },
+  });
+
   if (year.isLoading) return <Spinner />;
   const first = profile?.full_name?.split(' ')[0];
   if (!year.data) return <><PageHeader title={`Hi${first ? `, ${first}` : ''}`} /><NoYear /></>;
@@ -65,6 +77,11 @@ export function StudentHome() {
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold truncate">{d.entity?.short_name}</p>
                       <p className="text-[13px] text-muted truncate">{semLabel(d.semester_id)} · {d.is_paid ? `paid ${date(d.paid_at)}` : 'pay your treasurer'}</p>
+                      {d.is_paid && receipts.data?.get(d.id) && (
+                        <Link to={`/receipt/${receipts.data.get(d.id)}`} className="inline-flex items-center min-h-8 text-[13px] font-semibold text-primary hover:underline">
+                          View receipt
+                        </Link>
+                      )}
                     </div>
                     {/* Amount above the chip, so the text on the left has room (no 3-line wrap). */}
                     <div className="flex flex-col items-end gap-1 shrink-0">
