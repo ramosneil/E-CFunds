@@ -226,3 +226,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   limit is ₱0); list split into "Waiting for SAS · n" and "Done"; Cancel request = 44 px outlined button (confirm
   kept); rejected → "File again" (form pre-filled with kind, amount, description); 📎 on rows with a receipt/proof;
   request icons match Home everywhere (Landmark remit, HandCoins release; admin org Release button too).
+- Neil confirmed the treasurer Requests fixes on his phone ("Looks right"). Treasurer pages reviewed: Members, Home, Requests.
