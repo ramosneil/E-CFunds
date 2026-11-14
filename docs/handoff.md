@@ -65,6 +65,6 @@ Update it every session: tick done items, add new ones.
 E-CFunds stays on **https://e-cfunds.vercel.app** with Supabase's built-in email sender ("too complicated" — OMSC IT
 had not added the DNS records). Undone by Claude: `ecfunds.omsc.edu.ph` removed from Resend, the IT Gmail draft
 discarded, `docs/it-request.md` deleted (still in git history), push VAPID contact set to the vercel.app address.
-[ ] Vercel still lists `ecfunds.omsc.edu.ph` on the project: blocked by Vercel's "Secure your account with 2FA" pop-up
-    (Neil's decision) — then Project → Settings → Domains → ecfunds.omsc.edu.ph → Edit → Remove.
+[x] Neil turned on Vercel 2FA (authenticator app); Claude then removed `ecfunds.omsc.edu.ph` from the Vercel project
+    — only `e-cfunds.vercel.app` is left (2026-11-14).
 Optional, works with the built-in sender too: branded email templates in `docs/email-templates/`.

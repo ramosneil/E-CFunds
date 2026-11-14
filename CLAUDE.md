@@ -39,8 +39,8 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - **Web address stays `e-cfunds.vercel.app`; email stays Supabase's built-in sender** — Neil cancelled the school
   subdomain + Resend plan (2026-11-14, "too complicated"; OMSC IT controls the DNS). Undone: Resend domain deleted,
   IT draft discarded, `docs/it-request.md` removed (git history has it), VAPID contact = the vercel.app URL.
-  Open: `ecfunds.omsc.edu.ph` still attached to the Vercel project — remove it once Neil handles Vercel's 2FA pop-up
-  (the Vercel connector has no remove-domain action). Optional: `docs/email-templates/` work with the built-in sender.
+  Vercel project now has only `e-cfunds.vercel.app` (school domain removed after Neil turned on Vercel 2FA).
+  Optional: `docs/email-templates/` work with the built-in sender.
 - Claude in Chrome works on Neil's PC (Gmail, Resend, Vercel signed in). Never sign in for him; ask before sending,
   deleting or changing anything; never decide security prompts (e.g. 2FA) for him; its filter hides long `=`/`;`
   values — use the site's Copy button + clipboard, never disguise text.

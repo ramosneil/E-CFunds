@@ -259,3 +259,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - Neil confirmed: My account shows 'Phone notifications: On' after the fix.
 - Resend domain added by Claude via Neil's Chrome (Tokyo); IT letter filled (CNAME web + DKIM TXT + 2 CNAME SPF + _dmarc.ecfunds; MX left out); saved as Gmail draft (recipient unknown).
 - Neil cancelled the school web address + Resend sender (keep vercel.app). Undone: Resend domain deleted, IT Gmail draft discarded (Gmail deletes drafts permanently, not to Trash), docs/it-request.md removed, private.push_config.vapid_subject = https://e-cfunds.vercel.app. Vercel project domain removal blocked by Vercel's 2FA pop-up (Neil's call).
+- Neil set up Vercel 2FA; Claude removed ecfunds.omsc.edu.ph from the Vercel project (connector confirms only e-cfunds.vercel.app; site + OTA manifest 200).
