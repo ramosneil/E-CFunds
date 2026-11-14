@@ -208,3 +208,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   under the bar; shorter subtitle; sign-out moved off the phone header into My account + "Sign out?" confirm (also
   desktop sidebar); Android status bar hidden again on the next tap after a swipe-down (Android keeps it otherwise).
   Checked with sample data (light/dark, phone/desktop); not yet seen signed in or on the phone.
+- Neil confirmed the Members page fixes on his phone ("Looks right").
