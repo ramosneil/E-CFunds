@@ -10,6 +10,7 @@ import { Card, DuesBar, EntityLogo, HeroCard, SectionTitle, Spinner, Stat } from
 import { NoYear, RequestRow } from '../../components/common';
 import { LedgerList, useLedger } from '../admin/EntityDetail';
 import { ExportMenu, exportsLib } from '../../components/ExportMenu';
+import { FinancialReportButton } from '../../components/FinancialReportSheet';
 
 export function TreasurerHome() {
   const { profile } = useAuth();
@@ -33,8 +34,9 @@ export function TreasurerHome() {
           <p className="micro text-muted">Treasurer</p>
           <h1 className="font-display text-[24px] sm:text-[28px] font-extrabold leading-tight truncate">{e?.short_name ?? 'Your org'}</h1>
         </div>
+        {e && year.data && <FinancialReportButton entityId={e.id} yearId={year.data.id} className="h-11 px-3 sm:px-4" />}
         {e && year.data && <ExportMenu options={[
-          { label: 'Financial report', kind: 'pdf', run: async () => (await exportsLib()).orgReport('pdf', e, year.data!) },
+          { label: 'Summary report (charts)', kind: 'pdf', run: async () => (await exportsLib()).orgReport('pdf', e, year.data!) },
           { label: 'Ledger', kind: 'csv', run: async () => (await exportsLib()).orgReport('csv', e, year.data!) },
           { label: 'Members & dues', kind: 'csv', run: async () => (await exportsLib()).membersCsv(e, year.data!) },
         ]} />}

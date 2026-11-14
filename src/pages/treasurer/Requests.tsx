@@ -10,13 +10,14 @@ import type { Enum } from '../../lib/database.types';
 import { Alert, Button, Card, Empty, Field, Input, PageHeader, SectionTitle, Select, Sheet, Spinner } from '../../components/ui';
 import { IfApproved, NoYear, RequestRow, Segmented } from '../../components/common';
 import { confirmAsk } from '../../lib/confirm';
+import { ItemRows, blankItem, itemsPayload, itemsProblem, itemsTotal, type ItemLine } from '../../components/ItemRows';
 import { BudgetCard, LiquidateSheet, NewBudgetSheet, isOpen, releaseLeft, useBudgets, type Budget } from '../../components/budgets';
 
 type Kind = Enum<'request_kind'>;
 type Category = Enum<'expense_category'>;
 const KINDS: [Kind, string][] = [['remittance', 'Remit'], ['release', 'Release'], ['expense', 'Expense']];
 
-type Draft = { kind: Kind; amount: string; desc: string; category?: Category };
+type Draft = { kind: Kind; amount: string; desc: string; category?: Category; items?: ItemLine[] };
 
 export function Requests() {
   const { profile } = useAuth();
@@ -30,8 +31,14 @@ export function Requests() {
   const [err, setErr] = useState('');
   const [draft, setDraft] = useState<Draft | null>(null);   // "File again" fills the form from a rejected request
 
-  function fileAgain(r: { kind: Kind; amount: number; description: string; category: Category | null }) {
-    setDraft({ kind: r.kind, amount: String(r.amount), desc: r.description, category: r.category ?? undefined });
+  async function fileAgain(r: { id: number; kind: Kind; amount: number; description: string; category: Category | null }) {
+    // An expense comes back with its receipt items, so only what SAS asked for needs fixing.
+    let items: ItemLine[] | undefined;
+    if (r.kind === 'expense') {
+      const { data } = await supabase.from('expense_items').select('*').eq('request_id', r.id).order('line_no');
+      if (data?.length) items = data.map((x) => ({ particular: x.particular, unit: x.unit, qty: String(Number(x.qty)), price: String(Number(x.unit_price)) }));
+    }
+    setDraft({ kind: r.kind, amount: String(r.amount), desc: r.description, category: r.category ?? undefined, items });
     setParams({ new: r.kind });
   }
 
@@ -112,12 +119,14 @@ function NewRequest({ initial, draft, entityId, yearId, onClose }: { initial: Ki
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+  const [items, setItems] = useState<ItemLine[]>(draft?.items ?? [blankItem()]);
   const budgets = useBudgets(entityId);
   const open = (budgets.data ?? []).filter(isOpen);
   const overdue = (budgets.data ?? []).some((b) => b.is_overdue);
   const [budgetId, setBudgetId] = useState('');
   const budget = open.find((b) => String(b.id) === budgetId);
-  const a = Number(amount);
+  // An expense's amount is the total of its receipt items.
+  const a = kind === 'expense' ? itemsTotal(items) : Number(amount);
   const base = !r ? 0 : kind === 'remittance' ? r.available_to_remit : kind === 'release' ? r.available_to_release : r.cash_on_hand - r.pending_expenses - r.pending_remittances;
   // A release is also capped by what is left of its budget.
   const limit = kind === 'release' && budget ? Math.min(base, releaseLeft(budget)) : base;
@@ -133,7 +142,8 @@ function NewRequest({ initial, draft, entityId, yearId, onClose }: { initial: Ki
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (!(a > 0)) { setErr('Enter an amount above ₱0.00.'); return; }
+    if (kind === 'expense') { const p = itemsProblem(items); if (p) { setErr(p); return; } }
+    if (!(a > 0)) { setErr(kind === 'expense' ? 'The items add up to ₱0.00. Check the unit prices.' : 'Enter an amount above ₱0.00.'); return; }
     if (over || nothing || blocked) return;
     if (kind === 'release' && !budget) { setErr('Pick the budget this release is for.'); return; }
     if (desc.trim().length < 3) { setErr('Describe what this is for.'); return; }
@@ -151,7 +161,8 @@ function NewRequest({ initial, draft, entityId, yearId, onClose }: { initial: Ki
       }
       const { error } = await supabase.rpc('file_request', { p_entity_id: entityId, p_kind: kind, p_amount: a, p_description: desc.trim(), p_attachment_path: path,
         ...(kind === 'expense' && category ? { p_category: category } : {}),
-        ...(kind !== 'remittance' && budget ? { p_budget_id: budget.id } : {}) });
+        ...(kind !== 'remittance' && budget ? { p_budget_id: budget.id } : {}),
+        ...(kind === 'expense' ? { p_items: itemsPayload(items) } : {}) });
       if (error) throw error;
       void qc.invalidateQueries();
       onClose();
@@ -178,12 +189,25 @@ function NewRequest({ initial, draft, entityId, yearId, onClose }: { initial: Ki
           </Field>
         )}
         {draft && !nothing && <Alert tone="ok">Filled in from your rejected request. Fix what SAS asked for, then send it again.</Alert>}
-        <Field label="Amount" hint={r ? <>{limitLabel}: <b className="money text-ink">{peso(max)}</b></> : undefined}
-          error={over && !nothing ? `That’s more than you have. ${limitLabel}: ${peso(max)}.` : null}>
-          <Input inputMode="decimal" required value={amount} onChange={(e) => setAmount(e.target.value)} aria-invalid={over || undefined}
-            className="money text-[24px] h-14 font-semibold" placeholder="0.00" disabled={nothing || blocked} />
-        </Field>
-        <Field label="What is it for?"><Input required value={desc} onChange={(e) => setDesc(e.target.value)} placeholder={kind === 'expense' ? 'e.g. Tarpaulin for org fair' : kind === 'release' ? 'e.g. Budget for seminar' : 'e.g. Dues collected this week'} /></Field>
+        {kind === 'expense' ? (
+          <div>
+            <p className="text-[14px] font-semibold mb-2">Items on the receipt</p>
+            <ItemRows lines={items} onChange={setItems} disabled={nothing} />
+            <div className={`mt-3 rounded-[16px] p-4 flex items-center justify-between ${over && !nothing ? 'bg-bad-soft text-bad' : 'bg-surface2'}`}>
+              <span className="micro">Expense total</span><span className="money font-display font-extrabold text-[22px]">{peso(a)}</span>
+            </div>
+            <p className={`text-[13px] mt-1 ${over && !nothing ? 'text-bad' : 'text-muted'}`}>
+              {over && !nothing ? `That’s more than you have. ${limitLabel}: ${peso(max)}.` : r ? <>{limitLabel}: <b className="money text-ink">{peso(max)}</b></> : null}
+            </p>
+          </div>
+        ) : (
+          <Field label="Amount" hint={r ? <>{limitLabel}: <b className="money text-ink">{peso(max)}</b></> : undefined}
+            error={over && !nothing ? `That’s more than you have. ${limitLabel}: ${peso(max)}.` : null}>
+            <Input inputMode="decimal" required value={amount} onChange={(e) => setAmount(e.target.value)} aria-invalid={over || undefined}
+              className="money text-[24px] h-14 font-semibold" placeholder="0.00" disabled={nothing || blocked} />
+          </Field>
+        )}
+        <Field label={kind === 'expense' ? 'Activity / what it was for' : 'What is it for?'} hint={kind === 'expense' ? 'Used as the table title in the Financial Report (unless you pick a budget).' : undefined}><Input required value={desc} onChange={(e) => setDesc(e.target.value)} placeholder={kind === 'expense' ? 'e.g. SimuLIT' : kind === 'release' ? 'e.g. Budget for seminar' : 'e.g. Dues collected this week'} /></Field>
         {kind === 'expense' && (
           <Field label="Category" hint="Once SAS approves, students see this expense's purpose, category and amount (never the receipt).">
             <Select required value={category} onChange={(e) => setCategory(e.target.value as Category)}>

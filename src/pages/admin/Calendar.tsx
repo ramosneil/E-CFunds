@@ -6,6 +6,7 @@ import { supabase, errorText } from '../../lib/supabase';
 import { date, manilaDate } from '../../lib/format';
 import { Alert, Button, Card, Chip, Empty, Field, Input, PageHeader, SectionTitle, Sheet, Spinner } from '../../components/ui';
 import type { Row } from '../../lib/database.types';
+import { ReportSettingsCard } from '../../components/FinancialReportSheet';
 
 export function Calendar() {
   const years = useSchoolYears();
@@ -19,6 +20,7 @@ export function Calendar() {
       ) : (
         <Card><Empty icon={<CalendarPlus className="size-6" />} title="No school years yet">Create the current school year to start. Its two semesters are added for you.</Empty></Card>
       )}
+      <div className="mt-4"><ReportSettingsCard /></div>
       <NewYearSheet open={adding} onClose={() => setAdding(false)} hasCurrent={!!years.data?.some((y) => y.is_current)} />
     </>
   );

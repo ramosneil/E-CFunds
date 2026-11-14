@@ -12,6 +12,7 @@ import { BudgetCard, isOpen, releaseLeft, useBudgets } from '../../components/bu
 import { IfApproved, NoYear, Segmented } from '../../components/common';
 import { confirmAsk, promptAsk } from '../../lib/confirm';
 import { ExportMenu, exportsLib } from '../../components/ExportMenu';
+import { FinancialReportButton } from '../../components/FinancialReportSheet';
 
 export function useLedger(entityId: number | undefined, yearId: number | undefined) {
   return useQuery({
@@ -110,8 +111,9 @@ export function EntityDetail() {
           <h1 className="font-display text-[26px] font-extrabold leading-tight">{e.short_name}</h1>
           <p className="text-muted truncate">{e.name}</p>
         </div>
+        {year.data && <FinancialReportButton entityId={e.id} yearId={year.data.id} />}
         {year.data && <ExportMenu options={[
-          { label: 'Financial report', kind: 'pdf', run: async () => (await exportsLib()).orgReport('pdf', e, year.data!) },
+          { label: 'Summary report (charts)', kind: 'pdf', run: async () => (await exportsLib()).orgReport('pdf', e, year.data!) },
           { label: 'Ledger', kind: 'csv', run: async () => (await exportsLib()).orgReport('csv', e, year.data!) },
           { label: 'Members & dues', kind: 'csv', run: async () => (await exportsLib()).membersCsv(e, year.data!) },
         ]} />}

@@ -11,6 +11,7 @@ import { IfApproved, RequestRow, Segmented } from '../../components/common';
 import { confirmAsk, promptAsk } from '../../lib/confirm';
 import { useAuth } from '../../lib/auth';
 import { BudgetDecisionCard, useBudgets } from '../../components/budgets';
+import { ExpenseItemList } from '../../components/ItemRows';
 
 export function Approvals() {
   const [params] = useSearchParams();   // the Dashboard's "accounts to approve" link opens ?tab=accounts
@@ -144,6 +145,7 @@ function ApprovalCard({ r, entity, cash, saved }: { r: Row<'fund_requests'>; ent
         </div>
         <p className="money font-display font-bold text-[22px]">{peso(r.amount)}</p>
       </div>
+      {r.kind === 'expense' && <div className="mt-3"><ExpenseItemList requestId={r.id} /></div>}
       {r.attachment_path && (
         <Button variant="soft" onClick={openReceipt} className="mt-3 h-11 px-4 text-[14px]"><Paperclip className="size-4" aria-hidden />{r.kind === 'expense' ? 'View receipt' : 'View proof'}</Button>
       )}

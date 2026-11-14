@@ -169,6 +169,12 @@ export type Database = {
         Row: { id: number; entity_id: number; sent_on: string; sent_at: string; sent_by: string | null; students: number };
         Insert: never; Update: never; Relationships: [];
       };
+      expense_items: {
+        Row: { id: number; request_id: number; line_no: number; particular: string; unit: string; qty: number; unit_price: number };
+        Insert: never; Update: never; Relationships: [];
+      };
+      signatories: { Row: Signatories; Insert: never; Update: never; Relationships: [] };
+      report_settings: { Row: ReportSettings; Insert: never; Update: never; Relationships: [] };
       year_closures: {
         Row: { closed_at: string; closed_by: string | null; closing_total: number; entity_id: number; school_year_id: number };
         Insert: never; Update: never; Relationships: [];
@@ -215,8 +221,11 @@ export type Database = {
       enable_account: { Args: { p_profile_id: string; p_remarks?: string }; Returns: undefined };
       import_students: { Args: { p_rows: Json }; Returns: Json };
       remind_unpaid: { Args: { p_entity_id: number }; Returns: number };
+      get_financial_report: { Args: { p_entity_id: number; p_semester_id?: number; p_as_of?: string }; Returns: FinancialReport };
+      save_signatories: { Args: { p_entity_id: number; p_head_title: string; p_head_name: string; p_auditor_name: string; p_adviser_name: string }; Returns: undefined };
+      save_report_settings: { Args: { p: Json }; Returns: undefined };
       file_request: {
-        Args: { p_amount: number; p_attachment_path?: string; p_description: string; p_entity_id: number; p_kind: E['request_kind']; p_category?: E['expense_category']; p_budget_id?: number };
+        Args: { p_amount: number; p_attachment_path?: string; p_description: string; p_entity_id: number; p_kind: E['request_kind']; p_category?: E['expense_category']; p_budget_id?: number; p_items?: Json };
         Returns: number;
       };
       get_entity_report: { Args: { p_school_year_id: number; p_semester_id?: number }; Returns: EntityReport[] };
@@ -280,6 +289,25 @@ export type SchoolSummary = {
   saved_with_sas: number; students: number; total_fund: number;
 };
 
+export type Signatories = {
+  entity_id: number; school_year_id: number; head_title: string; head_name: string | null; auditor_name: string | null;
+  adviser_name: string | null; updated_by?: string | null; updated_at: string;
+};
+export type ReportSettings = {
+  id?: boolean; republic_line: string; school_name: string; campus_line: string; website: string | null; email: string | null;
+  phone: string | null; coordinator_name: string | null; coordinator_title: string; updated_by?: string | null; updated_at: string;
+};
+export type ReportItem = { particular: string; unit: string; qty: number; unit_price: number; total: number; date: string };
+/** get_financial_report (migration 34): the SAS financial report form, computed from the ledger. */
+export type FinancialReport = {
+  entity: { id: number; name: string; short_name: string; logo_path: string | null; is_school_wide: boolean };
+  school_year: string; semester_term: number | null; period_start: string; as_of: string;
+  previous_fund: number; membership: { paid: number; unpaid: number; rate: number | null; amount: number };
+  total_collection: number; subtotal: number;
+  expense_groups: { title: string; budget_id: number | null; first_date: string; subtotal: number; items: ReportItem[] }[];
+  total_expenses: number; adjustments: number; remaining_fund: number; cash_on_hand: number; saved_with_sas: number;
+  signatories: Signatories | null; ssg_signatories: Signatories | null; settings: ReportSettings; treasurer_name: string | null;
+};
 export type BudgetStatus = 'pending' | 'approved' | 'rejected' | 'cancelled' | 'liquidation_submitted' | 'liquidated';
 export type BudgetRow = {
   id: number; entity_id: number; school_year_id: number; title: string; purpose: string | null; activity_date: string;

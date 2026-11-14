@@ -62,6 +62,19 @@ async function circleImage(src: string, crop?: { cx: number; cy: number; r: numb
 const SEAL = { path: 'brand/omsc-seal-source.jpg', crop: { cx: 506, cy: 237, r: 206 } };
 let sealCache: Promise<string | null> | null = null;
 
+/** A blank document of any size (mm) with Inter loaded — for forms with their own layout (Financial Report, Folio). */
+export async function createDoc(format: [number, number]) {
+  const [{ jsPDF, autoTable }, reg, bold] = await Promise.all([loadLibs(), fontB64('Inter-Regular.ttf'), fontB64('Inter-Bold.ttf')]);
+  const doc = new jsPDF({ unit: 'mm', format, orientation: 'portrait', compress: true });
+  doc.addFileToVFS('Inter-Regular.ttf', reg); doc.addFont('Inter-Regular.ttf', 'Inter', 'normal');
+  doc.addFileToVFS('Inter-Bold.ttf', bold); doc.addFont('Inter-Bold.ttf', 'Inter', 'bold');
+  doc.setFont('Inter', 'normal');
+  return { doc, autoTable };
+}
+/** OMSC seal and an org/club logo as round PNG data URLs (null if they can't load). */
+export function sealImage() { sealCache ??= circleImage(logoUrl(SEAL.path)!, SEAL.crop); return sealCache; }
+export function logoImage(path: string | null | undefined) { return path ? circleImage(logoUrl(path)!) : Promise.resolve(null); }
+
 export async function newDoc(opts: { title: string; subtitle?: string; orgLogoPath?: string | null; generatedBy?: string | null; landscape?: boolean }) {
   const [{ jsPDF, autoTable }, reg, bold] = await Promise.all([loadLibs(), fontB64('Inter-Regular.ttf'), fontB64('Inter-Bold.ttf')]);
   const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: opts.landscape ? 'landscape' : 'portrait', compress: true });
