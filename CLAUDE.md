@@ -29,7 +29,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Design tools on Neil's PC: plugins UI Design Review, playwright, Mobile App Design (iOS), Mobile Design System
   (installed with the Claude CLI); Supabase + Figma connectors; GitHub plugin via the Windows user variable
   GITHUB_PERSONAL_ACCESS_TOKEN (expires 2027-02-12).
-- Open items: Neil should delete the Supabase access token when no longer needed (`docs/handoff.md`).
+- Open items: none. (Supabase access token "E-CFunds deploy" revoked 2026-11-14 and removed from `.env`.)
 - Ideas not started: browser (web) push, custom domain, own email sender (SMTP), more course rules.
 
 ## Memberships & fees (migrations 15–17, 24)
@@ -94,9 +94,10 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
     `C:\Users\christian jay\Downloads\prod-ca-2021.crt`, verified TLS only (never disable certificate checks);
     node `pg` scripts in the session scratchpad (`run.mjs`, `rehearse.mjs`, `apply.mjs` → records
     `supabase_migrations.schema_migrations`).
-- **Edge Functions:** connector, or CLI with `SUPABASE_ACCESS_TOKEN` in `.env`:
-  `npx supabase@2.122.0 functions deploy <name> --project-ref nvmlawpojydnouzqilaf --use-api`
-  (+ `--no-verify-jwt` for `push` and `student-login`). CORS allows exact origins only: localhost:3000,
+- **Edge Functions:** Supabase connector (`deploy_edge_function`; `verify_jwt: false` for `push` and
+  `student-login`). Fallback if the connector is down: Neil makes a new scoped access token → `.env`
+  `SUPABASE_ACCESS_TOKEN`, then `npx supabase@2.122.0 functions deploy <name> --project-ref nvmlawpojydnouzqilaf
+  --use-api` (+ `--no-verify-jwt` for those two); revoke the token afterwards. CORS allows exact origins only: localhost:3000,
   127.0.0.1:3000, `https://localhost` (Android), `https://e-cfunds.vercel.app`.
 - **Never use window.confirm/prompt/alert** (silently fail in the Android app) → `confirmAsk/promptAsk/alertAsk`
   from `src/lib/confirm.ts`.
@@ -116,7 +117,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 ## Security (non-negotiable)
 - No secrets in git. Supabase secrets: GEMINI_API_KEY, FCM_SERVICE_ACCOUNT. Vercel env: public URL + publishable key.
   GitHub: ANDROID_* signing, GOOGLE_SERVICES_JSON, variable SUPABASE_PUBLISHABLE_KEY. Local `.env` (gitignored):
-  SUPABASE_SECRET_KEY, SUPABASE_DB_URL, SUPABASE_ACCESS_TOKEN. Never paste keys in chat; never type Neil's passwords.
+  SUPABASE_SECRET_KEY, SUPABASE_DB_URL. Never paste keys in chat; never type Neil's passwords.
 - If a key shows up in chat or a screenshot, ask Neil to rotate it (the secret key was rotated 2026-11-13).
 - Every table has RLS; test each role. Students get aggregates only. Push jobs need service role + secret.
 - Leaked-password protection needs the Pro plan → off on Free (advisor WARN expected). Expected INFO: RLS with no
