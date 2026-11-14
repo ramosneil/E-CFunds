@@ -86,7 +86,7 @@ export type Database = {
           amount: number; attachment_path: string | null; description: string; entity_id: number; filed_at: string;
           filed_by: string | null; id: number; kind: E['request_kind']; remarks: string | null; reviewed_at: string | null;
           reviewed_by: string | null; school_year_id: number; status: E['request_status'];
-          category: E['expense_category'] | null;
+          category: E['expense_category'] | null; budget_id: number | null;
         };
         Insert: never; Update: never; Relationships: [];
       };
@@ -95,7 +95,7 @@ export type Database = {
           amount: number; attachment_path: string | null; created_at: string; created_by: string | null; description: string;
           direction: number | null; entity_id: number; id: number; kind: E['ledger_kind']; membership_id: number | null;
           occurred_on: string; pocket: E['pocket'] | null; request_id: number | null; reverses_id: number | null;
-          school_year_id: number; semester_id: number | null; category: E['expense_category'] | null;
+          school_year_id: number; semester_id: number | null; category: E['expense_category'] | null; budget_id: number | null;
         };
         Insert: never; Update: never; Relationships: [];
       };
@@ -160,12 +160,21 @@ export type Database = {
         Update: { course?: string | null; email?: string | null; full_name?: string; is_active?: boolean; student_no?: string; year_level?: number | null };
         Relationships: [];
       };
+      budgets: { Row: BudgetRow; Insert: never; Update: never; Relationships: [] };
+      budget_items: {
+        Row: { id: number; budget_id: number; item: string; qty: number; unit_cost: number };
+        Insert: never; Update: never; Relationships: [];
+      };
       year_closures: {
         Row: { closed_at: string; closed_by: string | null; closing_total: number; entity_id: number; school_year_id: number };
         Insert: never; Update: never; Relationships: [];
       };
     };
     Views: {
+      budget_status: {
+        Row: BudgetRow & { released: number; spent: number; pending_release: number; is_overdue: boolean };
+        Relationships: [];
+      };
       accredited_list: {
         Row: {
           academic_year: string | null; accredited_on: string | null; adviser: string | null; category: E['entity_category'] | null;
@@ -190,14 +199,19 @@ export type Database = {
       mark_notifications_read: { Args: Record<string, never>; Returns: number };
       accept_terms: { Args: Record<string, never>; Returns: string };
       admin_adjust: { Args: { p_amount: number; p_direction: number; p_entity_id: number; p_pocket: E['pocket']; p_reason: string }; Returns: number };
-      admin_release: { Args: { p_amount: number; p_description: string; p_entity_id: number }; Returns: number };
+      admin_release: { Args: { p_amount: number; p_description: string; p_entity_id: number; p_budget_id?: number }; Returns: number };
+      file_budget: { Args: { p_entity_id: number; p_title: string; p_purpose: string; p_activity_date: string; p_items: Json }; Returns: number };
+      cancel_budget: { Args: { p_budget_id: number }; Returns: undefined };
+      review_budget: { Args: { p_budget_id: number; p_approve: boolean; p_remarks?: string }; Returns: undefined };
+      submit_liquidation: { Args: { p_budget_id: number; p_note: string }; Returns: undefined };
+      review_liquidation: { Args: { p_budget_id: number; p_approve: boolean; p_remarks?: string }; Returns: undefined };
       cancel_request: { Args: { p_request_id: number }; Returns: undefined };
       close_school_year: { Args: { p_entity_id: number; p_school_year_id: number }; Returns: number };
       disable_account: { Args: { p_profile_id: string; p_remarks?: string }; Returns: undefined };
       enable_account: { Args: { p_profile_id: string; p_remarks?: string }; Returns: undefined };
       import_students: { Args: { p_rows: Json }; Returns: Json };
       file_request: {
-        Args: { p_amount: number; p_attachment_path?: string; p_description: string; p_entity_id: number; p_kind: E['request_kind']; p_category?: E['expense_category'] };
+        Args: { p_amount: number; p_attachment_path?: string; p_description: string; p_entity_id: number; p_kind: E['request_kind']; p_category?: E['expense_category']; p_budget_id?: number };
         Returns: number;
       };
       get_entity_report: { Args: { p_school_year_id: number; p_semester_id?: number }; Returns: EntityReport[] };
@@ -259,6 +273,15 @@ export type Finance = {
 export type SchoolSummary = {
   cash_on_hand: number; clubs: number; expenses: number; organizations: number; pending_requests: number;
   saved_with_sas: number; students: number; total_fund: number;
+};
+
+export type BudgetStatus = 'pending' | 'approved' | 'rejected' | 'cancelled' | 'liquidation_submitted' | 'liquidated';
+export type BudgetRow = {
+  id: number; entity_id: number; school_year_id: number; title: string; purpose: string | null; activity_date: string;
+  liquidation_due: string; total: number; status: BudgetStatus; filed_by: string | null; filed_at: string;
+  reviewed_by: string | null; reviewed_at: string | null; remarks: string | null; liquidation_note: string | null;
+  liquidation_submitted_at: string | null; liquidated_by: string | null; liquidated_at: string | null;
+  reminded_7: boolean; reminded_due: boolean; overdue_notified: boolean;
 };
 
 type T = Database['public']['Tables'];

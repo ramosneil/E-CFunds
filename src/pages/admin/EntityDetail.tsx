@@ -7,7 +7,8 @@ import { useCurrentYear, useEntities, useEntityFinance, useEntityReport } from '
 import { FinancePanel } from '../../components/finance/FinancePanel';
 import { supabase, errorText } from '../../lib/supabase';
 import { date, kindLabel, peso } from '../../lib/format';
-import { Alert, Button, Card, DuesBar, EntityLogo, Field, HeroCard, Input, Sheet, Spinner, Stat } from '../../components/ui';
+import { Alert, Button, Card, DuesBar, EntityLogo, Field, HeroCard, Input, Select, Sheet, Spinner, Stat } from '../../components/ui';
+import { BudgetCard, isOpen, releaseLeft, useBudgets } from '../../components/budgets';
 import { IfApproved, NoYear, Segmented } from '../../components/common';
 import { confirmAsk, promptAsk } from '../../lib/confirm';
 import { ExportMenu, exportsLib } from '../../components/ExportMenu';
@@ -163,11 +164,25 @@ export function EntityDetail() {
               <TurnoverCard entityId={entityId} yearId={year.data.id} yearLabel={year.data.label} r={r} />
             </div>
           </div>
+          <EntityBudgets entityId={entityId} />
           <ReleaseSheet open={releasing} onClose={() => setReleasing(false)} entityId={entityId} cash={r.cash_on_hand} saved={r.saved_with_sas} max={r.available_to_release} />
           {adjusting && <AdjustSheet onClose={() => setAdjusting(false)} entityId={entityId} cash={r.cash_on_hand} saved={r.saved_with_sas} />}
         </>
       )}
     </>
+  );
+}
+
+/** This org/club's activity budgets: budget vs released vs spent. */
+function EntityBudgets({ entityId }: { entityId: number }) {
+  const budgets = useBudgets(entityId);
+  const list = (budgets.data ?? []).filter((b) => b.status !== 'cancelled');
+  if (!list.length) return null;
+  return (
+    <section className="mt-6">
+      <h2 className="font-display text-[19px] font-bold mb-3">Activity budgets</h2>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 items-start">{list.map((b) => <BudgetCard key={b.id} b={b} />)}</div>
+    </section>
   );
 }
 
@@ -177,15 +192,20 @@ function ReleaseSheet({ open, onClose, entityId, cash, saved, max }: { open: boo
   const [desc, setDesc] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+  const budgets = useBudgets(entityId);
+  const open_ = (budgets.data ?? []).filter(isOpen);
+  const overdue = (budgets.data ?? []).some((b) => b.is_overdue);
+  const [budgetId, setBudgetId] = useState('');
+  const budget = open_.find((b) => String(b.id) === budgetId);
   const a = Number(amount);
-  const limit = Math.max(0, max);
+  const limit = Math.max(0, budget ? Math.min(max, releaseLeft(budget)) : max);
   const over = a > limit;   // checked while typing: no negative preview, Release stays off
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (!(a > 0)) { setErr('Enter an amount above ₱0.00.'); return; }
     if (over) return;
     setBusy(true); setErr('');
-    const { error } = await supabase.rpc('admin_release', { p_entity_id: entityId, p_amount: a, p_description: desc.trim() });
+    const { error } = await supabase.rpc('admin_release', { p_entity_id: entityId, p_amount: a, p_description: desc.trim(), ...(budget ? { p_budget_id: budget.id } : {}) });
     setBusy(false);
     if (error) { setErr(errorText(error)); return; }
     void qc.invalidateQueries();
@@ -197,10 +217,19 @@ function ReleaseSheet({ open, onClose, entityId, cash, saved, max }: { open: boo
         <Field label="Amount" hint={`Up to ${peso(limit)}`} error={over ? `That’s more than can be released. Up to ${peso(limit)}.` : null}>
           <Input inputMode="decimal" required value={amount} onChange={(e) => setAmount(e.target.value)} aria-invalid={over || undefined} className="money text-[22px] h-14 font-semibold" placeholder="0.00" />
         </Field>
+        {overdue && <Alert>This org/club has an overdue liquidation. Releases are blocked until it is liquidated.</Alert>}
+        {open_.length > 0 && (
+          <Field label="Budget (optional)" hint={budget ? `Left in this budget: ${peso(releaseLeft(budget))}` : 'Link the release to an approved activity budget.'}>
+            <Select value={budgetId} onChange={(e) => setBudgetId(e.target.value)}>
+              <option value="">Not for a budget</option>
+              {open_.map((b) => <option key={b.id} value={b.id}>{b.title} · {peso(b.total)}</option>)}
+            </Select>
+          </Field>
+        )}
         <Field label="What is it for?"><Input required minLength={3} value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="e.g. Intramurals budget" /></Field>
         {!over && <IfApproved kind="release" amount={a || 0} cash={cash} saved={saved} />}
         {err && <Alert>{err}</Alert>}
-        <Button type="submit" variant="gold" busy={busy} disabled={over} className="w-full h-[54px]">Release {a > 0 && !over ? peso(a) : ''}</Button>
+        <Button type="submit" variant="gold" busy={busy} disabled={over || overdue} className="w-full h-[54px]">Release {a > 0 && !over ? peso(a) : ''}</Button>
       </form>
     </Sheet>
   );
@@ -266,9 +295,12 @@ function TurnoverCard({ entityId, yearId, yearLabel, r }: { entityId: number; ye
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const pending = Number(r.pending_remittances) + Number(r.pending_releases) + Number(r.pending_expenses);
+  const budgets = useBudgets(entityId);
+  const openBudgets = (budgets.data ?? []).filter((b) => ['pending', 'approved', 'liquidation_submitted'].includes(b.status)).length;
   const checks: [string, boolean, string][] = [
     ['All cash remitted to SAS', Number(r.cash_on_hand) === 0, `${peso(r.cash_on_hand)} still on hand — the treasurer remits it first`],
     ['No pending requests', pending === 0, 'Approve or reject the pending requests first'],
+    ['Every budget liquidated', openBudgets === 0, `${openBudgets} budget${openBudgets === 1 ? '' : 's'} still open — decide, liquidate or cancel ${openBudgets === 1 ? 'it' : 'them'} first`],
   ];
   const ready = checks.every(([, ok]) => ok);
 

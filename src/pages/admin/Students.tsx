@@ -69,7 +69,7 @@ export function Students() {
           <Search className="size-5 text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden />
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name or Student ID" className="pl-11" aria-label="Search students" />
         </label>
-        <div className="grid grid-cols-2 gap-3 sm:w-[300px]">
+        <div className="grid grid-cols-2 gap-3 sm:w-[340px]">
           <Select value={course} onChange={(e) => setCourse(e.target.value)} aria-label="Course">
             <option value="">All courses</option>
             {courses.data?.map((c) => <option key={c.code} value={c.code}>{c.code}</option>)}

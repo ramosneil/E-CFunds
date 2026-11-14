@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Inbox, Paperclip, Search, UserCheck } from 'lucide-react';
+import { ClipboardList, Inbox, Paperclip, Search, UserCheck } from 'lucide-react';
 import { useCurrentYear, useEntities, useEntityReport, useRequests } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
 import { CATEGORIES, categoryLabel, date, kindLabel, peso } from '../../lib/format';
@@ -10,20 +10,24 @@ import { Alert, Button, Card, Chip, Empty, EntityLogo, Field, Input, PageHeader,
 import { IfApproved, RequestRow, Segmented } from '../../components/common';
 import { confirmAsk, promptAsk } from '../../lib/confirm';
 import { useAuth } from '../../lib/auth';
+import { BudgetDecisionCard, useBudgets } from '../../components/budgets';
 
 export function Approvals() {
   const [params] = useSearchParams();   // the Dashboard's "accounts to approve" link opens ?tab=accounts
-  const [tab, setTab] = useState<'requests' | 'accounts'>(params.get('tab') === 'accounts' ? 'accounts' : 'requests');
+  const t = params.get('tab');
+  const [tab, setTab] = useState<'requests' | 'budgets' | 'accounts'>(t === 'accounts' || t === 'budgets' ? t : 'requests');
   const pending = useRequests({ status: 'pending' });
   const profiles = useProfiles();
+  const budgets = useBudgets();
   const nReq = pending.data?.length ?? 0;
+  const nBud = (budgets.data ?? []).filter((b) => b.status === 'pending' || b.status === 'liquidation_submitted').length;
   const nAcc = (profiles.data ?? []).filter((p) => p.status === 'pending').length;
   return (
     <>
-      <PageHeader title="Approvals" sub="Money requests and new accounts wait here for SAS." />
-      <div className="max-w-sm mb-5"><Segmented value={tab} onChange={setTab}
-        options={[['requests', `Money requests · ${nReq}`], ['accounts', `Accounts · ${nAcc}`]]} /></div>
-      {tab === 'requests' ? <RequestQueue /> : <AccountQueue />}
+      <PageHeader title="Approvals" sub="Money requests, activity budgets and new accounts wait here for SAS." />
+      <div className="max-w-lg mb-5"><Segmented value={tab} onChange={setTab}
+        options={[['requests', `Money · ${nReq}`], ['budgets', `Budgets · ${nBud}`], ['accounts', `Accounts · ${nAcc}`]]} /></div>
+      {tab === 'requests' ? <RequestQueue /> : tab === 'budgets' ? <BudgetQueue /> : <AccountQueue />}
     </>
   );
 }
@@ -50,6 +54,40 @@ function RequestQueue() {
         {done.length ? <div className="divide-y divide-line">{done.map((r) => <RequestRow key={r.id} r={r} entityName={byId.get(r.entity_id)?.short_name} />)}</div>
           : <p className="text-muted text-[14px] py-4">No decisions yet.</p>}
       </Card>
+    </div>
+  );
+}
+
+function BudgetQueue() {
+  const budgets = useBudgets();
+  const entities = useEntities();
+  const byId = new Map(entities.data?.map((e) => [e.id, e]));
+  if (budgets.isLoading) return <Spinner />;
+  const all = budgets.data ?? [];
+  const waiting = all.filter((b) => b.status === 'pending' || b.status === 'liquidation_submitted');
+  const overdue = all.filter((b) => b.is_overdue);
+  const open = all.filter((b) => b.status === 'approved' && !b.is_overdue);
+  return (
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.5fr_1fr] items-start">
+      <div className="space-y-4">
+        {waiting.length ? waiting.map((b) => <BudgetDecisionCard key={b.id} b={b} entity={byId.get(b.entity_id)} />)
+          : <Card><Empty icon={<ClipboardList className="size-6" />} title="No budgets or liquidations waiting">Activity budgets and liquidation reports from treasurers show up here.</Empty></Card>}
+      </div>
+      <div className="space-y-4">
+        {overdue.length > 0 && (
+          <Card>
+            <h2 className="font-display text-[17px] font-bold mb-1 text-bad">Liquidation overdue · {overdue.length}</h2>
+            <p className="text-[13px] text-muted mb-2">These orgs/clubs get no new releases until they liquidate.</p>
+            <ul className="divide-y divide-line">{overdue.map((b) => <li key={b.id} className="py-2 text-[14px]"><b>{byId.get(b.entity_id)?.short_name}</b> · {b.title} <span className="text-muted">· due {date(b.liquidation_due)}</span></li>)}</ul>
+          </Card>
+        )}
+        <Card>
+          <h2 className="font-display text-[17px] font-bold mb-1">Approved, not yet liquidated</h2>
+          {open.length ? <ul className="divide-y divide-line">{open.map((b) => (
+            <li key={b.id} className="py-2 text-[14px] flex gap-3"><span className="flex-1 min-w-0"><b>{byId.get(b.entity_id)?.short_name}</b> · {b.title}<span className="block text-[13px] text-muted">Due {date(b.liquidation_due)} · released {peso(b.released)} of {peso(b.total)}</span></span></li>
+          ))}</ul> : <p className="text-muted text-[14px] py-2">None.</p>}
+        </Card>
+      </div>
     </div>
   );
 }
@@ -101,6 +139,7 @@ function ApprovalCard({ r, entity, cash, saved }: { r: Row<'fund_requests'>; ent
         <div className="min-w-0 flex-1">
           <p className="font-semibold">{kindLabel[r.kind]} · {entity?.short_name}</p>
           <p className="text-[14px] text-muted">{r.description}</p>
+          {r.budget_id && <RequestBudget id={r.budget_id} />}
           <p className="text-[13px] text-muted mt-0.5">Filed {date(r.filed_at)}</p>
         </div>
         <p className="money font-display font-bold text-[22px]">{peso(r.amount)}</p>
@@ -126,6 +165,15 @@ function ApprovalCard({ r, entity, cash, saved }: { r: Row<'fund_requests'>; ent
       </div>
     </Card>
   );
+}
+
+/** "Budget: Seminar · ₱1,300 · ₱300 left" under a request that names a budget. */
+function RequestBudget({ id }: { id: number }) {
+  const budgets = useBudgets();
+  const b = budgets.data?.find((x) => x.id === id);
+  if (!b) return null;
+  const left = Number(b.total) - Number(b.released);
+  return <p className="text-[13px] mt-0.5"><span className="text-muted">Budget:</span> <b>{b.title}</b> · {peso(b.total)} · {peso(left)} not yet released{b.is_overdue ? ' · overdue' : ''}</p>;
 }
 
 function useProfiles() {
@@ -302,7 +350,7 @@ function AccountCard({ p }: { p: Row<'profiles'> }) {
         )}
       </div>
       <div className="mt-3"><Field label="Remarks" hint="Required when rejecting."><Input value={remarks} onChange={(e) => setRemarks(e.target.value)} /></Field></div>
-      {studentBlocked && <p className="text-[13px] text-muted mt-2">A treasurer must add this student ID to their roster before the account can be approved as a student.</p>}
+      {studentBlocked && <p className="text-[13px] text-muted mt-2">Add this Student ID first (Students page → Import, or a club adds the student), then approve.</p>}
       {err && <div className="mt-3"><Alert>{err}</Alert></div>}
       <div className="mt-4 grid grid-cols-2 gap-3">
         <Button variant="danger" busy={busy === 'no'} disabled={!!busy} onClick={() => decide(false)}>Reject</Button>
