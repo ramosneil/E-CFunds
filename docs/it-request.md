@@ -27,12 +27,16 @@ The `omsc.edu.ph` DNS is on **Cloudflare**. Please add these records:
 
 **2. Email sending** (Resend — sending only, no mailboxes; does not affect any existing OMSC email)
 
-| Type | Name | Value | Priority |
+| Type | Name | Value | Proxy status |
 |---|---|---|---|
-| _(Neil pastes the records from Resend here — usually 1 MX, 2 TXT)_ | | | |
+| TXT | `resend._domainkey.ecfunds` | `p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDElhBwGgPZmRUW+JEimvKkSJs9qtfYBPCBDCQERnM6zY2USObCHv+scK9wGPpHIQycsslhWhN55Iz8+cW+FZP4W0StlA/EDV9AeGH6Gv/KEWpqiUB0NiGTJyc+oZAFaLAMYB3MhKp0luyEPCbF21hA/uO1TIrpAjqjHAWuSOUuQwIDAQAB` | — |
+| CNAME | `rsend.ecfunds` | `rsend-apne1.forge.rmta.net` | **DNS only** |
+| CNAME | `send.ecfunds` | `send.forge.rmta.net` | **DNS only** |
+| TXT | `_dmarc.ecfunds` | `v=DMARC1; p=none;` | — |
 
-These are only for the `ecfunds` subdomain (e.g. `send.ecfunds` and `resend._domainkey.ecfunds`), so they do not
-change mail for `omsc.edu.ph` itself. All records: **DNS only**, TTL Auto.
+These are only for the `ecfunds` subdomain, so they do not change mail for `omsc.edu.ph` itself (no MX record:
+E-CFunds only sends, it doesn't receive mail). TTL: Auto. In Cloudflare, type each Name exactly as shown — Cloudflare
+adds `.omsc.edu.ph` by itself.
 
 Nothing else on `omsc.edu.ph` changes. Thank you very much!
 
