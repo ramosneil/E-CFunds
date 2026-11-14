@@ -24,7 +24,11 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Database: **25 migrations** live (last `20261114090000_clubs_only_add`).
 - Android: latest APK **v1.1.1 = build 10**; `ota.json` minNativeBuild = 10.
 - **Confirmed working on Neil's phone:** push notifications with the app closed, app self-update end to end
-  (download → reopen → "E-CFunds was updated"), Back button, full screen, Delete conversation, Add member (adds only).
+  (download → reopen → "E-CFunds was updated"), Back button, full screen, Delete conversation, Add member (adds only),
+  Members page review fixes (⋮ undo, ₱ totals, Ask clearance, sign-out in My account with confirm).
+- Design tools on Neil's PC: plugins UI Design Review, playwright, Mobile App Design (iOS), Mobile Design System
+  (installed with the Claude CLI); Supabase + Figma connectors; GitHub plugin via the Windows user variable
+  GITHUB_PERSONAL_ACCESS_TOKEN (expires 2027-02-12).
 - Open items: Neil should delete the Supabase access token when no longer needed (`docs/handoff.md`).
 - Ideas not started: browser (web) push, custom domain, own email sender (SMTP), more course rules.
 
