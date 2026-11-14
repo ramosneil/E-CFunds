@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { ArrowDownLeft, ArrowUpRight, CalendarX2, Receipt } from 'lucide-react';
+import { CalendarX2, HandCoins, Landmark, Paperclip, Receipt } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { Row } from '../lib/database.types';
 import { date, kindLabel, peso } from '../lib/format';
@@ -18,7 +18,8 @@ export function NoYear({ admin }: { admin?: boolean }) {
 }
 
 const kindIcon: Record<string, ReactNode> = {
-  remittance: <ArrowUpRight className="size-5" />, release: <ArrowDownLeft className="size-5" />, expense: <Receipt className="size-5" />,
+  // Same icons as the Home actions: bank = remit to SAS, hand with coins = release, receipt = expense.
+  remittance: <Landmark className="size-5" />, release: <HandCoins className="size-5" />, expense: <Receipt className="size-5" />,
 };
 const kindTile: Record<string, string> = {
   remittance: 'bg-primary-soft text-primary', release: 'bg-gold-soft text-gold-text', expense: 'bg-bad-soft text-bad',
@@ -31,7 +32,10 @@ export function RequestRow({ r, entityName, action }: { r: Row<'fund_requests'>;
       <span className={`size-11 rounded-[14px] grid place-items-center shrink-0 ${kindTile[r.kind]}`}>{kindIcon[r.kind]}</span>
       <div className="min-w-0 flex-1">
         <p className="font-semibold truncate">{kindLabel[r.kind]}{entityName ? ` · ${entityName}` : ''}</p>
-        <p className="text-[13px] text-muted truncate">{r.description} · {date(r.filed_at)}</p>
+        <p className="text-[13px] text-muted truncate flex items-center gap-1">
+          {r.attachment_path && <Paperclip className="size-3.5 shrink-0" aria-label={r.kind === 'expense' ? 'Receipt attached' : 'Proof attached'} />}
+          <span className="truncate">{r.description} · {date(r.filed_at)}</span>
+        </p>
       </div>
       <div className="text-right shrink-0">
         <p className="money font-semibold">{peso(r.amount)}</p>

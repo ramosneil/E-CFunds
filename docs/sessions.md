@@ -221,3 +221,8 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   only; money stays year-wide — checked live as admin in a rolled-back transaction: money identical for all 10
   orgs/clubs). Fixes admin Dashboard ("Dues · this semester"), org detail, Approvals, student Reports, treasurer
   Requests, and the PDF/CSV exports (reportRow).
+- UI review of treasurer Requests (Neil's light phone screenshots) → 6 fixes: New request checks the amount while
+  typing (red note under Amount, Send off, no negative "If approved"; "Nothing is saved with SAS yet…" when the
+  limit is ₱0); list split into "Waiting for SAS · n" and "Done"; Cancel request = 44 px outlined button (confirm
+  kept); rejected → "File again" (form pre-filled with kind, amount, description); 📎 on rows with a receipt/proof;
+  request icons match Home everywhere (Landmark remit, HandCoins release; admin org Release button too).

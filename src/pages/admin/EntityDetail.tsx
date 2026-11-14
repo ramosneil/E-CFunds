@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, ArrowDownLeft } from 'lucide-react';
+import { ArrowLeft, HandCoins } from 'lucide-react';
 import { useCurrentYear, useEntities, useEntityReport } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
 import { date, kindLabel, peso } from '../../lib/format';
@@ -108,7 +108,7 @@ export function EntityDetail() {
               <Card>
                 <h2 className="font-display text-[17px] font-bold">Release funds</h2>
                 <p className="text-[14px] text-muted mt-1 mb-4">Give the treasurer cash from what's saved with SAS, without a request.</p>
-                <Button variant="gold" className="w-full" disabled={r.saved_with_sas <= 0} onClick={() => setReleasing(true)}><ArrowDownLeft className="size-5" />Release</Button>
+                <Button variant="gold" className="w-full" disabled={r.saved_with_sas <= 0} onClick={() => setReleasing(true)}><HandCoins className="size-5" />Release</Button>
               </Card>
             </div>
           </div>

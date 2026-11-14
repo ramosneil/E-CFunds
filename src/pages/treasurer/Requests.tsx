@@ -1,18 +1,20 @@
 import { useState, type FormEvent } from 'react';
 import { useSearchParams } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { Paperclip, Plus, Receipt } from 'lucide-react';
+import { Paperclip, Plus, Receipt, RotateCcw } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { useCurrentYear, useEntityReport, useRequests } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
 import { peso } from '../../lib/format';
 import type { Enum } from '../../lib/database.types';
-import { Alert, Button, Card, Empty, Field, Input, PageHeader, Sheet, Spinner } from '../../components/ui';
+import { Alert, Button, Card, Empty, Field, Input, PageHeader, SectionTitle, Sheet, Spinner } from '../../components/ui';
 import { IfApproved, NoYear, RequestRow, Segmented } from '../../components/common';
 import { confirmAsk } from '../../lib/confirm';
 
 type Kind = Enum<'request_kind'>;
 const KINDS: [Kind, string][] = [['remittance', 'Remit'], ['release', 'Release'], ['expense', 'Expense']];
+
+type Draft = { kind: Kind; amount: string; desc: string };
 
 export function Requests() {
   const { profile } = useAuth();
@@ -23,6 +25,12 @@ export function Requests() {
   const qc = useQueryClient();
   const newKind = params.get('new') as Kind | null;
   const [err, setErr] = useState('');
+  const [draft, setDraft] = useState<Draft | null>(null);   // "File again" fills the form from a rejected request
+
+  function fileAgain(r: { kind: Kind; amount: number; description: string }) {
+    setDraft({ kind: r.kind, amount: String(r.amount), desc: r.description });
+    setParams({ new: r.kind });
+  }
 
   async function cancel(id: number) {
     if (!(await confirmAsk({ title: 'Cancel this request?', body: 'SAS will no longer see it. You can file a new one any time.', confirm: 'Cancel request', tone: 'bad' }))) return;
@@ -33,46 +41,83 @@ export function Requests() {
 
   if (year.isLoading) return <Spinner />;
   if (!year.data) return <><PageHeader title="Requests" /><NoYear /></>;
+  const all = requests.data ?? [];
+  const waiting = all.filter((r) => r.status === 'pending');
+  const done = all.filter((r) => r.status !== 'pending');
   return (
     <>
       <PageHeader title="Requests" sub="Remittances, releases and expenses go to SAS for approval."
-        action={<Button onClick={() => setParams({ new: 'remittance' })}><Plus className="size-5" />New</Button>} />
+        action={<Button onClick={() => { setDraft(null); setParams({ new: 'remittance' }); }}><Plus className="size-5" />New</Button>} />
       {err && <div className="mb-3"><Alert>{err}</Alert></div>}
-      {requests.isLoading ? <Spinner /> : requests.data?.length ? (
-        <Card>
-          <div className="divide-y divide-line">
-            {requests.data.map((r) => (
-              <div key={r.id}>
-                <RequestRow r={r} />
-                {r.status === 'pending' && <button onClick={() => cancel(r.id)} className="text-[13px] font-semibold text-bad -mt-1 mb-3 ml-14 cursor-pointer">Cancel request</button>}
-                {r.remarks && r.status !== 'pending' && <p className="text-[13px] text-muted -mt-1 mb-3 ml-14">SAS: {r.remarks}</p>}
+      {requests.isLoading ? <Spinner /> : all.length ? (
+        <div className="space-y-4">
+          {waiting.length > 0 && (
+            <Card>
+              <SectionTitle>Waiting for SAS · {waiting.length}</SectionTitle>
+              <div className="divide-y divide-line">
+                {waiting.map((r) => (
+                  <div key={r.id}>
+                    <RequestRow r={r} />
+                    <div className="pl-14 pb-3">
+                      <button type="button" onClick={() => cancel(r.id)}
+                        className="inline-flex items-center h-11 px-4 rounded-[14px] border border-line text-bad font-semibold text-[14px] hover:bg-bad-soft transition cursor-pointer">Cancel request</button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </Card>
+            </Card>
+          )}
+          {done.length > 0 && (
+            <Card>
+              <SectionTitle>Done</SectionTitle>
+              <div className="divide-y divide-line">
+                {done.map((r) => (
+                  <div key={r.id}>
+                    <RequestRow r={r} />
+                    {r.remarks && <p className="text-[13px] text-muted -mt-1 mb-3 pl-14">SAS: {r.remarks}</p>}
+                    {r.status === 'rejected' && (
+                      <div className="pl-14 pb-3">
+                        <Button variant="soft" className="h-11 px-4 text-[14px]" onClick={() => fileAgain(r)}><RotateCcw className="size-4" aria-hidden />File again</Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+        </div>
       ) : <Card><Empty icon={<Receipt className="size-6" />} title="No requests yet">Remit cash to SAS, ask for a release, or file an expense with its receipt.</Empty></Card>}
-      {newKind && <NewRequest key={newKind} initial={KINDS.some(([k]) => k === newKind) ? newKind : 'remittance'} entityId={entityId} yearId={year.data.id} onClose={() => setParams({})} />}
+      {newKind && <NewRequest key={newKind + (draft ? ':again' : '')} initial={KINDS.some(([k]) => k === newKind) ? newKind : 'remittance'}
+        draft={draft?.kind === newKind ? draft : null} entityId={entityId} yearId={year.data.id} onClose={() => { setDraft(null); setParams({}); }} />}
     </>
   );
 }
 
-function NewRequest({ initial, entityId, yearId, onClose }: { initial: Kind; entityId: number; yearId: number; onClose: () => void }) {
+function NewRequest({ initial, draft, entityId, yearId, onClose }: { initial: Kind; draft: Draft | null; entityId: number; yearId: number; onClose: () => void }) {
   const qc = useQueryClient();
   const report = useEntityReport(yearId);
   const r = report.data?.find((x) => x.entity_id === entityId);
   const [kind, setKind] = useState<Kind>(initial);
-  const [amount, setAmount] = useState('');
-  const [desc, setDesc] = useState('');
+  const [amount, setAmount] = useState(draft?.amount ?? '');
+  const [desc, setDesc] = useState(draft?.desc ?? '');
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const a = Number(amount);
   const limit = !r ? 0 : kind === 'remittance' ? r.available_to_remit : kind === 'release' ? r.available_to_release : r.cash_on_hand - r.pending_expenses - r.pending_remittances;
   const limitLabel = kind === 'remittance' ? 'Cash you can remit' : kind === 'release' ? 'Saved with SAS you can ask for' : 'Cash available for expenses';
+  const max = Math.max(0, limit);
+  // Checked while typing, so the preview never shows a negative pocket and Send stays off until it's possible.
+  const nothing = !!r && max <= 0;
+  const over = !!r && a > max;
+  const nothingText = kind === 'release' ? 'Nothing is saved with SAS yet. Remit cash first, then you can ask for a release.'
+    : kind === 'remittance' ? 'There is no cash on hand to remit right now (pending requests already count).'
+    : 'There is no cash on hand for expenses right now (pending requests already count). Ask SAS for a release first.';
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (!(a > 0)) { setErr('Enter an amount above ₱0.'); return; }
+    if (!(a > 0)) { setErr('Enter an amount above ₱0.00.'); return; }
+    if (over || nothing) return;
     if (desc.trim().length < 3) { setErr('Describe what this is for.'); return; }
     if (kind === 'expense' && !file) { setErr('Attach the receipt for this expense.'); return; }
     if (file && file.size > 10 * 1024 * 1024) { setErr('Attachment must be 10 MB or smaller.'); return; }
@@ -99,8 +144,12 @@ function NewRequest({ initial, entityId, yearId, onClose }: { initial: Kind; ent
         <p className="text-[14px] text-muted -mt-1">
           {kind === 'remittance' ? 'Hand cash on hand to SAS to keep it safe.' : kind === 'release' ? 'Get cash back from what is saved with SAS, for a budget.' : 'Record money spent from cash on hand. A receipt is required.'}
         </p>
-        <Field label="Amount" hint={r ? <>{limitLabel}: <b className="money text-ink">{peso(Math.max(0, limit))}</b></> : undefined}>
-          <Input inputMode="decimal" required value={amount} onChange={(e) => setAmount(e.target.value)} className="money text-[24px] h-14 font-semibold" placeholder="0.00" />
+        {nothing && <Alert tone="warn">{nothingText}</Alert>}
+        {draft && !nothing && <Alert tone="ok">Filled in from your rejected request. Fix what SAS asked for, then send it again.</Alert>}
+        <Field label="Amount" hint={r ? <>{limitLabel}: <b className="money text-ink">{peso(max)}</b></> : undefined}
+          error={over && !nothing ? `That’s more than you have. ${limitLabel}: ${peso(max)}.` : null}>
+          <Input inputMode="decimal" required value={amount} onChange={(e) => setAmount(e.target.value)} aria-invalid={over || undefined}
+            className="money text-[24px] h-14 font-semibold" placeholder="0.00" disabled={nothing} />
         </Field>
         <Field label="What is it for?"><Input required value={desc} onChange={(e) => setDesc(e.target.value)} placeholder={kind === 'expense' ? 'e.g. Tarpaulin for org fair' : kind === 'release' ? 'e.g. Budget for seminar' : 'e.g. Dues collected this week'} /></Field>
         <label className="flex items-center gap-3 rounded-[14px] border border-dashed border-line p-4 cursor-pointer hover:bg-surface2">
@@ -111,9 +160,9 @@ function NewRequest({ initial, entityId, yearId, onClose }: { initial: Kind; ent
           </span>
           <input type="file" accept="image/jpeg,image/png,image/webp,image/heic,application/pdf" className="sr-only" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
         </label>
-        {r && <IfApproved kind={kind} amount={a || 0} cash={r.cash_on_hand} saved={r.saved_with_sas} />}
+        {r && !over && !nothing && <IfApproved kind={kind} amount={a || 0} cash={r.cash_on_hand} saved={r.saved_with_sas} />}
         {err && <Alert>{err}</Alert>}
-        <Button type="submit" busy={busy} className="w-full h-[54px]">Send to SAS</Button>
+        <Button type="submit" busy={busy} disabled={over || nothing} className="w-full h-[54px]">Send to SAS</Button>
       </form>
     </Sheet>
   );
