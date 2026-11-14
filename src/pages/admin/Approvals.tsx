@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Inbox, Paperclip, UserCheck } from 'lucide-react';
 import { useCurrentYear, useEntities, useEntityReport, useRequests } from '../../lib/data';
@@ -9,7 +10,8 @@ import { Alert, Button, Card, Chip, Empty, EntityLogo, Field, Input, PageHeader,
 import { IfApproved, RequestRow, Segmented } from '../../components/common';
 
 export function Approvals() {
-  const [tab, setTab] = useState<'requests' | 'accounts'>('requests');
+  const [params] = useSearchParams();   // the Dashboard's "accounts to approve" link opens ?tab=accounts
+  const [tab, setTab] = useState<'requests' | 'accounts'>(params.get('tab') === 'accounts' ? 'accounts' : 'requests');
   return (
     <>
       <PageHeader title="Approvals" sub="Money requests and new accounts wait here for SAS." />
