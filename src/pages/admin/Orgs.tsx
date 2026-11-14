@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { ImageUp, Pencil, Plus } from 'lucide-react';
-import { useEntities } from '../../lib/data';
+import { ImageUp, Pencil, Plus, UserRound } from 'lucide-react';
+import { useEntities, useTreasurers } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
 import { peso } from '../../lib/format';
 import type { Row } from '../../lib/database.types';
@@ -10,6 +10,7 @@ import { Alert, Button, Card, Chip, EntityLogo, Field, Input, PageHeader, Select
 
 export function Orgs() {
   const entities = useEntities();
+  const treasurers = useTreasurers();
   const [edit, setEdit] = useState<Row<'entities'> | 'new' | null>(null);
   if (entities.isLoading) return <Spinner />;
   const groups: [string, Row<'entities'>[]][] = [
@@ -25,16 +26,23 @@ export function Orgs() {
           <h2 className="micro text-muted mb-3">{title} · {list.length}</h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {list.map((e) => (
-              <Card key={e.id} className={`p-4 ${e.is_active ? '' : 'opacity-60'}`}>
+              // The whole card opens the org; the ✏️ button (on top) edits it.
+              <Card key={e.id} className={`p-4 relative hover:bg-surface2/60 transition ${e.is_active ? '' : 'opacity-60'}`}>
                 <div className="flex items-center gap-3">
                   <EntityLogo path={e.logo_path} name={e.name} size={52} />
                   <div className="min-w-0 flex-1">
-                    <Link to={`/orgs/${e.id}`} className="font-semibold block truncate hover:text-primary">{e.short_name}</Link>
+                    <Link to={`/orgs/${e.id}`} className="font-semibold block truncate after:absolute after:inset-0 after:rounded-[inherit]">{e.short_name}</Link>
                     <p className="text-[13px] text-muted truncate">{e.name}</p>
                   </div>
-                  <button aria-label={`Edit ${e.short_name}`} onClick={() => setEdit(e)} className="size-10 grid place-items-center rounded-full hover:bg-surface2 text-muted cursor-pointer"><Pencil className="size-4" /></button>
+                  <button aria-label={`Edit ${e.short_name}`} onClick={() => setEdit(e)} className="relative z-10 size-11 grid place-items-center rounded-full hover:bg-surface2 text-muted cursor-pointer"><Pencil className="size-4" /></button>
                 </div>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
+                <p className="mt-3 text-[13px] flex items-center gap-1.5">
+                  <UserRound className="size-4 text-muted shrink-0" aria-hidden />
+                  {treasurers.data?.get(e.id)
+                    ? <span className="truncate">Treasurer: <b>{treasurers.data.get(e.id)}</b></span>
+                    : <span className="text-warn font-semibold">No treasurer yet</span>}
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
                   <Chip tone="gold"><span className="money">{peso(e.dues_amount)}</span>&nbsp;/ {e.dues_period === 'semester' ? 'semester' : 'school year'}</Chip>
                   {e.is_school_wide && <Chip tone="primary">School-wide</Chip>}
                   {!e.is_active && <Chip>Archived</Chip>}
@@ -54,7 +62,8 @@ function EntitySheet({ entity, onClose }: { entity: Row<'entities'> | null; onCl
   const [name, setName] = useState(entity?.name ?? '');
   const [short, setShort] = useState(entity?.short_name ?? '');
   const [category, setCategory] = useState<Row<'entities'>['category']>(entity?.category ?? 'organization');
-  const [period, setPeriod] = useState<Row<'entities'>['dues_period']>(entity?.dues_period ?? 'school_year');
+  // New orgs/clubs default to per-semester fees (SAS rule: every org and club collects each semester).
+  const [period, setPeriod] = useState<Row<'entities'>['dues_period']>(entity?.dues_period ?? 'semester');
   const [amount, setAmount] = useState(String(entity?.dues_amount ?? '0'));
   const [active, setActive] = useState(entity?.is_active ?? true);
   const [file, setFile] = useState<File | null>(null);

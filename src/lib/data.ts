@@ -93,3 +93,17 @@ export function useRequests(filter: { entityId?: number; status?: 'pending' } = 
 
 /** Query keys to refresh after any money action. */
 export const moneyKeys = [['report'], ['summary'], ['requests'], ['ledger'], ['memberships']];
+
+/** Approved treasurers by org/club id (admin only — RLS lets SAS read every profile). */
+export function useTreasurers(enabled = true) {
+  return useQuery({
+    queryKey: ['profiles', 'treasurers'],
+    enabled,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('profiles').select('full_name, email, entity_id')
+        .eq('role', 'treasurer').eq('status', 'approved');
+      if (error) throw error;
+      return new Map(data.filter((p) => p.entity_id).map((p) => [p.entity_id!, p.full_name || p.email || 'Treasurer']));
+    },
+  });
+}

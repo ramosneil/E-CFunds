@@ -37,11 +37,12 @@ export function AuthLayout({ title, sub, children }: { title: string; sub?: Reac
   );
 }
 
-export function Brand({ light }: { light?: boolean }) {
+export function Brand({ light, compact }: { light?: boolean; compact?: boolean }) {
   return (
-    <span className="flex items-center gap-2.5 relative">
+    <span className="flex items-center gap-2.5 relative" aria-label="E-CFunds">
       <span className={`size-9 rounded-xl grid place-items-center font-display font-extrabold ${light ? 'bg-white text-hero' : 'bg-primary text-on-primary'}`}>₱</span>
-      <span className="font-display font-extrabold text-[18px] tracking-tight">E-CFunds</span>
+      {/* compact: the phone top bar hides the word on very small screens (under 360 px) to fit its 4 buttons */}
+      <span className={`font-display font-extrabold text-[18px] tracking-tight ${compact ? 'max-[359px]:hidden' : ''}`}>E-CFunds</span>
     </span>
   );
 }

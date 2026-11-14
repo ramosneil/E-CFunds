@@ -6,7 +6,7 @@ import { useCurrentYear, useEntities } from '../lib/data';
 import { useMessagesRealtime, useUnread } from '../lib/messages';
 import { Brand } from '../pages/auth/AuthLayout';
 import { EntityLogo, Loading, Sheet, ThemeToggle } from './ui';
-import { ChatButton } from './ChatButton';
+import { AskTopButton, ChatButton } from './ChatButton';
 import { NotificationBell } from './NotificationBell';
 import { useLiveNotifications } from '../lib/notifications';
 import { useLiveScreens } from '../lib/live';
@@ -99,8 +99,9 @@ export function Shell() {
 
       <div className="min-w-0 flex flex-col">
         <header className="lg:hidden sticky top-0 z-30 bg-bg/90 backdrop-blur border-b border-line px-5 pt-[env(safe-area-inset-top)] h-[calc(4rem+env(safe-area-inset-top))] flex items-center justify-between">
-          <Brand />
+          <Brand compact />
           <div className="flex items-center">
+            <AskTopButton />
             {uid && <NotificationBell uid={uid} />}
             <ThemeToggle />
             <NavLink to="/account" aria-label="My account and sign out" className="size-11 grid place-items-center rounded-full text-muted hover:bg-surface2"><UserRound className="size-5" /></NavLink>
@@ -110,7 +111,7 @@ export function Shell() {
           <span>{year.data ? <>School year <b className="text-ink ml-1">{year.data.label}</b></> : 'No school year open'}</span>
           {uid && <NotificationBell uid={uid} />}
         </div>
-        <main className={`flex-1 w-full max-w-6xl mx-auto px-5 sm:px-8 pt-5 lg:pt-0 ${chat ? 'pb-[92px] lg:pb-12' : 'pb-[168px] lg:pb-28'}`}>
+        <main className={`flex-1 w-full max-w-6xl mx-auto px-5 sm:px-8 pt-5 lg:pt-0 ${chat ? 'pb-[92px] lg:pb-12' : 'pb-28'}`}>
           <Suspense fallback={<Loading />}><Outlet /></Suspense>
         </main>
       </div>

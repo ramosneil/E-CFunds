@@ -63,6 +63,7 @@ export function EntityDetail() {
   const report = useEntityReport(year.data?.id);
   const ledger = useLedger(entityId, year.data?.id);
   const [releasing, setReleasing] = useState(false);
+  const [allLedger, setAllLedger] = useState(false);
   const e = entities.data?.find((x) => x.id === entityId);
   const r = report.data?.find((x) => x.entity_id === entityId);
 
@@ -95,12 +96,20 @@ export function EntityDetail() {
               <Stat label="Released" value={peso(r.releases)} />
             </div>
           </div>
+          {/* Phones: Dues + Release first, then the ledger. Computers: ledger left, the two cards right. */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr] mt-4 items-start">
-            <Card>
+            <Card className="order-2 lg:order-1">
               <h2 className="font-display text-[17px] font-bold mb-1">Ledger</h2>
-              {ledger.isLoading ? <Spinner /> : <LedgerList entries={ledger.data ?? []} />}
+              {ledger.isLoading ? <Spinner /> : <>
+                <LedgerList entries={allLedger ? (ledger.data ?? []) : (ledger.data ?? []).slice(0, 10)} />
+                {(ledger.data?.length ?? 0) > 10 && (
+                  <Button variant="soft" className="w-full mt-3 h-11" onClick={() => setAllLedger((v) => !v)}>
+                    {allLedger ? 'Show the latest 10' : `Show all ${ledger.data!.length}`}
+                  </Button>
+                )}
+              </>}
             </Card>
-            <div className="space-y-4">
+            <div className="space-y-4 order-1 lg:order-2">
               <Card>
                 <h2 className="font-display text-[17px] font-bold mb-3">Dues · this semester</h2>
                 <DuesBar paid={r.paid_members} members={r.members} />
@@ -126,10 +135,12 @@ function ReleaseSheet({ open, onClose, entityId, cash, saved, max }: { open: boo
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const a = Number(amount);
+  const limit = Math.max(0, max);
+  const over = a > limit;   // checked while typing: no negative preview, Release stays off
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (!(a > 0)) { setErr('Enter an amount above ₱0.'); return; }
-    if (a > max) { setErr(`Only ${peso(max)} can be released right now.`); return; }
+    if (!(a > 0)) { setErr('Enter an amount above ₱0.00.'); return; }
+    if (over) return;
     setBusy(true); setErr('');
     const { error } = await supabase.rpc('admin_release', { p_entity_id: entityId, p_amount: a, p_description: desc.trim() });
     setBusy(false);
@@ -140,11 +151,13 @@ function ReleaseSheet({ open, onClose, entityId, cash, saved, max }: { open: boo
   return (
     <Sheet open={open} onClose={onClose} title="Release funds">
       <form onSubmit={submit} className="space-y-4">
-        <Field label="Amount" hint={`Up to ${peso(max)}`}><Input inputMode="decimal" required value={amount} onChange={(e) => setAmount(e.target.value)} className="money text-[22px] h-14 font-semibold" placeholder="0.00" /></Field>
+        <Field label="Amount" hint={`Up to ${peso(limit)}`} error={over ? `That’s more than can be released. Up to ${peso(limit)}.` : null}>
+          <Input inputMode="decimal" required value={amount} onChange={(e) => setAmount(e.target.value)} aria-invalid={over || undefined} className="money text-[22px] h-14 font-semibold" placeholder="0.00" />
+        </Field>
         <Field label="What is it for?"><Input required minLength={3} value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="e.g. Intramurals budget" /></Field>
-        <IfApproved kind="release" amount={a || 0} cash={cash} saved={saved} />
+        {!over && <IfApproved kind="release" amount={a || 0} cash={cash} saved={saved} />}
         {err && <Alert>{err}</Alert>}
-        <Button type="submit" variant="gold" busy={busy} className="w-full h-[54px]">Release {a > 0 ? peso(a) : ''}</Button>
+        <Button type="submit" variant="gold" busy={busy} disabled={over} className="w-full h-[54px]">Release {a > 0 && !over ? peso(a) : ''}</Button>
       </form>
     </Sheet>
   );

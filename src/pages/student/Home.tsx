@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronRight, Wallet } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
-import { useCurrentYear, useSchoolSummary } from '../../lib/data';
+import { useCurrentYear, useSchoolSummary, useSemesters } from '../../lib/data';
 import { supabase } from '../../lib/supabase';
 import { date, peso } from '../../lib/format';
 import { Card, Chip, Empty, EntityLogo, HeroCard, PageHeader, SectionTitle, Spinner } from '../../components/ui';
@@ -12,13 +12,14 @@ export function StudentHome() {
   const { profile } = useAuth();
   const year = useCurrentYear();
   const summary = useSchoolSummary(year.data?.id);
+  const sems = useSemesters(year.data?.id);
   const dues = useQuery({
     queryKey: ['my-dues', profile?.student_id, year.data?.id],
     enabled: !!profile?.student_id && !!year.data,
     queryFn: async () => {
       // RLS: a student reads only their own memberships.
       const { data, error } = await supabase.from('memberships')
-        .select('id, amount_due, is_paid, paid_at, entity:entities(id, name, short_name, logo_path)')
+        .select('id, amount_due, is_paid, paid_at, semester_id, entity:entities(id, name, short_name, logo_path)')
         .eq('school_year_id', year.data!.id);
       if (error) throw error;
       return data;
@@ -30,6 +31,16 @@ export function StudentHome() {
   if (!year.data) return <><PageHeader title={`Hi${first ? `, ${first}` : ''}`} /><NoYear /></>;
   const owed = (dues.data ?? []).filter((d) => !d.is_paid).reduce((s, d) => s + Number(d.amount_due), 0);
   const s = summary.data;
+  // Fees are per semester: label each due with its semester, current semester first, then unpaid before paid.
+  const semOf = new Map((sems.data ?? []).map((x) => [x.id, x]));
+  const semLabel = (id: number | null) => {
+    const x = id ? semOf.get(id) : undefined;
+    return x ? `${x.term === 1 ? '1st' : '2nd'} semester` : 'School year';
+  };
+  const rank = (id: number | null) => (id && semOf.get(id)?.is_current ? 0 : 1);
+  const list = [...(dues.data ?? [])].sort((a, b) => rank(a.semester_id) - rank(b.semester_id)
+    || (semOf.get(b.semester_id ?? 0)?.term ?? 0) - (semOf.get(a.semester_id ?? 0)?.term ?? 0)
+    || Number(a.is_paid) - Number(b.is_paid));
 
   return (
     <>
@@ -46,15 +57,18 @@ export function StudentHome() {
                 <p className="money font-display font-extrabold text-[28px]">{peso(owed)}</p>
               </div>
               <ul className="divide-y divide-line">
-                {dues.data.map((d) => (
+                {list.map((d) => (
                   <li key={d.id} className="py-3 flex items-center gap-3">
                     <EntityLogo path={d.entity?.logo_path ?? null} name={d.entity?.name ?? ''} size={40} />
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold truncate">{d.entity?.short_name}</p>
-                      <p className="text-[13px] text-muted">{d.is_paid ? `Paid ${date(d.paid_at)}` : 'Pay your treasurer in cash'}</p>
+                      <p className="text-[13px] text-muted truncate">{semLabel(d.semester_id)} · {d.is_paid ? `paid ${date(d.paid_at)}` : 'pay your treasurer'}</p>
                     </div>
-                    <span className="money font-semibold">{peso(d.amount_due)}</span>
-                    <Chip tone={d.is_paid ? 'ok' : 'bad'}>{d.is_paid ? 'Paid' : 'Unpaid'}</Chip>
+                    {/* Amount above the chip, so the text on the left has room (no 3-line wrap). */}
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className="money font-semibold">{peso(d.amount_due)}</span>
+                      <Chip tone={d.is_paid ? 'ok' : 'bad'}>{d.is_paid ? 'Paid' : 'Unpaid'}</Chip>
+                    </div>
                   </li>
                 ))}
               </ul>

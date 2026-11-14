@@ -8,14 +8,20 @@ import { date, kindLabel, peso } from '../../lib/format';
 import type { Row } from '../../lib/database.types';
 import { Alert, Button, Card, Chip, Empty, EntityLogo, Field, Input, PageHeader, Select, Spinner, StatusChip } from '../../components/ui';
 import { IfApproved, RequestRow, Segmented } from '../../components/common';
+import { confirmAsk, promptAsk } from '../../lib/confirm';
 
 export function Approvals() {
   const [params] = useSearchParams();   // the Dashboard's "accounts to approve" link opens ?tab=accounts
   const [tab, setTab] = useState<'requests' | 'accounts'>(params.get('tab') === 'accounts' ? 'accounts' : 'requests');
+  const pending = useRequests({ status: 'pending' });
+  const profiles = useProfiles();
+  const nReq = pending.data?.length ?? 0;
+  const nAcc = (profiles.data ?? []).filter((p) => p.status === 'pending').length;
   return (
     <>
       <PageHeader title="Approvals" sub="Money requests and new accounts wait here for SAS." />
-      <div className="max-w-sm mb-5"><Segmented value={tab} onChange={setTab} options={[['requests', 'Money requests'], ['accounts', 'Accounts']]} /></div>
+      <div className="max-w-sm mb-5"><Segmented value={tab} onChange={setTab}
+        options={[['requests', `Money requests · ${nReq}`], ['accounts', `Accounts · ${nAcc}`]]} /></div>
       {tab === 'requests' ? <RequestQueue /> : <AccountQueue />}
     </>
   );
@@ -54,8 +60,23 @@ function ApprovalCard({ r, entity, cash, saved }: { r: Row<'fund_requests'>; ent
   const [err, setErr] = useState('');
 
   async function decide(approve: boolean) {
+    // Money moves on approval and can only be fixed later with a correction, so always confirm first.
+    const what = `${entity?.short_name ?? 'this org'}’s ${peso(r.amount)} ${kindLabel[r.kind].toLowerCase()}`;
+    let note = remarks.trim();
+    if (approve) {
+      const ok = await confirmAsk({ title: `Approve ${what}?`, body: 'The money moves right away. A mistake can only be fixed later with a correction.', confirm: 'Approve', tone: 'primary' });
+      if (!ok) return;
+    } else if (note.length >= 3) {
+      const ok = await confirmAsk({ title: `Reject ${what}?`, body: `Reason sent to the treasurer: “${note}”`, confirm: 'Reject', tone: 'bad' });
+      if (!ok) return;
+    } else {
+      const reason = await promptAsk({ title: `Reject ${what}?`, body: 'The treasurer sees this reason and can file again.', confirm: 'Reject', tone: 'bad',
+        input: { label: 'Reason', placeholder: 'e.g. The receipt is unreadable', minLength: 3 } });
+      if (!reason) return;
+      note = reason.trim();
+    }
     setBusy(approve ? 'yes' : 'no'); setErr('');
-    const { error } = await supabase.rpc('review_request', { p_request_id: r.id, p_approve: approve, p_remarks: remarks.trim() || undefined });
+    const { error } = await supabase.rpc('review_request', { p_request_id: r.id, p_approve: approve, p_remarks: note || undefined });
     setBusy(null);
     if (error) { setErr(errorText(error)); return; }
     void qc.invalidateQueries();
@@ -82,10 +103,10 @@ function ApprovalCard({ r, entity, cash, saved }: { r: Row<'fund_requests'>; ent
         <p className="money font-display font-bold text-[22px]">{peso(r.amount)}</p>
       </div>
       {r.attachment_path && (
-        <button onClick={openReceipt} className="mt-3 flex items-center gap-2 text-primary font-semibold text-[14px] cursor-pointer"><Paperclip className="size-4" />View attachment</button>
+        <Button variant="soft" onClick={openReceipt} className="mt-3 h-11 px-4 text-[14px]"><Paperclip className="size-4" aria-hidden />{r.kind === 'expense' ? 'View receipt' : 'View proof'}</Button>
       )}
       <div className="mt-4"><IfApproved kind={r.kind} amount={Number(r.amount)} cash={Number(cash)} saved={Number(saved)} /></div>
-      <div className="mt-4"><Field label="Remarks" hint="Required when rejecting."><Input value={remarks} onChange={(e) => setRemarks(e.target.value)} placeholder="Optional note to the treasurer" /></Field></div>
+      <div className="mt-4"><Field label="Note to the treasurer" hint="Optional when approving. When rejecting, you'll be asked for a reason."><Input value={remarks} onChange={(e) => setRemarks(e.target.value)} placeholder="Optional note" /></Field></div>
       {err && <div className="mt-3"><Alert>{err}</Alert></div>}
       <div className="mt-4 grid grid-cols-2 gap-3">
         <Button variant="danger" busy={busy === 'no'} disabled={!!busy} onClick={() => decide(false)}>Reject</Button>
