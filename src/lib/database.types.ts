@@ -195,6 +195,7 @@ export type Database = {
       close_school_year: { Args: { p_entity_id: number; p_school_year_id: number }; Returns: number };
       disable_account: { Args: { p_profile_id: string; p_remarks?: string }; Returns: undefined };
       enable_account: { Args: { p_profile_id: string; p_remarks?: string }; Returns: undefined };
+      import_students: { Args: { p_rows: Json }; Returns: Json };
       file_request: {
         Args: { p_amount: number; p_attachment_path?: string; p_description: string; p_entity_id: number; p_kind: E['request_kind']; p_category?: E['expense_category'] };
         Returns: number;

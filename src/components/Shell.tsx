@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useState, type ComponentType } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router';
-import { BadgeCheck, Building2, CalendarRange, CheckCheck, Ellipsis, History, Home, LogOut, MessagesSquare, Receipt, Users, BarChart3, UserRound } from 'lucide-react';
+import { BadgeCheck, Building2, CalendarRange, CheckCheck, Ellipsis, GraduationCap, History, Home, LogOut, MessagesSquare, Receipt, Users, BarChart3, UserRound } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { useCurrentYear, useEntities } from '../lib/data';
 import { useMessagesRealtime, useUnread } from '../lib/messages';
@@ -24,6 +24,7 @@ const NAV: Record<string, Item[]> = {
     { to: '/approvals', label: 'Approvals', icon: CheckCheck },
     { to: '/orgs', label: 'Orgs & clubs', icon: Building2 },
     { to: '/messages', label: 'Messages', icon: MessagesSquare, badge: 'messages' },
+    { to: '/students', label: 'Students', icon: GraduationCap, phone: false },
     { to: '/accredited', label: 'Accredited', icon: BadgeCheck, phone: false },
     { to: '/calendar', label: 'School year', icon: CalendarRange, phone: false },
     { to: '/activity', label: 'Activity log', icon: History, phone: false },
