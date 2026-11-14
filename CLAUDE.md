@@ -18,7 +18,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   migrations, notification events) · `docs/design-system.md` · `docs/handoff.md` (things only Neil can do) ·
   `docs/sessions.md` (what each session did) · `docs/working-rules.md` (Neil's rules in full).
 
-## Status (updated 2026-11-14, end of session 5)
+## Status (updated 2026-11-14, end of session 6)
 - **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
   student on the roster. Test data was wiped before launch.
 - Database: **25 migrations** live (last `20261114090000_clubs_only_add`).
@@ -31,7 +31,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   (installed with the Claude CLI); Supabase + Figma connectors; GitHub plugin via the Windows user variable
   GITHUB_PERSONAL_ACCESS_TOKEN (expires 2027-02-12).
 - Open items: none. (Supabase access token "E-CFunds deploy" revoked 2026-11-14 and removed from `.env`.)
-- Ideas not started: browser (web) push, custom domain, own email sender (SMTP), more course rules.
+- Ideas not started: browser (web) push, custom domain, own email sender (SMTP), more course rules, iPhone app.
 
 ## Memberships & fees (migrations 15–17, 24)
 - **Organizations are mandatory by course** (tables `courses`, `course_orgs`; SAS can change them):
@@ -65,9 +65,13 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   Terms: checkbox on sign-up / Google's first screen → `profiles.terms_accepted_at`.
 
 ## Features
-- Admin: dashboard, approvals, orgs & logos, accredited list + history, school year/semesters, messages + Announcement.
-- Treasurer: home (fund, pockets, export), members (course-based; add, then record when paid), requests.
-- Student: my dues, reports. Everyone: My account, "Ask E-CFunds" assistant (Gemini via `chat`, RLS-scoped).
+- Admin: dashboard (waiting-for-you near top, accounts to approve, per-org list on phones / table on computers),
+  approvals (confirm before Approve; Reject asks a reason), orgs & logos (treasurer shown per card), accredited list +
+  history, school year/semesters, messages + Announcement.
+- Treasurer: home (fund, compact actions, dues this semester → Members "To collect"), members (course-based; add,
+  then record when paid; ⋮ = undo payment), requests (waiting/done groups, File again on rejected).
+- Student: my dues (labelled by semester), reports. Everyone: My account (sign out lives here, with a confirm),
+  "Ask E-CFunds" assistant (Gemini via `chat`, RLS-scoped) — ✨ in the phone top bar, floating button on computers.
 - Exports: org report PDF (charts, OMSC letterhead, Inter font for ₱) + CSVs, school summary, members, accredited.
 - **Live screens:** data-free ticks in `live_changes` → open screens re-fetch within ~0.5 s (`src/lib/live.ts`).
 - **Notifications** (migrations 19–20, 22–23; events per role in `docs/database.md`): bell + pop-up + soft chime
@@ -77,8 +81,25 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - **App updates:** website "Update available → Reload"; Android self-updates (`src/lib/ota.ts`,
   `@capgo/capacitor-updater` self-hosted: Vercel builds `/ota/manifest.json` + zip; applies at the next app start;
   status + "Check for updates" in My account). Raise `ota.json` minNativeBuild only when a change needs a new APK.
-- **Android app:** full screen (status bar hidden, Capacitor SystemBars), Back button (`NativeBack.tsx`), exports
-  via share sheet, Google sign-in via `ph.edu.omsc.ecfunds://auth/callback`, email links open the live site.
+- **Android app:** full screen (status bar hidden, Capacitor SystemBars; hidden again on the next tap after a
+  swipe-down, `src/main.tsx`), Back button (`NativeBack.tsx`), exports via share sheet, Google sign-in via
+  `ph.edu.omsc.ecfunds://auth/callback`, email links open the live site. Android screenshots still show the bar.
+
+## UI conventions (from the 2026-11-14 page-by-page review — keep them)
+- **Dues counts = current semester.** `useEntityReport` passes `p_semester_id` (filters memberships only; money stays
+  year-wide). Exports do the same (`reportRow`). Label it "Dues · this semester".
+- **Money forms check while typing:** red note under Amount, submit disabled, never show a negative "If approved".
+- **Anything that moves money asks first** (`confirmAsk`); rejections ask for a reason (`promptAsk`).
+- Touch targets ≥ 44 px; whole cards/rows are tappable; nothing floats over content on phones (no FAB).
+- Phone vs computer: phones get lists/cards, computers get tables; tables must fit at 1440 px.
+- Request icons: Landmark = remit, HandCoins = release, Receipt = expense (`kindIcon` in `common.tsx`).
+- `Button`'s `cx` doesn't merge Tailwind classes — a `text-*` in className can lose to the variant's; use a plain
+  `<button>` for one-off colours.
+- Shared lookups in `src/lib/data.ts`: `useTreasurers()` (admin), `useSemesters()`, `useEntityReport()`.
+- **How to review a page:** UI Design Review plugin (`/ui-design-review:ui-review`). Admin pages: Claude can open the
+  live site in the browser pane where Neil is signed in as SAS admin — view only, never approve/send. Treasurer and
+  student pages: ask Neil for phone screenshots (light + dark). Changed components: check with a temporary
+  `preview.html` + `src/__preview.tsx` (sample data; delete before committing).
 
 ## Stack
 - React 19 + TypeScript + Vite 8 + Tailwind 4 + React Router 8 + React Query + supabase-js (PKCE).
@@ -112,8 +133,10 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   and GOOGLE_SERVICES_JSON (Firebase; release builds fail without it). Push code requires build ≥ 9
   (`PUSH_MIN_BUILD` in `src/lib/push.ts`).
 - **Icons/splash:** `node scripts/make-app-assets.mjs` → `npx capacitor-assets generate --android`.
-- Testing two roles at once: localhost:3000 vs 127.0.0.1:3000. The Claude browser pane can't run service workers —
-  test offline/PWA in headless Edge. Desktop app: `/mcp` sign-in dialogs don't open — use the token/DB-URL routes.
+- Testing two roles at once: localhost:3000 vs 127.0.0.1:3000. On e-cfunds.vercel.app the browser pane DOES run the
+  service worker, so after a deploy it shows the old build until "Update available → Reload" (or SKIP_WAITING).
+  Desktop app: `/mcp` sign-in dialogs don't open — use connectors (claude.ai/settings/connectors) or tokens.
+- After a push, wait for `https://e-cfunds.vercel.app/ota/manifest.json` `version` = the new commit before checking.
 
 ## Security (non-negotiable)
 - No secrets in git. Supabase secrets: GEMINI_API_KEY, FCM_SERVICE_ACCOUNT. Vercel env: public URL + publishable key.
