@@ -36,16 +36,15 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   browser (web row in `push_devices`); a received browser notification not yet confirmed; no iPhone test yet.
 - **Phone notifications card** (My account, Android): `notifyPermission` times out after 3 s and falls back to the
   push plugin's permission; the card never hides (fixed + confirmed "On" on Neil's phone, 2026-11-14).
-- **In progress (waiting on OMSC IT):** web address `ecfunds.omsc.edu.ph` (added to Vercel; OMSC DNS is on
-  Cloudflare) + own email sender via Resend (domain added in Neil's Resend account, Tokyo, tracking off). The IT
-  letter `docs/it-request.md` is complete (web CNAME + DKIM TXT + 2 SPF CNAMEs + `_dmarc.ecfunds`; MX for receiving
-  deliberately left out) and saved as a **Gmail draft with no recipient** — Neil must find the IT/MIS address and send.
-  When IT is done: check `get_domain_config` → switch LIVE_URL, OTA SITE, CORS, Vercel primary domain (keep `/ota/*`
-  on vercel.app for old apps); Neil: Resend Verify + API key → Supabase SMTP, Auth URLs, templates in
-  `docs/email-templates/` (steps: `docs/handoff.md` session 6).
-- Claude in Chrome works on Neil's PC (Gmail + Resend signed in). Never sign in for him; ask before sending or
-  changing anything; its filter hides long `=`/`;` values — use the site's Copy button + clipboard, never disguise text.
-- Ideas not started: more course rules, App Store iPhone app.
+- **Web address stays `e-cfunds.vercel.app`; email stays Supabase's built-in sender** — Neil cancelled the school
+  subdomain + Resend plan (2026-11-14, "too complicated"; OMSC IT controls the DNS). Undone: Resend domain deleted,
+  IT draft discarded, `docs/it-request.md` removed (git history has it), VAPID contact = the vercel.app URL.
+  Open: `ecfunds.omsc.edu.ph` still attached to the Vercel project — remove it once Neil handles Vercel's 2FA pop-up
+  (the Vercel connector has no remove-domain action). Optional: `docs/email-templates/` work with the built-in sender.
+- Claude in Chrome works on Neil's PC (Gmail, Resend, Vercel signed in). Never sign in for him; ask before sending,
+  deleting or changing anything; never decide security prompts (e.g. 2FA) for him; its filter hides long `=`/`;`
+  values — use the site's Copy button + clipboard, never disguise text.
+- Ideas not started: more course rules, App Store iPhone app, school web address/own email sender (cancelled once).
 
 ## Memberships & fees (migrations 15–17, 24)
 - **Organizations are mandatory by course** (tables `courses`, `course_orgs`; SAS can change them):

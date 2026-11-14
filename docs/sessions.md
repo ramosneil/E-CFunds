@@ -258,3 +258,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - Bug (Neil's phone): 'Phone notifications' card missing in My account while push worked (admin android device registered 20:11). notifyPermission now times out after 3 s and falls back to the push plugin's permission; the card always shows (Checking… / settings hint).
 - Neil confirmed: My account shows 'Phone notifications: On' after the fix.
 - Resend domain added by Claude via Neil's Chrome (Tokyo); IT letter filled (CNAME web + DKIM TXT + 2 CNAME SPF + _dmarc.ecfunds; MX left out); saved as Gmail draft (recipient unknown).
+- Neil cancelled the school web address + Resend sender (keep vercel.app). Undone: Resend domain deleted, IT Gmail draft discarded (Gmail deletes drafts permanently, not to Trash), docs/it-request.md removed, private.push_config.vapid_subject = https://e-cfunds.vercel.app. Vercel project domain removal blocked by Vercel's 2FA pop-up (Neil's call).

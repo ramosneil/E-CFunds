@@ -1,7 +1,7 @@
 # E-CFunds email templates (Supabase Auth)
 
-Branded emails in the E-CFunds colours. Paste them into Supabase **after** the own email sender (Resend) works —
-see `docs/handoff.md`, session 6, part C. They work with Supabase's default sender too.
+Branded emails in the E-CFunds colours. Optional — they work with Supabase's built-in sender (the own-sender plan
+was cancelled, 2026-11-14).
 
 | Supabase template | File | Subject to use |
 |---|---|---|
