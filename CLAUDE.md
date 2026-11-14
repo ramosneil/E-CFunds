@@ -23,7 +23,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   student on the roster. Test data was wiped before launch.
 - Database: **27 migrations** live (last `20261114130000_expense_categories`).
 - **"Where the money goes" (transparency) live 2026-11-14:** per-org charts + approved expenses for every role;
-  numbers checked against the live ledger; not yet seen signed in as student/treasurer.
+  numbers checked against the live ledger; confirmed on Neil's phone.
 - Android: latest APK **v1.1.1 = build 10**; `ota.json` minNativeBuild = 10.
 - **Confirmed working on Neil's phone:** push notifications with the app closed, app self-update end to end
   (download → reopen → "E-CFunds was updated"), Back button, full screen, Delete conversation, Add member (adds only),

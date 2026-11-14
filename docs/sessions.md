@@ -254,3 +254,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   view) on /reports/:id (students + treasurers), student Home + SAS Dashboard (school-wide), treasurer Home, SAS org
   detail; category in the expense form + Approvals + request rows; PDF org report adds category bars + expense table.
   Neil: students must not see the "receipt checked by SAS" mark (staff only). iPhone: printable docs/iphone-install-guide.html.
+- Neil confirmed "Where the money goes" on his phone ("Looks right").
