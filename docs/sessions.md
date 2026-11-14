@@ -233,3 +233,15 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   /approvals?tab=accounts); tiles = Money requests, Accounts to approve, Collected this year, Spent this year (cash/
   saved tiles repeated the card); table full width on tablet/desktop, fits at 1440 (was 22 px too wide); orgs with
   pending requests first; Ask = icon only under 360 px. Verified live after deploy (phone light/dark, 1440, 320).
+- UI review of Approvals, Orgs & clubs, org detail, Messages (Claude, live as SAS admin, view only) + student Home
+  and Reports (Neil's screenshots) → 16 fixes, deployed 78afd49:
+  - Ask moved into the phone top bar (✨ next to 🔔; floating button only on computers) — nothing covers content;
+    "E-CFunds" word hides under 360 px so the bar fits (checked at 320).
+  - Approvals: Approve asks "Approve X's ₱Y …?"; Reject asks for the reason (or confirms the typed note);
+    "View receipt/proof" 48 px button; tab counts. NOT clicked in testing (real money) — confirm flow unverified live.
+  - Orgs: whole card opens the org, ✏️ 44 px, "Treasurer: …" / "No treasurer yet", new orgs default to per semester.
+  - Org detail: Dues + Release above the ledger on phones; ledger latest 10 + "Show all"; Release form live check.
+  - Messages: explainer line (announcement vs All treasurers); thread header "Treasurer: …"; back button 44 px.
+  - Student Home: each due labelled with its semester, current first; amount above chip (no 3-line wrap).
+  - Reports: "Dues · this semester" label, "No members yet", orgs with money first, empty ones as compact rows.
+  - Shared: useTreasurers() in src/lib/data.ts.
