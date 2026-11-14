@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Link } from 'react-router';
+import { ChevronRight } from 'lucide-react';
 import { useCurrentYear, useEntities, useEntityReport } from '../../lib/data';
 import { peso } from '../../lib/format';
 import { Card, Chip, DuesBar, EntityLogo, PageHeader, PocketBar, Spinner } from '../../components/ui';
@@ -44,6 +46,9 @@ export function Reports() {
               </dl>
               <p className="micro text-muted mt-4 mb-1.5">Dues · this semester</p>
               {r.members > 0 ? <DuesBar paid={r.paid_members} members={r.members} /> : <p className="text-[13px] text-muted">No members yet</p>}
+              <Link to={`/reports/${r.entity_id}`} className="mt-4 h-11 -mb-1 flex items-center justify-between rounded-[12px] bg-primary-soft text-primary px-3 font-semibold text-[14px] hover:brightness-95">
+                See where the money goes<ChevronRight className="size-4" aria-hidden />
+              </Link>
             </Card>
           ))}
         </div>
@@ -52,10 +57,13 @@ export function Reports() {
             <p className="micro text-muted px-5 pt-4 pb-1">Nothing recorded yet · {empty.length}</p>
             <ul className="divide-y divide-line">
               {empty.map((r) => (
-                <li key={r.entity_id} className="px-5 py-3 flex items-center gap-3">
-                  <EntityLogo path={logo.get(r.entity_id) ?? null} name={r.name} size={32} />
-                  <span className="font-semibold truncate flex-1">{r.short_name}</span>
-                  <span className="money text-[14px] text-muted">{peso(0)}</span>
+                <li key={r.entity_id}>
+                  <Link to={`/reports/${r.entity_id}`} className="px-5 py-3 flex items-center gap-3 hover:bg-surface2/60">
+                    <EntityLogo path={logo.get(r.entity_id) ?? null} name={r.name} size={32} />
+                    <span className="font-semibold truncate flex-1">{r.short_name}</span>
+                    <span className="money text-[14px] text-muted">{peso(0)}</span>
+                    <ChevronRight className="size-4 text-muted" aria-hidden />
+                  </Link>
                 </li>
               ))}
             </ul>

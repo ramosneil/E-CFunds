@@ -92,7 +92,7 @@ export function useRequests(filter: { entityId?: number; status?: 'pending' } = 
 }
 
 /** Query keys to refresh after any money action. */
-export const moneyKeys = [['report'], ['summary'], ['requests'], ['ledger'], ['memberships']];
+export const moneyKeys = [['report'], ['summary'], ['requests'], ['ledger'], ['memberships'], ['finance']];
 
 /** Approved treasurers by org/club id (admin only — RLS lets SAS read every profile). */
 export function useTreasurers(enabled = true) {
@@ -104,6 +104,32 @@ export function useTreasurers(enabled = true) {
         .eq('role', 'treasurer').eq('status', 'approved');
       if (error) throw error;
       return new Map(data.filter((p) => p.entity_id).map((p) => [p.entity_id!, p.full_name || p.email || 'Treasurer']));
+    },
+  });
+}
+
+/** Where an org/club's money came from and went (approved users; students never get the receipt mark). */
+export function useEntityFinance(entityId: number | undefined, yearId: number | undefined) {
+  return useQuery({
+    queryKey: ['finance', entityId, yearId],
+    enabled: !!entityId && !!yearId,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_entity_finance', { p_entity_id: entityId!, p_school_year_id: yearId! });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+/** The same, summed over every org and club (no expense lines). */
+export function useSchoolFinance(yearId: number | undefined) {
+  return useQuery({
+    queryKey: ['finance', 'school', yearId],
+    enabled: !!yearId,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_school_finance', { p_school_year_id: yearId! });
+      if (error) throw error;
+      return data;
     },
   });
 }

@@ -1,7 +1,8 @@
 import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronRight, UserCheck } from 'lucide-react';
-import { useCurrentYear, useEntities, useEntityReport, useRequests, useSchoolSummary } from '../../lib/data';
+import { useCurrentYear, useEntities, useEntityReport, useRequests, useSchoolFinance, useSchoolSummary } from '../../lib/data';
+import { FinancePanel } from '../../components/finance/FinancePanel';
 import { supabase } from '../../lib/supabase';
 import { peso } from '../../lib/format';
 import { Card, DuesBar, EntityLogo, HeroCard, PageHeader, SectionTitle, Spinner, Stat, Chip } from '../../components/ui';
@@ -28,6 +29,7 @@ export function AdminDashboard() {
   const entities = useEntities();
   const pending = useRequests({ status: 'pending' });
   const accounts = usePendingAccounts();
+  const school = useSchoolFinance(y);
 
   if (year.isLoading) return <Spinner />;
   if (!year.data) return <><PageHeader title="Dashboard" /><NoYear admin /></>;
@@ -138,6 +140,10 @@ export function AdminDashboard() {
             </div>
           </>)}
         </Card>
+      </div>
+      <div className="mt-4">
+        <FinancePanel finance={school.data} loading={school.isLoading} title="Where all student funds went this year"
+          note="Every org and club together — students see this on their Home page." />
       </div>
     </>
   );

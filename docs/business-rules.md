@@ -219,3 +219,12 @@ Where the new numbers differ from the old ones, the old formula was a bug or con
 
 ## 10. Open questions
 None. Both §10 questions were answered in session 3 and moved to §8.
+
+## Transparency — where the money goes (Neil, 2026-11-14; migration 27)
+- Every approved user (students included) can open every org/club's report: money in vs out by month, spending by
+  category, and the list of **SAS-approved expenses** (date, purpose, category, amount). This replaces "students
+  see aggregates only" for expenses. Still never shown to students: student names, receipts/attachments, the
+  "receipt checked by SAS" mark (SAS + that org's treasurer only), remittance/release lines.
+- Expense categories (treasurer picks one; SAS can change it when approving): Events & activities, Supplies &
+  materials, Food & refreshments, Transportation, Printing & tarpaulins, Outreach & donations, Other. Expenses
+  approved before 2026-11-14 count as Other. Treasurers see a note that the purpose text becomes public.

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E-CFunds on iPhone</title>
+<style>
+  /* Printable 1-page guide (A4 / Letter). Open in a browser → Print → Save as PDF, or share the file. */
+  :root { --ink:#0D1530; --muted:#566080; --line:#DDE2EE; --soft:#E6ECFB; --primary:#1D3FAF; --bg:#F4F6FB; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 Inter, "Segoe UI", Arial, sans-serif; }
+  .page { max-width:720px; margin:24px auto; background:#fff; border:1px solid var(--line); border-radius:20px; padding:32px; }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:800; font-size:20px; }
+  .logo { width:40px; height:40px; border-radius:12px; background:var(--primary); color:#fff; display:grid; place-items:center; font-size:20px; }
+  h1 { font-size:28px; line-height:1.2; margin:20px 0 6px; }
+  .lead { color:var(--muted); margin:0 0 20px; }
+  ol { list-style:none; padding:0; margin:0; display:grid; gap:14px; }
+  li { display:flex; gap:16px; align-items:flex-start; border:1px solid var(--line); border-radius:16px; padding:16px; }
+  .n { flex:none; width:40px; height:40px; border-radius:50%; background:var(--soft); color:var(--primary); font-weight:800; display:grid; place-items:center; font-size:18px; }
+  li b { display:block; font-size:16px; }
+  .icon { display:inline-grid; place-items:center; width:26px; height:26px; border:1.5px solid var(--primary); border-radius:6px; color:var(--primary); font-weight:700; vertical-align:middle; margin:0 2px; }
+  .url { display:inline-block; margin-top:4px; font-weight:700; color:var(--primary); font-size:18px; }
+  .note { margin-top:20px; padding:14px 16px; border-radius:14px; background:var(--soft); color:var(--primary); font-size:14px; }
+  .foot { margin-top:22px; color:var(--muted); font-size:12px; border-top:1px solid var(--line); padding-top:12px; }
+  @media print { body { background:#fff; } .page { border:0; margin:0; max-width:none; padding:12mm; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="brand"><span class="logo">&#8369;</span>E-CFunds</div>
+  <h1>Use E-CFunds like an app on your iPhone</h1>
+  <p class="lead">Free — no App Store needed. It opens full screen from your Home Screen and can send you notifications
+    (iPhone with iOS 16.4 or newer).</p>
+  <ol>
+    <li><span class="n">1</span><div><b>Open Safari and go to</b><span class="url">e-cfunds.vercel.app</span>
+      <div style="color:var(--muted);font-size:14px">Use <b style="display:inline;font-size:14px">Safari</b> — not Chrome or Facebook's browser.</div></div></li>
+    <li><span class="n">2</span><div><b>Tap Share <span class="icon">&#8679;</span></b>
+      The square with an arrow, at the bottom of the screen (on iPad: at the top).</div></li>
+    <li><span class="n">3</span><div><b>Tap “Add to Home Screen”, then “Add”</b>
+      Scroll down the list if you don't see it right away.</div></li>
+    <li><span class="n">4</span><div><b>Open E-CFunds from your Home Screen and sign in</b>
+      Use your Student ID and password, or Google.</div></li>
+    <li><span class="n">5</span><div><b>Turn on notifications</b>
+      Tap your profile icon (top right) → <b style="display:inline;font-size:15px">My account</b> →
+      <b style="display:inline;font-size:15px">Turn on notifications</b> → Allow.</div></li>
+  </ol>
+  <div class="note">In E-CFunds you can see your dues, and every org and club's report: how much was collected,
+    what it was spent on, and the approved expenses — open <b>Reports</b>.</div>
+  <p class="foot">E-CFunds · Office of Student Affairs and Services, OMSC Mamburao · Android phones: download the app
+    from the sign-in page.</p>
+</div>
+</body>
+</html>

@@ -2,7 +2,8 @@ import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronRight, HandCoins, Landmark, Receipt, Wallet } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
-import { useCurrentYear, useEntities, useEntityReport, useRequests, useSemesters } from '../../lib/data';
+import { useCurrentYear, useEntities, useEntityFinance, useEntityReport, useRequests, useSemesters } from '../../lib/data';
+import { FinancePanel } from '../../components/finance/FinancePanel';
 import { supabase } from '../../lib/supabase';
 import { peso } from '../../lib/format';
 import { Card, DuesBar, EntityLogo, HeroCard, SectionTitle, Spinner, Stat } from '../../components/ui';
@@ -21,6 +22,7 @@ export function TreasurerHome() {
   const e = entities.data?.find((x) => x.id === entityId);
   const r = report.data?.find((x) => x.entity_id === entityId);
   const dues = useDues(entityId, year.data?.id, e?.dues_period === 'semester');
+  const finance = useEntityFinance(entityId, year.data?.id);
 
   if (year.isLoading || entities.isLoading) return <Spinner />;
   return (
@@ -75,6 +77,10 @@ export function TreasurerHome() {
               <SectionTitle>Recent activity</SectionTitle>
               {ledger.isLoading ? <Spinner /> : <LedgerList entries={(ledger.data ?? []).slice(0, 8)} />}
             </Card>
+          </div>
+          <div className="mt-4">
+            <FinancePanel finance={finance.data} loading={finance.isLoading} title="Your report — what students see"
+              note="Every signed-in student sees these charts and your approved expenses (purpose, category, amount). They don't see receipts or the receipt mark." />
           </div>
         </>
       )}

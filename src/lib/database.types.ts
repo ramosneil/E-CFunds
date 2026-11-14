@@ -82,6 +82,7 @@ export type Database = {
           amount: number; attachment_path: string | null; description: string; entity_id: number; filed_at: string;
           filed_by: string | null; id: number; kind: E['request_kind']; remarks: string | null; reviewed_at: string | null;
           reviewed_by: string | null; school_year_id: number; status: E['request_status'];
+          category: E['expense_category'] | null;
         };
         Insert: never; Update: never; Relationships: [];
       };
@@ -90,7 +91,7 @@ export type Database = {
           amount: number; attachment_path: string | null; created_at: string; created_by: string | null; description: string;
           direction: number | null; entity_id: number; id: number; kind: E['ledger_kind']; membership_id: number | null;
           occurred_on: string; pocket: E['pocket'] | null; request_id: number | null; reverses_id: number | null;
-          school_year_id: number; semester_id: number | null;
+          school_year_id: number; semester_id: number | null; category: E['expense_category'] | null;
         };
         Insert: never; Update: never; Relationships: [];
       };
@@ -177,11 +178,13 @@ export type Database = {
       close_school_year: { Args: { p_entity_id: number; p_school_year_id: number }; Returns: number };
       disable_account: { Args: { p_profile_id: string; p_remarks?: string }; Returns: undefined };
       file_request: {
-        Args: { p_amount: number; p_attachment_path?: string; p_description: string; p_entity_id: number; p_kind: E['request_kind'] };
+        Args: { p_amount: number; p_attachment_path?: string; p_description: string; p_entity_id: number; p_kind: E['request_kind']; p_category?: E['expense_category'] };
         Returns: number;
       };
       get_entity_report: { Args: { p_school_year_id: number; p_semester_id?: number }; Returns: EntityReport[] };
       get_school_summary: { Args: { p_school_year_id: number }; Returns: SchoolSummary[] };
+      get_entity_finance: { Args: { p_entity_id: number; p_school_year_id: number }; Returns: Finance };
+      get_school_finance: { Args: { p_school_year_id: number }; Returns: Finance };
       mark_thread_read: { Args: { p_entity_id: number }; Returns: number };
       mark_broadcasts_read: { Args: Record<string, never>; Returns: number };
       record_payment: { Args: { p_membership_id: number }; Returns: number };
@@ -193,7 +196,7 @@ export type Database = {
         };
         Returns: undefined;
       };
-      review_request: { Args: { p_approve: boolean; p_remarks?: string; p_request_id: number }; Returns: number };
+      review_request: { Args: { p_approve: boolean; p_remarks?: string; p_request_id: number; p_category?: E['expense_category'] }; Returns: number };
       // Server-function only (service_role); the browser cannot call these two.
       student_login_lookup: { Args: { p_student_no: string }; Returns: { email: string | null; locked_until: string | null }[] };
       student_login_record: { Args: { p_student_no: string; p_ok: boolean }; Returns: undefined };
@@ -214,6 +217,7 @@ export type Database = {
       pocket: 'cash' | 'saved';
       request_kind: 'remittance' | 'release' | 'expense';
       request_status: 'pending' | 'approved' | 'rejected' | 'cancelled';
+      expense_category: 'events' | 'supplies' | 'food' | 'transport' | 'printing' | 'outreach' | 'other';
     };
     CompositeTypes: { [_ in never]: never };
   };
@@ -225,6 +229,13 @@ export type EntityReport = {
   is_school_wide: boolean; members: number; name: string; openings: number; paid_members: number;
   pending_expenses: number; pending_releases: number; pending_remittances: number; previous_funds: number;
   releases: number; remittances: number; saved_with_sas: number; short_name: string; total_fund: number;
+};
+/** get_entity_finance / get_school_finance (migration 27). `receipt_checked` only reaches SAS + that org's treasurer. */
+export type Finance = {
+  money_in: number; money_out: number;
+  monthly: { month: string; money_in: number; money_out: number }[];
+  categories: { category: E['expense_category']; amount: number }[];
+  expenses: { date: string; description: string; category: E['expense_category']; amount: number; receipt_checked?: boolean }[] | null;
 };
 export type SchoolSummary = {
   cash_on_hand: number; clubs: number; expenses: number; organizations: number; pending_requests: number;

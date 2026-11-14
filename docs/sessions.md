@@ -246,3 +246,11 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   - Reports: "Dues · this semester" label, "No members yet", orgs with money first, empty ones as compact rows.
   - Shared: useTreasurers() in src/lib/data.ts.
 - Neil confirmed the admin + student fixes on his phone, incl. the Approve confirm ("Looks right"). Every page has now had a UI review.
+- Website notifications (Web Push, migration 26) + iPhone Home Screen app polish + IT letter/Resend steps/email
+  templates (domain + email waiting on Neil/IT).
+- Transparency (Neil): "where the money goes" for all roles — migration 27 (expense categories, get_entity_finance,
+  get_school_finance; rehearsed: student sees no receipt/attachment/names, reversed expenses drop out, SAS category
+  override). FinancePanel (hand-built SVG charts per the dataviz skill; palette validated light+dark; tooltip; table
+  view) on /reports/:id (students + treasurers), student Home + SAS Dashboard (school-wide), treasurer Home, SAS org
+  detail; category in the expense form + Approvals + request rows; PDF org report adds category bars + expense table.
+  Neil: students must not see the "receipt checked by SAS" mark (staff only). iPhone: printable docs/iphone-install-guide.html.

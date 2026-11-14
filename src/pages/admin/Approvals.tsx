@@ -4,8 +4,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Inbox, Paperclip, UserCheck } from 'lucide-react';
 import { useCurrentYear, useEntities, useEntityReport, useRequests } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
-import { date, kindLabel, peso } from '../../lib/format';
-import type { Row } from '../../lib/database.types';
+import { CATEGORIES, categoryLabel, date, kindLabel, peso } from '../../lib/format';
+import type { Enum, Row } from '../../lib/database.types';
 import { Alert, Button, Card, Chip, Empty, EntityLogo, Field, Input, PageHeader, Select, Spinner, StatusChip } from '../../components/ui';
 import { IfApproved, RequestRow, Segmented } from '../../components/common';
 import { confirmAsk, promptAsk } from '../../lib/confirm';
@@ -56,6 +56,7 @@ function RequestQueue() {
 function ApprovalCard({ r, entity, cash, saved }: { r: Row<'fund_requests'>; entity?: Row<'entities'>; cash: number; saved: number }) {
   const qc = useQueryClient();
   const [remarks, setRemarks] = useState('');
+  const [category, setCategory] = useState<Enum<'expense_category'>>(r.category ?? 'other');
   const [busy, setBusy] = useState<'yes' | 'no' | null>(null);
   const [err, setErr] = useState('');
 
@@ -76,7 +77,8 @@ function ApprovalCard({ r, entity, cash, saved }: { r: Row<'fund_requests'>; ent
       note = reason.trim();
     }
     setBusy(approve ? 'yes' : 'no'); setErr('');
-    const { error } = await supabase.rpc('review_request', { p_request_id: r.id, p_approve: approve, p_remarks: note || undefined });
+    const { error } = await supabase.rpc('review_request', { p_request_id: r.id, p_approve: approve, p_remarks: note || undefined,
+      ...(approve && r.kind === 'expense' ? { p_category: category } : {}) });
     setBusy(null);
     if (error) { setErr(errorText(error)); return; }
     void qc.invalidateQueries();
@@ -106,6 +108,15 @@ function ApprovalCard({ r, entity, cash, saved }: { r: Row<'fund_requests'>; ent
         <Button variant="soft" onClick={openReceipt} className="mt-3 h-11 px-4 text-[14px]"><Paperclip className="size-4" aria-hidden />{r.kind === 'expense' ? 'View receipt' : 'View proof'}</Button>
       )}
       <div className="mt-4"><IfApproved kind={r.kind} amount={Number(r.amount)} cash={Number(cash)} saved={Number(saved)} /></div>
+      {r.kind === 'expense' && (
+        <div className="mt-4">
+          <Field label="Category" hint="Students see this category (and the purpose and amount) once approved. Change it if it doesn't fit.">
+            <Select value={category} onChange={(e) => setCategory(e.target.value as Enum<'expense_category'>)}>
+              {CATEGORIES.map((c) => <option key={c} value={c}>{categoryLabel[c]}</option>)}
+            </Select>
+          </Field>
+        </div>
+      )}
       <div className="mt-4"><Field label="Note to the treasurer" hint="Optional when approving. When rejecting, you'll be asked for a reason."><Input value={remarks} onChange={(e) => setRemarks(e.target.value)} placeholder="Optional note" /></Field></div>
       {err && <div className="mt-3"><Alert>{err}</Alert></div>}
       <div className="mt-4 grid grid-cols-2 gap-3">

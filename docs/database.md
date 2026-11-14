@@ -89,6 +89,13 @@ prevents two approvals racing past a limit.
 - VAPID key pair lives only in `private.push_config` (written by a local script); the public key is in
   `src/lib/webpush.ts`. Never regenerate it: every browser subscription would stop working.
 
+## Where the money goes (migration 27, 2026-11-14)
+- Enum `expense_category`; `fund_requests.category`, `ledger_entries.category` (old rows null = Other; ledger stays
+  append-only). `file_request(…, p_category)`, `review_request(…, p_category)` (SAS may override on approval).
+- `get_entity_finance(entity, year)` / `get_school_finance(year)` (SECURITY DEFINER, any approved user): money in/out,
+  monthly series, category totals, approved expense list (not reversed). `receipt_checked` only for SAS + that org's
+  treasurer. Built on `private.entity_flows` (reversals count against what they reverse; remits/releases excluded).
+
 ## Design notes
 - Balances are never stored: `private.d_cash/d_saved` implement business-rules §2; reports sum the ledger.
 - A wrong remittance/release is corrected with two `admin_adjust` rows (reversal only for single-pocket kinds).

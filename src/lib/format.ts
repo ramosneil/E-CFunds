@@ -34,3 +34,15 @@ const manila = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila', year:
 export function manilaDate(d: Date | string = new Date()): string {
   return manila.format(typeof d === 'string' ? new Date(d) : d);
 }
+
+/** Expense categories (migration 27) — the treasurer picks one; SAS may change it when approving. */
+export const categoryLabel: Record<string, string> = {
+  events: 'Events & activities', supplies: 'Supplies & materials', food: 'Food & refreshments',
+  transport: 'Transportation', printing: 'Printing & tarpaulins', outreach: 'Outreach & donations', other: 'Other',
+};
+export const CATEGORIES = ['events', 'supplies', 'food', 'transport', 'printing', 'outreach', 'other'] as const;
+
+/** '2026-11' → 'Nov' (with the year when asked). */
+export const monthLabel = (ym: string, withYear = false) =>
+  new Intl.DateTimeFormat('en-PH', { month: 'short', ...(withYear ? { year: 'numeric' } : {}), timeZone: 'UTC' })
+    .format(new Date(`${ym}-01T00:00:00Z`));

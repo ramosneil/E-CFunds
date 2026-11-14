@@ -2,7 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, HandCoins } from 'lucide-react';
-import { useCurrentYear, useEntities, useEntityReport } from '../../lib/data';
+import { useCurrentYear, useEntities, useEntityFinance, useEntityReport } from '../../lib/data';
+import { FinancePanel } from '../../components/finance/FinancePanel';
 import { supabase, errorText } from '../../lib/supabase';
 import { date, kindLabel, peso } from '../../lib/format';
 import { Alert, Button, Card, DuesBar, EntityLogo, Field, HeroCard, Input, Sheet, Spinner, Stat } from '../../components/ui';
@@ -64,6 +65,7 @@ export function EntityDetail() {
   const ledger = useLedger(entityId, year.data?.id);
   const [releasing, setReleasing] = useState(false);
   const [allLedger, setAllLedger] = useState(false);
+  const finance = useEntityFinance(entityId, year.data?.id);
   const e = entities.data?.find((x) => x.id === entityId);
   const r = report.data?.find((x) => x.entity_id === entityId);
 
@@ -95,6 +97,10 @@ export function EntityDetail() {
               <Stat label="Remitted" value={peso(r.remittances)} />
               <Stat label="Released" value={peso(r.releases)} />
             </div>
+          </div>
+          <div className="mt-4">
+            <FinancePanel finance={finance.data} loading={finance.isLoading} title="Where the money goes — what students see"
+              note="Students see these charts and the approved expenses, but not receipts or the receipt mark." />
           </div>
           {/* Phones: Dues + Release first, then the ledger. Computers: ledger left, the two cards right. */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr] mt-4 items-start">

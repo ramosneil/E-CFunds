@@ -1,6 +1,6 @@
 // The four exports (Neil, 2026-11-13). Everything is read under RLS, so a treasurer can only ever export their own org.
 import { supabase } from '../supabase';
-import { date, kindLabel, manilaDate, peso } from '../format';
+import { categoryLabel, date, kindLabel, manilaDate, peso } from '../format';
 import type { EntityReport, Row } from '../database.types';
 import { downloadCsv, slug } from './csv';
 import { finish, myName, newDoc, PAGE, room, sectionTitle, tableStyle, text, MUTED } from './pdf';
@@ -108,6 +108,30 @@ export async function orgReport(format: 'pdf' | 'csv', entity: Entity, year: Yea
   y = monthly(doc, y + 3, byMonth(year, ledger));
   text(doc, 'Money in = collections and opening balance; money out = expenses. Remittances and releases only move money between pockets.', PAGE.m, y, { size: 7, color: MUTED, maxWidth: 178 });
   y += 8;
+
+  // Where the money went (same numbers students see: get_entity_finance).
+  const fin = await must(supabase.rpc('get_entity_finance', { p_entity_id: entity.id, p_school_year_id: year.id }));
+  const cats = [...(fin.categories ?? [])].sort((a, b) => Number(b.amount) - Number(a.amount));
+  y = sectionTitle(doc, 'What the money was spent on', room(doc, y + 2, 20 + cats.length * 7));
+  if (cats.length) {
+    const spent = cats.reduce((t, c) => t + Number(c.amount), 0);
+    y = hBars(doc, y + 2, cats.map((c) => ({
+      label: categoryLabel[c.category] ?? c.category, value: Number(c.amount), color: C.out,
+      note: `(${spent ? Math.round((Number(c.amount) / spent) * 100) : 0}%)`,
+    })), { labelW: 44 });
+  } else {
+    text(doc, 'Nothing spent yet this school year.', PAGE.m, y + 5, { size: 8, color: MUTED }); y += 9;
+  }
+  const exps = fin.expenses ?? [];
+  y = sectionTitle(doc, `Approved expenses (${exps.length})`, room(doc, y + 3, 30));
+  autoTable(doc, {
+    ...tableStyle(), startY: y + 1,
+    head: [['Date', 'Purpose', 'Category', 'Amount']],
+    body: exps.length ? exps.map((e) => [date(e.date), e.description, categoryLabel[e.category] ?? 'Other', peso(e.amount)])
+      : [[{ content: 'No approved expenses yet this school year.', colSpan: 4, styles: { halign: 'center', textColor: MUTED } }]],
+    columnStyles: { 0: { cellWidth: 24 }, 2: { cellWidth: 40 }, 3: { halign: 'right', cellWidth: 26, fontStyle: 'bold' } },
+  });
+  y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 4;
 
   y = sectionTitle(doc, 'Dues', room(doc, y + 2, 20));
   const pct = rep.members ? Math.round((rep.paid_members / rep.members) * 100) : 0;

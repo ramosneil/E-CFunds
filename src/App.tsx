@@ -28,6 +28,7 @@ const Members = page(() => import('./pages/treasurer/Members'), 'Members');
 const Requests = page(() => import('./pages/treasurer/Requests'), 'Requests');
 const StudentHome = page(() => import('./pages/student/Home'), 'StudentHome');
 const Reports = page(() => import('./pages/student/Reports'), 'Reports');
+const ReportDetail = page(() => import('./pages/student/ReportDetail'), 'ReportDetail');
 const Account = page(() => import('./pages/Account'), 'Account');
 const Messages = page(() => import('./pages/Messages'), 'Messages');
 const Privacy = page(() => import('./pages/Privacy'), 'Privacy');
@@ -35,8 +36,8 @@ const Terms = page(() => import('./pages/Terms'), 'Terms');
 
 const ROLE_PAGES = {
   admin: [AdminDashboard, Approvals, Orgs, EntityDetail, Messages, Accredited, Calendar, Account],
-  treasurer: [TreasurerHome, Members, Requests, Messages, Reports, Account],
-  student: [StudentHome, Reports, Account],
+  treasurer: [TreasurerHome, Members, Requests, Messages, Reports, ReportDetail, Account],
+  student: [StudentHome, Reports, ReportDetail, Account],
 } as const;
 
 /** After the first screen has painted, fetch the rest of this role's screens while the browser is idle. */
@@ -126,11 +127,13 @@ function Gate() {
           <Route path="members" element={<Members />} />
           <Route path="requests" element={<Requests />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="reports/:id" element={<ReportDetail />} />
           <Route path="messages" element={<Messages />} />
         </>}
         {role === 'student' && <>
           <Route index element={<StudentHome />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="reports/:id" element={<ReportDetail />} />
         </>}
         <Route path="account" element={<Account />} />
         <Route path="*" element={<Navigate to="/" replace />} />

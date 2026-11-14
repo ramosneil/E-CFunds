@@ -5,16 +5,17 @@ import { Paperclip, Plus, Receipt, RotateCcw } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { useCurrentYear, useEntityReport, useRequests } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
-import { peso } from '../../lib/format';
+import { CATEGORIES, categoryLabel, peso } from '../../lib/format';
 import type { Enum } from '../../lib/database.types';
-import { Alert, Button, Card, Empty, Field, Input, PageHeader, SectionTitle, Sheet, Spinner } from '../../components/ui';
+import { Alert, Button, Card, Empty, Field, Input, PageHeader, SectionTitle, Select, Sheet, Spinner } from '../../components/ui';
 import { IfApproved, NoYear, RequestRow, Segmented } from '../../components/common';
 import { confirmAsk } from '../../lib/confirm';
 
 type Kind = Enum<'request_kind'>;
+type Category = Enum<'expense_category'>;
 const KINDS: [Kind, string][] = [['remittance', 'Remit'], ['release', 'Release'], ['expense', 'Expense']];
 
-type Draft = { kind: Kind; amount: string; desc: string };
+type Draft = { kind: Kind; amount: string; desc: string; category?: Category };
 
 export function Requests() {
   const { profile } = useAuth();
@@ -27,8 +28,8 @@ export function Requests() {
   const [err, setErr] = useState('');
   const [draft, setDraft] = useState<Draft | null>(null);   // "File again" fills the form from a rejected request
 
-  function fileAgain(r: { kind: Kind; amount: number; description: string }) {
-    setDraft({ kind: r.kind, amount: String(r.amount), desc: r.description });
+  function fileAgain(r: { kind: Kind; amount: number; description: string; category: Category | null }) {
+    setDraft({ kind: r.kind, amount: String(r.amount), desc: r.description, category: r.category ?? undefined });
     setParams({ new: r.kind });
   }
 
@@ -100,6 +101,7 @@ function NewRequest({ initial, draft, entityId, yearId, onClose }: { initial: Ki
   const [kind, setKind] = useState<Kind>(initial);
   const [amount, setAmount] = useState(draft?.amount ?? '');
   const [desc, setDesc] = useState(draft?.desc ?? '');
+  const [category, setCategory] = useState<Category | ''>(draft?.category ?? '');
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
@@ -119,6 +121,7 @@ function NewRequest({ initial, draft, entityId, yearId, onClose }: { initial: Ki
     if (!(a > 0)) { setErr('Enter an amount above ₱0.00.'); return; }
     if (over || nothing) return;
     if (desc.trim().length < 3) { setErr('Describe what this is for.'); return; }
+    if (kind === 'expense' && !category) { setErr('Choose a category for this expense.'); return; }
     if (kind === 'expense' && !file) { setErr('Attach the receipt for this expense.'); return; }
     if (file && file.size > 10 * 1024 * 1024) { setErr('Attachment must be 10 MB or smaller.'); return; }
     setBusy(true); setErr('');
@@ -130,7 +133,8 @@ function NewRequest({ initial, draft, entityId, yearId, onClose }: { initial: Ki
         const up = await supabase.storage.from('receipts').upload(path, file, { contentType: file.type });
         if (up.error) throw up.error;
       }
-      const { error } = await supabase.rpc('file_request', { p_entity_id: entityId, p_kind: kind, p_amount: a, p_description: desc.trim(), p_attachment_path: path });
+      const { error } = await supabase.rpc('file_request', { p_entity_id: entityId, p_kind: kind, p_amount: a, p_description: desc.trim(), p_attachment_path: path,
+        ...(kind === 'expense' && category ? { p_category: category } : {}) });
       if (error) throw error;
       void qc.invalidateQueries();
       onClose();
@@ -152,6 +156,14 @@ function NewRequest({ initial, draft, entityId, yearId, onClose }: { initial: Ki
             className="money text-[24px] h-14 font-semibold" placeholder="0.00" disabled={nothing} />
         </Field>
         <Field label="What is it for?"><Input required value={desc} onChange={(e) => setDesc(e.target.value)} placeholder={kind === 'expense' ? 'e.g. Tarpaulin for org fair' : kind === 'release' ? 'e.g. Budget for seminar' : 'e.g. Dues collected this week'} /></Field>
+        {kind === 'expense' && (
+          <Field label="Category" hint="Once SAS approves, students see this expense's purpose, category and amount (never the receipt).">
+            <Select required value={category} onChange={(e) => setCategory(e.target.value as Category)}>
+              <option value="" disabled>Choose…</option>
+              {CATEGORIES.map((c) => <option key={c} value={c}>{categoryLabel[c]}</option>)}
+            </Select>
+          </Field>
+        )}
         <label className="flex items-center gap-3 rounded-[14px] border border-dashed border-line p-4 cursor-pointer hover:bg-surface2">
           <span className="size-10 rounded-[12px] bg-primary-soft text-primary grid place-items-center"><Paperclip className="size-5" /></span>
           <span className="min-w-0 flex-1">

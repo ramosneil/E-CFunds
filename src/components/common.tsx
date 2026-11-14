@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { CalendarX2, HandCoins, Landmark, Paperclip, Receipt } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { Row } from '../lib/database.types';
-import { date, kindLabel, peso } from '../lib/format';
+import { categoryLabel, date, kindLabel, peso } from '../lib/format';
 import { Button, Card, Empty, StatusChip } from './ui';
 
 export function NoYear({ admin }: { admin?: boolean }) {
@@ -34,7 +34,7 @@ export function RequestRow({ r, entityName, action }: { r: Row<'fund_requests'>;
         <p className="font-semibold truncate">{kindLabel[r.kind]}{entityName ? ` · ${entityName}` : ''}</p>
         <p className="text-[13px] text-muted truncate flex items-center gap-1">
           {r.attachment_path && <Paperclip className="size-3.5 shrink-0" aria-label={r.kind === 'expense' ? 'Receipt attached' : 'Proof attached'} />}
-          <span className="truncate">{r.description} · {date(r.filed_at)}</span>
+          <span className="truncate">{r.kind === 'expense' && r.category ? `${categoryLabel[r.category]} · ` : ''}{r.description} · {date(r.filed_at)}</span>
         </p>
       </div>
       <div className="text-right shrink-0">
