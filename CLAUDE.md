@@ -32,13 +32,15 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Design tools on Neil's PC: plugins UI Design Review, playwright, Mobile App Design (iOS), Mobile Design System
   (installed with the Claude CLI); Supabase + Figma connectors; GitHub plugin via the Windows user variable
   GITHUB_PERSONAL_ACCESS_TOKEN (expires 2027-02-12).
-- **Website notifications (Web Push): confirmed on Neil's PC (Chrome), 2026-11-14.** If a browser shows nothing,
-  check Windows → Settings → System → Notifications → Google Chrome (it was off on Neil's PC). iPhone not tested yet.
-- Android push shows nothing although FCM accepts (`sent` counts it)? Phone side: Settings → Apps → E-CFunds →
-  Notifications (allow, pop-up) + Battery (allow background activity, auto launch). Oppo/Realme force-stop swiped apps.
-  With those settings Neil's phone gets pushes even with the app swiped away (confirmed 2026-11-14).
-- **Phone notifications card** (My account, Android): `notifyPermission` times out after 3 s and falls back to the
-  push plugin's permission; the card never hides (fixed + confirmed "On" on Neil's phone, 2026-11-14).
+- **Notifications confirmed 2026-11-14:** Android phone (background AND swiped away) + Chrome on Neil's PC (site
+  closed). iPhone Home Screen app not tested yet. When the push function says `sent: N` but nothing shows, it's the
+  device: **Windows** → Settings → System → Notifications → Google Chrome (was off on Neil's PC); **Android** →
+  Settings → Apps → E-CFunds → Notifications (allow, pop-up) + Battery (background activity, auto launch) —
+  Oppo/Realme force-stop swiped apps without it. My account's phone card falls back to the push permission (3 s).
+- **Safe test push** (Supabase connector, one SQL): insert a `notifications` row for the person with `read_at = now()`
+  (trigger skips it, bell shows no dot), then `net.http_post(private.push_config.url, {id}, x-push-secret)` in the same
+  statement — the secret never leaves the DB; read `net._http_response` (`{"sent":N}`), then delete the row. The
+  direct-`pg` scratch scripts can hang on connect — prefer the connector.
 - **Web address stays `e-cfunds.vercel.app`; email stays Supabase's built-in sender** — Neil cancelled the school
   subdomain + Resend plan (2026-11-14, "too complicated"; OMSC IT controls the DNS). Undone: Resend domain deleted,
   IT draft discarded, `docs/it-request.md` removed (git history has it), VAPID contact = the vercel.app URL.
