@@ -275,8 +275,9 @@ None. Both §10 questions were answered in session 3 and moved to §8.
   student (newest information wins). SAS sets them on the Students page / import.
 - **Clubs can import** a class list (Members → Import): every row checked first; already members are counted;
   a student who already paid another club this semester is skipped with the reason (1 club per semester).
-- **Updates are automatic** (no manual check): a new version switches in when nobody is typing. **Pull down** to
-  refresh on phones.
+- **Updates:** checked every 5 min / on return. A ready version shows **"Update ready — pull down"** (phones) or an
+  **Update** button; pulling down installs it at once. If nobody does, it installs when the screen is left (Home
+  button / other tab). Without an update, pulling down refreshes the numbers.
 - **Android Back on Home** asks "Log out of E-CFunds?" (Log out / Stay). **5 minutes unused** (no E-CFunds screen
   active in that browser/app) → signed out on return, everyone.
 - **Notifications continue after signing out** (Neil): the phone/browser stays registered; the next person to sign

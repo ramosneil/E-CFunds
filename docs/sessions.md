@@ -312,3 +312,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   5-minute auto log out (`AutoLogout.tsx`), push kept on sign-out. Bug found live: the first auto-logout version used a
   per-tab "away since" and signed Neil's Chrome out (another tab was in the background) → replaced by a shared
   "last active" heartbeat from visible screens. Neil must sign in again in Chrome (his to do).
+- Neil: 'pull down to update' — a ready version now shows a banner ("Update ready — pull down" / Update button); pulling installs it; it also installs when the screen is left. Tested: pull, leave screen, button.

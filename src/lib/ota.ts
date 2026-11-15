@@ -8,7 +8,7 @@
 // Every step's result is kept (otaStatus) and shown in My account, with "Check for updates" / "Restart to update".
 import { LIVE_URL } from './native';
 import { toast } from './toast';
-import { applyWhenSafe, CHECK_UPDATE_EVENT } from './autoUpdate';
+import { offerUpdate, CHECK_UPDATE_EVENT } from './autoUpdate';
 
 const LAST = 'ecfunds:build';
 const READY = 'ecfunds:ota-ready';
@@ -86,10 +86,10 @@ export async function checkForUpdate(): Promise<OtaStatus | null> {
     const have = (await Updater.list()).bundles.find((b) => b.version === m.version && usable(b.status));
     const bundle = have ?? await Updater.download({ url: m.url, version: m.version, checksum: m.sha256 });
     put(READY, JSON.stringify({ id: bundle.id, version: m.version }));
-    setStatus('Update downloaded — switching to it now.', true);
+    setStatus('New version ready — pull down to update (or it installs when you leave the app).', true);
     put(ANNOUNCED, m.version);
-    // Automatic (Neil): switch as soon as nobody is typing / no sheet is open, or when the app goes to the background.
-    applyWhenSafe(() => { void applyReady(); });
+    // Neil: banner "pull down to update"; pulling installs it, otherwise it installs when the app goes to the background.
+    offerUpdate(() => { void applyReady(); });
   } catch (e) {
     setStatus(`Update check failed: ${msg(e)}`, false);
     console.warn('[ota]', e);

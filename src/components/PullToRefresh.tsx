@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
-import { requestUpdateCheck } from '../lib/autoUpdate';
+import { installUpdate, requestUpdateCheck, useUpdateReady } from '../lib/autoUpdate';
 
 const TRIGGER = 64;   // px of (damped) pull needed to refresh
 
@@ -13,6 +13,7 @@ export function PullToRefresh() {
   const [pull, setPull] = useState(0);
   const [busy, setBusy] = useState(false);
   const busyRef = useRef(false);
+  const updateWaiting = useUpdateReady();
 
   useEffect(() => {
     if (!window.matchMedia('(pointer: coarse)').matches) return;
@@ -35,6 +36,8 @@ export function PullToRefresh() {
       startY = null;
       if (cur >= TRIGGER) {
         busyRef.current = true; setBusy(true); setPull(TRIGGER);
+        // A new version was waiting: switch to it now (the page reloads). If it somehow doesn't, clear the spinner.
+        if (installUpdate()) { setTimeout(() => { busyRef.current = false; setBusy(false); setPull(0); }, 6000); return; }
         requestUpdateCheck();
         try { await qc.invalidateQueries(); } finally {
           await new Promise((r) => setTimeout(r, 350));   // let the spinner be seen
@@ -63,7 +66,7 @@ export function PullToRefresh() {
       <span className={`size-10 rounded-full grid place-items-center shadow-lg border border-line ${ready ? 'bg-primary text-on-primary' : 'bg-surface text-primary'}`}>
         <RefreshCw className={`size-5 ${busy ? 'animate-spin' : ''}`} style={busy ? undefined : { transform: `rotate(${pull * 3}deg)` }} aria-hidden />
       </span>
-      <span className="sr-only">{busy ? 'Refreshing' : ready ? 'Release to refresh' : 'Pull to refresh'}</span>
+      <span className="sr-only">{busy ? (updateWaiting ? 'Updating' : 'Refreshing') : ready ? `Release to ${updateWaiting ? 'update' : 'refresh'}` : `Pull to ${updateWaiting ? 'update' : 'refresh'}`}</span>
     </div>
   );
 }

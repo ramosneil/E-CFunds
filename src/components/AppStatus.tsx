@@ -1,11 +1,11 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { Download, WifiOff } from 'lucide-react';
+import { Download, RefreshCw, WifiOff } from 'lucide-react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { isNative } from '../lib/native';
 import { chime } from '../lib/chime';
 import { toast } from '../lib/toast';
 import { noteInBell, otaState } from '../lib/ota';
-import { applyWhenSafe, CHECK_UPDATE_EVENT } from '../lib/autoUpdate';
+import { offerUpdate, installUpdate, useUpdateReady, CHECK_UPDATE_EVENT } from '../lib/autoUpdate';
 import { APK_URL } from './AndroidAppLink';
 
 /** "You're offline" pill (all platforms) + update notices: website "Update available → Reload" and
@@ -28,6 +28,7 @@ export function AppStatus() {
         </div>
       )}
       {isNative ? <NeedsApk /> : <UpdatePrompt />}
+      <UpdateReadyBanner />
     </>
   );
 }
@@ -44,8 +45,8 @@ function webUpdatedNotice() {
   } catch { /* private mode */ }
 }
 
-/** Website: new versions install by themselves (Neil: no manual "Reload"). Checks every 5 minutes, when the tab comes
- *  back, and on pull-to-refresh; switches as soon as nobody is typing (applyWhenSafe). "E-CFunds was updated" after. */
+/** Website: checks for a new version every 5 minutes, when the tab comes back, and on pull-to-refresh. A ready version
+ *  is offered with the banner (pull down / Update); it installs by itself when the tab is left. */
 function UpdatePrompt() {
   const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW({
     onRegisteredSW(_url, reg) {
@@ -56,8 +57,27 @@ function UpdatePrompt() {
       window.addEventListener(CHECK_UPDATE_EVENT, check);
     },
   });
-  useEffect(() => { if (needRefresh) applyWhenSafe(() => { void updateServiceWorker(true); }); }, [needRefresh, updateServiceWorker]);
+  useEffect(() => { if (needRefresh) offerUpdate(() => { void updateServiceWorker(true); }); }, [needRefresh, updateServiceWorker]);
   return null;
+}
+
+/** "New version ready — pull down to update" (phones) / "Update" (any device). Sits at the top, never over buttons. */
+function UpdateReadyBanner() {
+  const ready = useUpdateReady();
+  const [busy, setBusy] = useState(false);
+  if (!ready && !busy) return null;
+  const touch = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+  return (
+    <div role="status" className="fixed z-[65] left-1/2 -translate-x-1/2 top-[calc(env(safe-area-inset-top)+72px)] lg:top-[max(10px,env(safe-area-inset-top))] max-w-[calc(100vw-24px)]
+      bg-primary text-on-primary shadow-lg rounded-full pl-4 pr-1.5 h-11 flex items-center gap-2 text-[13.5px] font-semibold whitespace-nowrap">
+      <RefreshCw className={`size-4 shrink-0 ${busy ? 'animate-spin' : ''}`} aria-hidden />
+      <span className="truncate">{busy ? 'Updating…' : touch ? 'Update ready — pull down' : 'New version of E-CFunds ready'}</span>
+      {!busy && (
+        <button type="button" onClick={() => { setBusy(true); installUpdate(); setTimeout(() => setBusy(false), 6000); }}
+          className="h-8 px-3 rounded-full bg-on-primary text-primary text-[13px] font-bold cursor-pointer shrink-0">Update</button>
+      )}
+    </div>
+  );
 }
 
 /** Android app too old for the newest code (a new APK is needed — rare). */

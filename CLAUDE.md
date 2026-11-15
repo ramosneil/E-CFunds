@@ -107,7 +107,8 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
     `report_settings` (School year page). Rules: business-rules "Financial Report".
   - **Sections A–D, year 1–4** (migration 37): Members grouped 1A…4D; Add member shows all fields, fills from the
     list; clubs **Import** (`ImportSheet mode="club"` → `import_members`). Rules: business-rules "Sections".
-  - **App:** automatic updates (`src/lib/autoUpdate.ts`, no manual button), pull-to-refresh, Android Back on Home →
+  - **App:** updates offered as "Update ready — pull down" (`src/lib/autoUpdate.ts`; pull/Update installs, leaving
+    the screen installs too), pull-to-refresh, Android Back on Home →
     "Log out?", 5 min unused → signed out (`AutoLogout.tsx`, shared "last active" heartbeat — never per-tab).
     Sign-out keeps push registered (Neil).
   - **Reminders:** Members "Remind unpaid" (1/day/org). pg_cron (UTC): `weekly-dues-reminders` Mon 00:00 = 8 AM
