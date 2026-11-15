@@ -93,3 +93,21 @@ Nothing to install or sign in to. When you have time, as the **treasurer** and *
 1. Open the app → it updates itself ("E-CFunds was updated"), close and reopen once if asked.
 2. Sign out (My account → Sign out), then **Continue with Google** → you should land on your dashboard.
 3. If it still shows the start screen, send Claude a screenshot of it.
+
+## Password reset by 6-digit code — send emails through a Gmail (Neil, 2026-11-15)
+Why: Supabase's free built-in email can only send a link and its templates can't be edited. Sending through a
+Gmail ("custom SMTP") unlocks the code email, our E-CFunds email designs, and a higher hourly email limit.
+Only you do steps 1–3 (they involve your Google password and a secret app password — never paste them in chat).
+1. **Pick the Gmail** that will send E-CFunds emails (best: a separate one for SAS/E-CFunds, not your personal one).
+   Sign in to it in Chrome.
+2. **Turn on 2-Step Verification** for it: myaccount.google.com → Security → 2-Step Verification → Turn on.
+3. **Create an App password:** myaccount.google.com/apppasswords → name it `E-CFunds` → Create → Google shows a
+   16-letter password. Keep that page open (don't screenshot it).
+4. **Paste it into Supabase:** supabase.com → project `e-cfunds` → Authentication → Emails → **SMTP Settings** →
+   turn on **Enable custom SMTP** and fill in:
+   - Sender email: the Gmail from step 1 · Sender name: `E-CFunds`
+   - Host: `smtp.gmail.com` · Port: `465`
+   - Username: the same Gmail · Password: the 16-letter app password (spaces don't matter)
+   - **Save**. Then close the app-password page.
+5. Tell Claude "SMTP done". Claude then (with your OK, already given) pastes the code template into
+   Reset password, deploys the code screen, and sends one test code to nirrukurisuchan@gmail.com.
