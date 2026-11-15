@@ -301,3 +301,6 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   templates); Claude pasted docs/email-templates/reset-password.html into Supabase's Reset password template (subject
   "Your E-CFunds reset code", `{{ .Token }}`, no link). Forgot screen: email → Send code → code → Continue →
   verifyOtp(type recovery) → "Set a new password". Works the same in the app and on the web.
+- Tested live: code sent from the website to nirrukurisuchan@gmail.com via Neil's Gmail SMTP; email "Your E-CFunds
+  reset code" with the 6-digit code arrived (seen in the sender's Gmail). Auth log: email limit went 2/h → 30/h.
+  Code entry + new password left to Neil (never typed by Claude). Sender is Neil's personal Gmail for now.

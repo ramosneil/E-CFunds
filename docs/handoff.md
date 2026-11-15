@@ -94,7 +94,7 @@ Nothing to install or sign in to. When you have time, as the **treasurer** and *
 2. Sign out (My account → Sign out), then **Continue with Google** → you should land on your dashboard.
 3. If it still shows the start screen, send Claude a screenshot of it.
 
-## Password reset by 6-digit code — send emails through a Gmail (Neil, 2026-11-15)
+## Password reset by 6-digit code — send emails through a Gmail (Neil, 2026-11-15) — DONE (SMTP on, template pasted, code email tested). Optional later: switch the sender to a separate SAS/E-CFunds Gmail (same steps).
 Why: Supabase's free built-in email can only send a link and its templates can't be edited. Sending through a
 Gmail ("custom SMTP") unlocks the code email, our E-CFunds email designs, and a higher hourly email limit.
 Only you do steps 1–3 (they involve your Google password and a secret app password — never paste them in chat).
