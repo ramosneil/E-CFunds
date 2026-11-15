@@ -293,3 +293,7 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   requested with a one-off implicit-flow client (`resetEmailClient` in src/lib/supabase.ts) so the link carries the
   session in its #hash; ResetPassword reads it (setSession), and shows "ask for a new one" for expired/used links.
   Neil's screenshot showed his new password in clear text → asked him not to use that one.
+- Neil: reset should come back to the app. Reset asked in the Android app now uses redirect
+  `ph.edu.omsc.ecfunds://auth/callback` (same allow-listed link as Google): the email button opens the app, which
+  reads `#access_token…&type=recovery`, signs in and opens /reset ("Set a new password"); expired link → /reset with
+  the error. Website-asked resets stay on the website. A reset asked in the app must be opened on the same phone.

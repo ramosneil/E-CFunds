@@ -4,7 +4,7 @@ import { MailCheck } from 'lucide-react';
 import { supabase, errorText, resetEmailClient } from '../../lib/supabase';
 import { Alert, Button, Field, Input } from '../../components/ui';
 import { AuthLayout, Divider, GoogleButton } from './AuthLayout';
-import { isNative, webOrigin } from '../../lib/native';
+import { APP_AUTH_CALLBACK, isNative, webOrigin } from '../../lib/native';
 import { NATIVE_AUTH_ERROR, nativeGoogleSignIn } from '../../lib/nativeAuth';
 import { AndroidAppLink } from '../../components/AndroidAppLink';
 import { IphoneAppHint } from '../../components/IphoneInstall';
@@ -157,14 +157,15 @@ export function Forgot() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     setBusy(true); setErr('');
-    // A link that works wherever the email is opened (see resetEmailClient).
-    const { error } = await resetEmailClient().auth.resetPasswordForEmail(email.trim(), { redirectTo: webOrigin() + '/reset' });
+    // Asked in the Android app → the email's button opens the app ("Set a new password", already signed in).
+    // Asked on the website → the link opens the website. Either way the link carries the sign-in (resetEmailClient).
+    const { error } = await resetEmailClient().auth.resetPasswordForEmail(email.trim(), { redirectTo: isNative ? APP_AUTH_CALLBACK : webOrigin() + '/reset' });
     setBusy(false);
     if (error) setErr(errorText(error)); else setDone(true);
   }
   return (
     <AuthLayout title="Reset your password" sub="We'll email you a link to set a new one.">
-      {done ? <Alert tone="ok">If that email has an account, a reset link is on its way.</Alert> : (
+      {done ? <Alert tone="ok">If that email has an account, a reset link is on its way.{isNative ? ' Open the email on this phone and tap the button — it brings you back to this app to set the new password.' : ''}</Alert> : (
         <form onSubmit={submit} className="space-y-4">
           <Field label="Email"><Input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
           {err && <Alert>{err}</Alert>}

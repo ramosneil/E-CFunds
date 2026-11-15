@@ -74,6 +74,12 @@ export function App() {
  *  page the last person was on (e.g. My account, where Sign out lives) instead of the Dashboard. */
 function RecoveryRedirect() {
   const nav = useNavigate();
+  // Android: a password-reset link that opened the app (nativeAuth.ts) asks to show a page.
+  useEffect(() => {
+    const on = (e: Event) => { nav(String((e as CustomEvent).detail)); window.scrollTo(0, 0); };
+    window.addEventListener('ecfunds:native-go', on);
+    return () => window.removeEventListener('ecfunds:native-go', on);
+  }, [nav]);
   useEffect(() => {
     let had: boolean | null = null;   // was someone signed in? (null until the stored session is read)
     void supabase.auth.getSession().then(({ data }) => { if (had === null) had = !!data.session; });
@@ -81,8 +87,10 @@ function RecoveryRedirect() {
       if (evt === 'PASSWORD_RECOVERY') { had = true; nav('/reset'); return; }
       if (evt === 'INITIAL_SESSION') { had = !!s; return; }
       const now = !!s;
+      let recovering = false;
+      try { recovering = sessionStorage.getItem('ecfunds:recovery') === '1'; if (recovering) sessionStorage.removeItem('ecfunds:recovery'); } catch { /* fine */ }
       if (had !== null && now !== had && window.location.pathname !== '/reset') {
-        nav('/', { replace: true });
+        nav(recovering ? '/reset' : '/', { replace: true });
         window.scrollTo(0, 0);
       }
       had = now;
