@@ -304,3 +304,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - Tested live: code sent from the website to nirrukurisuchan@gmail.com via Neil's Gmail SMTP; email "Your E-CFunds
   reset code" with the 6-digit code arrived (seen in the sender's Gmail). Auth log: email limit went 2/h → 30/h.
   Code entry + new password left to Neil (never typed by Claude). Sender is Neil's personal Gmail for now.
+- Neil confirmed: reset by code worked end to end on his side (code → new password saved).
