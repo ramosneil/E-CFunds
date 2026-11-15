@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, type ComponentType, type ReactNode } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router';
-import { useAuth } from './lib/auth';
+import { hasSignedInBefore, useAuth } from './lib/auth';
 import { supabase } from './lib/supabase';
 import { Loading, Spinner } from './components/ui';
 import { Shell } from './components/Shell';
@@ -91,9 +91,11 @@ function Gate() {
       <Lazy>
         <Routes>
           <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<SignIn />} />
           <Route path="/forgot" element={<Forgot />} />
           <Route path="/reset" element={<ResetPassword />} />
-          <Route path="*" element={<SignIn />} />
+          {/* New device → Create account first; a device that has signed in before → Sign in. */}
+          <Route path="*" element={hasSignedInBefore() ? <SignIn /> : <Navigate to="/register" replace />} />
         </Routes>
       </Lazy>
     );

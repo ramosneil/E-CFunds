@@ -124,7 +124,7 @@ export function Register() {
         <MailCheck className="size-6 shrink-0" aria-hidden />
         <p className="text-[14px]">Open the link on this device. You'll come back here signed in, then tell SAS which org or club you belong to.</p>
       </div>
-      <Link to="/" className="block text-center mt-6 text-primary font-semibold">Back to sign in</Link>
+      <Link to="/login" className="block text-center mt-6 text-primary font-semibold">Back to sign in</Link>
     </AuthLayout>
   );
 
@@ -144,7 +144,7 @@ export function Register() {
         {err && <Alert>{err}</Alert>}
         <Button type="submit" busy={busy} disabled={!agree || !meetsRules(password)} className="w-full h-[54px]">Create account</Button>
       </form>
-      <p className="mt-5 text-center text-[14px] text-muted">Already have one? <Link to="/" className="text-primary font-semibold">Sign in</Link></p>
+      <p className="mt-5 text-center text-[14px] text-muted">Already have one? <Link to="/login" className="text-primary font-semibold">Sign in</Link></p>
     </AuthLayout>
   );
 }
@@ -170,7 +170,7 @@ export function Forgot() {
           <Button type="submit" busy={busy} className="w-full h-[54px]">Send reset link</Button>
         </form>
       )}
-      <Link to="/" className="block text-center mt-6 text-primary font-semibold">Back to sign in</Link>
+      <Link to="/login" className="block text-center mt-6 text-primary font-semibold">Back to sign in</Link>
     </AuthLayout>
   );
 }

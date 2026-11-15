@@ -19,17 +19,29 @@ export async function nativeGoogleSignIn(): Promise<string | null> {
   return null;
 }
 
-/** Call once at start-up in the Android app: finishes Google sign-in when the browser hands the link back. */
+const used = new Set<string>();   // a code works once; the same link can arrive twice (launch URL + event)
+
+async function finish(url: string) {
+  if (!url.startsWith(APP_AUTH_CALLBACK)) return;
+  const params = new URL(url).searchParams;
+  const code = params.get('code');
+  if (code && used.has(code)) return;
+  if (code) used.add(code);
+  const { Browser } = await import('@capacitor/browser');
+  void Browser.close().catch(() => { /* already closed */ });
+  if (!code) { fail(params.get('error_description') ?? 'Google sign-in was cancelled.'); return; }
+  const { data } = await supabase.auth.getSession();
+  if (data.session) return;                                  // already signed in with this link
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  if (error) fail(error.message);
+}
+
+/** Call once at start-up in the Android app: finishes Google sign-in when the browser hands the link back.
+ *  Many phones (Oppo/Realme…) close the app while Google is open, so the link may arrive as the app's LAUNCH url
+ *  (cold start) instead of an appUrlOpen event — handle both, or the person lands on the start screen. */
 export async function listenForAuthLinks() {
   const { App } = await import('@capacitor/app');
-  await App.addListener('appUrlOpen', async ({ url }) => {
-    if (!url.startsWith(APP_AUTH_CALLBACK)) return;
-    const { Browser } = await import('@capacitor/browser');
-    void Browser.close().catch(() => { /* already closed */ });
-    const params = new URL(url).searchParams;
-    const code = params.get('code');
-    if (!code) { fail(params.get('error_description') ?? 'Google sign-in was cancelled.'); return; }
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) fail(error.message);
-  });
+  await App.addListener('appUrlOpen', ({ url }) => { void finish(url); });
+  const launch = await App.getLaunchUrl().catch(() => undefined);
+  if (launch?.url) await finish(launch.url);
 }

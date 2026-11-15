@@ -80,7 +80,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - **Student**: own dues + every org's totals + "where the money goes" (charts + SAS-approved expenses: date,
   purpose, category, amount). Never: other students' names, receipts, the "receipt checked by SAS" mark (staff only),
   remit/release lines, the ledger. Rule + categories: `docs/business-rules.md` "Transparency".
-- Self-register → SAS approves (students must match a roster Student ID). Email/password, Google (web + app), or
+- Signed out: new device → Create account (`/register`), signed in here before → Sign in (`/login`). Self-register → SAS approves (students must match a roster Student ID). Email/password, Google (web + app), or
   Student ID + password (`student-login`, lockout 5 tries / 15 min). First admin via `private.bootstrap_admins`.
 - Passwords: 8+ chars with upper, lower, number, symbol (meter + checklist, eye icon) — also set in Supabase Auth.
   Terms: checkbox on sign-up / Google's first screen → `profiles.terms_accepted_at`.
@@ -126,7 +126,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   status + "Check for updates" in My account). Raise `ota.json` minNativeBuild only when a change needs a new APK.
 - **Android app:** full screen (status bar hidden, Capacitor SystemBars; hidden again on the next tap after a
   swipe-down, `src/main.tsx`), Back button (`NativeBack.tsx`), exports via share sheet, Google sign-in via
-  `ph.edu.omsc.ecfunds://auth/callback`, email links open the live site. Android screenshots still show the bar.
+  `ph.edu.omsc.ecfunds://auth/callback` (also read from the launch URL — phones kill the app during Google), email links open the live site. Android screenshots still show the bar.
 
 ## UI conventions (from the 2026-11-14 page-by-page review — keep them)
 - **Dues counts = current semester.** `useEntityReport` passes `p_semester_id` (filters memberships only; money stays

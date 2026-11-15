@@ -280,3 +280,7 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   Home + SAS org page. Rehearsal: totals = `get_entity_report` for all 10 orgs; caught 2 bugs (subtotal ×lines,
   settings wipe). Live: first call failed on pg_safeupdate (migration 36 fixed); then Sports Club report generated
   in Neil's Chrome as SAS (captured in page, nothing saved).
+- Sign-in fixes (Neil: Android app + Google landed on the start screen, not the dashboard): the app now also
+  finishes Google sign-in from its launch URL (Oppo/Realme close the app while Google is open, so the link arrived
+  on a cold start and was ignored). Signed-out start page: new device → Create account, device that signed in before
+  → Sign in (`/login`; localStorage `ecfunds:signed-in-before`). Checked locally; Android path needs Neil's phone.

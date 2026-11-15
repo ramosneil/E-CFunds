@@ -31,6 +31,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => data.subscription.unsubscribe();
   }, [qc]);
 
+  // A device that has signed in before opens on "Sign in"; a brand-new one opens on "Create account" (App.tsx).
+  useEffect(() => { if (session) rememberSignedIn(); }, [session]);
+
   const uid = session?.user.id;
   const profileQ = useQuery({
     queryKey: ['profile', uid],
@@ -58,6 +61,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
+
+const SEEN_KEY = 'ecfunds:signed-in-before';
+function rememberSignedIn() { try { localStorage.setItem(SEEN_KEY, '1'); } catch { /* private mode: fine */ } }
+export function hasSignedInBefore() { try { return localStorage.getItem(SEEN_KEY) === '1'; } catch { return false; } }
 
 export function useAuth(): AuthState {
   const v = useContext(Ctx);
