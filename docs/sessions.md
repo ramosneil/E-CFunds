@@ -284,3 +284,6 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   finishes Google sign-in from its launch URL (Oppo/Realme close the app while Google is open, so the link arrived
   on a cold start and was ignored). Signed-out start page: new device → Create account, device that signed in before
   → Sign in (`/login`; localStorage `ecfunds:signed-in-before`). Checked locally; Android path needs Neil's phone.
+- Neil's screenshot: after Google sign-in the app showed **My account** (scrolled down) — it reopened the page where
+  he had signed out. Fix (App.tsx `RecoveryRedirect`): on any sign-in/sign-out (not the first load, not a password
+  reset) go to `/` and scroll to the top. Auth log confirmed the Google sign-ins themselves succeeded.

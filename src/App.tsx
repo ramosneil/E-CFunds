@@ -69,11 +69,24 @@ export function App() {
   );
 }
 
-/** A password-reset link signs the user in; send them to the "new password" form. */
+/** A password-reset link signs the user in; send them to the "new password" form.
+ *  Any other sign-in or sign-out starts on the home screen, scrolled to the top — otherwise the app reopens the
+ *  page the last person was on (e.g. My account, where Sign out lives) instead of the Dashboard. */
 function RecoveryRedirect() {
   const nav = useNavigate();
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((evt) => { if (evt === 'PASSWORD_RECOVERY') nav('/reset'); });
+    let had: boolean | null = null;   // was someone signed in? (null until the stored session is read)
+    void supabase.auth.getSession().then(({ data }) => { if (had === null) had = !!data.session; });
+    const { data } = supabase.auth.onAuthStateChange((evt, s) => {
+      if (evt === 'PASSWORD_RECOVERY') { had = true; nav('/reset'); return; }
+      if (evt === 'INITIAL_SESSION') { had = !!s; return; }
+      const now = !!s;
+      if (had !== null && now !== had && window.location.pathname !== '/reset') {
+        nav('/', { replace: true });
+        window.scrollTo(0, 0);
+      }
+      had = now;
+    });
     return () => data.subscription.unsubscribe();
   }, [nav]);
   return null;
