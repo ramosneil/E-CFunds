@@ -9,6 +9,16 @@ export const supabase = createClient<Database>(url, key, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' },
 });
 
+/** Password-reset emails only: the link must work in ANY browser (e.g. reset asked in the Android app, email opened in
+ *  Chrome). The main client uses PKCE, whose secret half stays where the reset was asked, so that link failed with
+ *  "Auth session missing!". This one-off client asks for a link that carries the sign-in itself (in the URL #hash);
+ *  ResetPassword reads it. It stores nothing. */
+export function resetEmailClient() {
+  return createClient<Database>(url!, key!, {
+    auth: { flowType: 'implicit', persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: 'ecfunds-reset' },
+  });
+}
+
 export function logoUrl(path: string | null | undefined): string | null {
   return path ? supabase.storage.from('logos').getPublicUrl(path).data.publicUrl : null;
 }

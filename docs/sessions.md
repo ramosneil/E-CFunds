@@ -288,3 +288,8 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   he had signed out. Fix (App.tsx `RecoveryRedirect`): on any sign-in/sign-out (not the first load, not a password
   reset) go to `/` and scroll to the top. Auth log confirmed the Google sign-ins themselves succeeded.
 - Neil confirmed on his Android phone: Google sign-in now lands on the Dashboard.
+- Bug (Neil's screenshot): password reset showed "Auth session missing!". Cause (auth log): reset asked in the Android
+  app, email link opened in Chrome — the PKCE verifier lives only where the reset was asked. Fix: reset emails are
+  requested with a one-off implicit-flow client (`resetEmailClient` in src/lib/supabase.ts) so the link carries the
+  session in its #hash; ResetPassword reads it (setSession), and shows "ask for a new one" for expired/used links.
+  Neil's screenshot showed his new password in clear text → asked him not to use that one.

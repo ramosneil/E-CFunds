@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router';
 import { MailCheck } from 'lucide-react';
-import { supabase, errorText } from '../../lib/supabase';
+import { supabase, errorText, resetEmailClient } from '../../lib/supabase';
 import { Alert, Button, Field, Input } from '../../components/ui';
 import { AuthLayout, Divider, GoogleButton } from './AuthLayout';
 import { isNative, webOrigin } from '../../lib/native';
@@ -157,7 +157,8 @@ export function Forgot() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     setBusy(true); setErr('');
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: webOrigin() + '/reset' });
+    // A link that works wherever the email is opened (see resetEmailClient).
+    const { error } = await resetEmailClient().auth.resetPasswordForEmail(email.trim(), { redirectTo: webOrigin() + '/reset' });
     setBusy(false);
     if (error) setErr(errorText(error)); else setDone(true);
   }
@@ -180,6 +181,47 @@ export function ResetPassword() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [done, setDone] = useState(false);
+  // 'checking' → 'ready' (signed in by the email link, or already signed in) | 'bad' (expired/used/opened elsewhere).
+  const [link, setLink] = useState<'checking' | 'ready' | 'bad'>('checking');
+  const [linkErr, setLinkErr] = useState('');
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const h = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+      const q = new URLSearchParams(window.location.search);
+      const clean = () => window.history.replaceState(null, '', window.location.pathname);
+      const fail = h.get('error_description') ?? q.get('error_description');
+      if (fail) { clean(); if (alive) { setLinkErr(fail.replace(/\+/g, ' ')); setLink('bad'); } return; }
+      const access = h.get('access_token'), refresh = h.get('refresh_token');
+      if (access && refresh) {
+        const { error } = await supabase.auth.setSession({ access_token: access, refresh_token: refresh });
+        clean();
+        if (!alive) return;
+        if (error) { setLinkErr(errorText(error)); setLink('bad'); } else setLink('ready');
+        return;
+      }
+      // Older emails (PKCE ?code=…) work only where the reset was asked; the client handles those itself.
+      for (let i = 0; i < 10; i++) {
+        const { data } = await supabase.auth.getSession();
+        if (data.session) { if (alive) setLink('ready'); return; }
+        await new Promise((r) => setTimeout(r, 300));
+      }
+      if (alive) setLink('bad');
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  if (link !== 'ready' && !done) {
+    return (
+      <AuthLayout title="Set a new password">
+        {link === 'checking' ? <p className="text-muted">Checking your reset link…</p> : <>
+          <Alert>{linkErr && !/missing/i.test(linkErr) ? `${linkErr}. ` : ''}This reset link has expired, was already used, or was opened somewhere it can’t be used. Ask for a new one — the new link works in any browser.</Alert>
+          <Link to="/forgot" className="block text-center mt-6 text-primary font-semibold">Send a new reset link</Link>
+        </>}
+      </AuthLayout>
+    );
+  }
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (!meetsRules(password)) { setErr('Choose a stronger password: it needs every item in the checklist.'); return; }
