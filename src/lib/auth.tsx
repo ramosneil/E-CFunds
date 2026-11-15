@@ -14,7 +14,8 @@ type AuthState = {
   signOut: () => Promise<void>;
 };
 
-const Ctx = createContext<AuthState | null>(null);
+/** Exported only so sample-data previews can supply a signed-in person; the app uses AuthProvider. */
+export const Ctx = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);

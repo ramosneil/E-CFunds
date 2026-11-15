@@ -154,10 +154,10 @@ export type Database = {
       students: {
         Row: {
           course: string | null; created_at: string; email: string | null; full_name: string; id: number;
-          is_active: boolean; student_no: string; year_level: number | null;
+          is_active: boolean; student_no: string; year_level: number | null; section: string | null;
         };
-        Insert: { course?: string | null; email?: string | null; full_name: string; is_active?: boolean; student_no: string; year_level?: number | null };
-        Update: { course?: string | null; email?: string | null; full_name?: string; is_active?: boolean; student_no?: string; year_level?: number | null };
+        Insert: { course?: string | null; email?: string | null; full_name: string; is_active?: boolean; student_no: string; year_level?: number | null; section?: string | null };
+        Update: { course?: string | null; email?: string | null; full_name?: string; is_active?: boolean; student_no?: string; year_level?: number | null; section?: string | null };
         Relationships: [];
       };
       budgets: { Row: BudgetRow; Insert: never; Update: never; Relationships: [] };
@@ -196,7 +196,7 @@ export type Database = {
     };
     Functions: {
       add_member: {
-        Args: { p_student_no: string; p_full_name: string; p_course: string | null; p_year_level?: number | null };
+        Args: { p_student_no: string; p_full_name: string; p_course: string | null; p_year_level?: number | null; p_section?: string | null };
         Returns: {
           student_id: number; new_student: boolean; member_of: string[] | null; course: string | null;
           paid_amount: number; to_collect: string[]; membership_id: number | null; amount_due: number;
@@ -220,6 +220,7 @@ export type Database = {
       disable_account: { Args: { p_profile_id: string; p_remarks?: string }; Returns: undefined };
       enable_account: { Args: { p_profile_id: string; p_remarks?: string }; Returns: undefined };
       import_students: { Args: { p_rows: Json }; Returns: Json };
+      import_members: { Args: { p_rows: Json }; Returns: Json };
       remind_unpaid: { Args: { p_entity_id: number }; Returns: number };
       get_financial_report: { Args: { p_entity_id: number; p_semester_id?: number; p_as_of?: string }; Returns: FinancialReport };
       save_signatories: { Args: { p_entity_id: number; p_head_title: string; p_head_name: string; p_auditor_name: string; p_adviser_name: string }; Returns: undefined };

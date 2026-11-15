@@ -1,7 +1,7 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router';
-import { BellRing, Info, MoreVertical, Search, UserPlus, Users } from 'lucide-react';
+import { BellRing, Info, MoreVertical, Search, Upload, UserPlus, Users } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { useCurrentYear, useEntities, useSemesters } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
@@ -11,6 +11,8 @@ import { NoYear, Segmented } from '../../components/common';
 import { ExportMenu, exportsLib } from '../../components/ExportMenu';
 import { confirmAsk, promptAsk } from '../../lib/confirm';
 import { toast } from '../../lib/toast';
+import { SECTIONS, YEARS, yearSection } from '../../lib/roster';
+import { ImportSheet, useCourses } from '../admin/Students';
 
 export function Members() {
   const { profile } = useAuth();
@@ -30,6 +32,8 @@ export function Members() {
     return s === 'unpaid' || s === 'paid' ? s : 'all';
   });
   const [adding, setAdding] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const courses = useCourses();
   const [busy, setBusy] = useState<number | null>(null);
   const [err, setErr] = useState('');
 
@@ -39,7 +43,7 @@ export function Members() {
     queryFn: async () => {
       // Fees are per semester: each semester has its own member list (clubs are chosen again every semester).
       let qy = supabase.from('memberships')
-        .select('*, student:students(id, student_no, full_name, course, year_level)')
+        .select('*, student:students(id, student_no, full_name, course, year_level, section)')
         .eq('entity_id', entityId).eq('school_year_id', year.data!.id);
       if (perSemester && sem) qy = qy.eq('semester_id', sem.id);
       const { data, error } = await qy.order('created_at', { ascending: false });
@@ -92,6 +96,18 @@ export function Members() {
       .sort((a, b) => (a.student?.full_name ?? '').localeCompare(b.student?.full_name ?? ''));
   }, [members.data, q, show]);
 
+  // Grouped by year + section (1A, 1B … 4D), then year only, then "No year / section".
+  const groups = useMemo(() => {
+    const by = new Map<string, typeof rows>();
+    for (const m of rows) {
+      const k = yearSection(m.student?.year_level, m.student?.section) || '~';
+      by.set(k, [...(by.get(k) ?? []), m]);
+    }
+    const label = (k: string) => (k === '~' ? 'No year / section' : /^\d$/.test(k) ? `Year ${k} · no section` : k);
+    return [...by.entries()].sort(([a], [b]) => (a === '~' ? 1 : b === '~' ? -1 : a.localeCompare(b)))
+      .map(([key, list]) => ({ key, label: label(key), rows: list }));
+  }, [rows]);
+
   async function pay(id: number) {
     setBusy(id); setErr('');
     const { error } = await supabase.rpc('record_payment', { p_membership_id: id });
@@ -122,6 +138,7 @@ export function Members() {
       <PageHeader title="Members" sub={entity ? `${entity.short_name} · ${peso(entity.dues_amount)} ${perSemester ? (sem ? `· ${sem.term === 1 ? '1st' : '2nd'} semester` : 'per semester') : 'per school year'}` : undefined}
         action={<div className="flex items-center gap-2">
           {entity && <ExportMenu label="CSV" options={[{ label: 'Members & dues', kind: 'csv', run: async () => (await exportsLib()).membersCsv(entity, year.data!) }]} />}
+          {isClub && <Button variant="soft" aria-label="Import members" onClick={() => setImporting(true)}><Upload className="size-5" /><span className="hidden sm:inline">Import</span></Button>}
           {isClub && <Button aria-label="Add member" onClick={() => setAdding(true)}><UserPlus className="size-5" /><span className="hidden sm:inline">Add member</span></Button>}
         </div>} />
       <Card className="mb-4">
@@ -169,9 +186,15 @@ export function Members() {
           ? 'Add students who join your club. They start as to collect; record the fee when they pay.'
           : 'Members appear here automatically: when a club adds a student, they join SSG and their course organizations.'}</Empty></Card>
       ) : (
-        <Card className="p-0">
+        <div className="space-y-4">
+          {groups.map((g) => (
+          <Card key={g.key} className="p-0 overflow-hidden">
+          <div className="px-4 sm:px-5 py-2.5 bg-surface2 border-b border-line flex items-center justify-between gap-3">
+            <h2 className="font-display font-bold text-[16px]">{g.label}</h2>
+            <span className="text-[13px] text-muted">{g.rows.length} member{g.rows.length === 1 ? '' : 's'} · {g.rows.filter((m) => m.is_paid).length} paid</span>
+          </div>
           <ul className="divide-y divide-line">
-            {rows.map((m) => (
+            {g.rows.map((m) => (
               <li key={m.id} className="px-4 sm:px-5 py-3 flex items-center gap-3">
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold truncate flex items-center gap-2">
@@ -179,7 +202,7 @@ export function Members() {
                     {isClub && m.via_course && <span className="shrink-0 text-[11px] font-semibold px-2 h-5 rounded-full inline-flex items-center bg-primary-soft text-primary" title="Added automatically by the student's course">From course</span>}
                     {m.carried_over && !m.is_paid && <span className="shrink-0 text-[11px] font-semibold px-2 h-5 rounded-full inline-flex items-center bg-warn-soft text-warn" title="Member last semester. Record the fee if they stay; if they join another club, this listing is removed.">Carried over</span>}
                   </p>
-                  <p className="text-[13px] text-muted truncate">{m.student?.student_no}{m.student?.course ? ` · ${m.student.course}` : ''}{m.student?.year_level ? ` ${m.student.year_level}` : ''}{m.is_paid ? ` · paid ${date(m.paid_at)}` : ''}</p>
+                  <p className="text-[13px] text-muted truncate">{m.student?.student_no}{m.student?.course ? ` · ${m.student.course}` : ''}{m.is_paid ? ` · paid ${date(m.paid_at)}` : ''}</p>
                   {m.is_paid && receipts.data?.get(m.id) && (
                     <Link to={`/receipt/${receipts.data.get(m.id)}`} className="inline-flex items-center min-h-8 text-[13px] font-semibold text-primary hover:underline money">
                       Receipt {receipts.data.get(m.id)}
@@ -201,10 +224,13 @@ export function Members() {
                 )}
               </li>
             ))}
-            {!rows.length && <li className="px-5 py-6 text-center text-muted">No one matches.</li>}
           </ul>
-        </Card>
+          </Card>
+          ))}
+          {!rows.length && <Card><p className="text-center text-muted py-2">No one matches.</p></Card>}
+        </div>
       )}
+      {importing && isClub && <ImportSheet mode="club" courses={(courses.data ?? []).map((c) => c.code)} onClose={() => setImporting(false)} />}
       {adding && entity && isClub && <AddMember onClose={() => setAdding(false)} entityId={entityId} dues={Number(entity.dues_amount)} perSemester={entity.dues_period === 'semester'} />}
     </>
   );
@@ -238,7 +264,9 @@ function AddMember({ onClose, entityId, dues, perSemester }: { onClose: () => vo
   const [pick, setPick] = useState('');          // course code, OTHER, or '' (not chosen)
   const [otherCourse, setOtherCourse] = useState('');
   const [level, setLevel] = useState('');
-  const [found, setFound] = useState<{ id: number; full_name: string; course: string | null } | null | undefined>(undefined);
+  const [section, setSection] = useState('');
+  type Found = { id: number; full_name: string; course: string | null; year_level: number | null; section: string | null };
+  const [found, setFound] = useState<Found | null | undefined>(undefined);   // undefined = not checked yet
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [done, setDone] = useState<{ name: string; membershipId: number | null; due: number; toCollect: string[] } | null>(null);
@@ -246,7 +274,7 @@ function AddMember({ onClose, entityId, dues, perSemester }: { onClose: () => vo
   const [paid, setPaid] = useState(false);
 
   const me = entities.data?.find((e) => e.id === entityId);
-  // The course that will count: the roster's, if the student already has one; otherwise what the treasurer picks.
+  // The course that will count: the list's, if the student already has one; otherwise what the treasurer picks.
   const course = (found?.course ?? (pick === OTHER ? otherCourse : pick)).trim().toUpperCase().replace(/\s+/g, ' ');
   const courseOrgIds = (rules.data?.orgs ?? []).filter((o) => o.course === course).map((o) => o.entity_id);
   const isCourseStudent = courseOrgIds.length > 0;
@@ -259,19 +287,35 @@ function AddMember({ onClose, entityId, dues, perSemester }: { onClose: () => vo
   // An organization treasurer cannot take a student whose course belongs to other organizations.
   const blocked = !!me && me.category === 'organization' && !me.is_school_wide && isCourseStudent && !courseOrgIds.includes(me.id);
 
-  async function lookup() {
-    if (normStudentNo(no).length < 3) return;
-    const { data, error } = await supabase.from('students').select('id, full_name, course').eq('student_no', normStudentNo(no)).maybeSingle();
-    if (error) setErr(errorText(error)); else setFound(data);
-  }
+  // Look the Student ID up while typing (short pause): a student already on the list fills in the rest.
+  useEffect(() => {
+    const id = normStudentNo(no);
+    if (id.length < 3) { setFound(undefined); return; }
+    let alive = true;
+    const t = setTimeout(async () => {
+      const { data, error } = await supabase.from('students').select('id, full_name, course, year_level, section').eq('student_no', id).maybeSingle();
+      if (!alive) return;
+      if (error) { setErr(errorText(error)); return; }
+      setFound(data);
+      if (data) {
+        setName(data.full_name);
+        if (data.year_level) setLevel(String(data.year_level));
+        if (data.section) setSection(data.section);
+      }
+    }, 450);
+    return () => { alive = false; clearTimeout(t); };
+  }, [no]);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (found === null && !pick) { setErr('Choose the student’s course.'); return; }
+    if (normStudentNo(no).length < 3) { setErr('Type the Student ID.'); return; }
+    if (!found && !name.trim()) { setErr('Type the student’s full name.'); return; }
+    if (!found && !pick) { setErr('Choose the student’s course.'); return; }
+    if (pick === OTHER && !found && !otherCourse.trim()) { setErr('Type the other course.'); return; }
     setBusy(true); setErr('');
     const { data, error } = await supabase.rpc('add_member', {
       p_student_no: normStudentNo(no), p_full_name: name.trim(), p_course: course || null,
-      p_year_level: level ? Number(level) : null,
+      p_year_level: level ? Number(level) : null, p_section: section || null,
     });
     setBusy(false);
     if (error) { setErr(errorText(error)); return; }
@@ -306,27 +350,36 @@ function AddMember({ onClose, entityId, dues, perSemester }: { onClose: () => vo
   return (
     <Sheet open onClose={onClose} title="Add member">
       <form onSubmit={submit} className="space-y-4">
-        <Field label="Student ID" hint="We check the school roster first.">
-          <Input required value={no} onChange={(e) => { setNo(e.target.value); setFound(undefined); setErr(''); }} onBlur={lookup} placeholder="e.g. 2024-0317" />
+        <Field label="Student ID" hint={found ? undefined : 'If the student is already on the school list, the rest fills in by itself.'}>
+          <Input required value={no} onChange={(e) => { setNo(e.target.value); setErr(''); if (found) { setFound(undefined); setName(''); setLevel(''); setSection(''); } }} placeholder="e.g. 24-1-03178" autoComplete="off" className="money" />
         </Field>
-        {found ? <Alert tone="ok">On the roster: <b>{found.full_name}</b>{found.course ? ` · ${found.course}` : ''}</Alert> : found === null && (
-          <>
-            <Alert tone="warn">Not on the roster yet. Add their details:</Alert>
-            <Field label="Full name"><Input required value={name} onChange={(e) => setName(e.target.value)} autoComplete="off" /></Field>
-            <div className="grid grid-cols-[1fr_7rem] gap-3">
-              <Field label="Course">
-                <Select required value={pick} onChange={(e) => setPick(e.target.value)}>
-                  <option value="" disabled>Choose…</option>
-                  {(rules.data?.courses ?? []).map((c) => <option key={c.code} value={c.code}>{c.code} · {c.name}</option>)}
-                  <option value={OTHER}>Other course…</option>
-                </Select>
-              </Field>
-              <Field label="Year level"><Input type="number" inputMode="numeric" min={1} max={6} value={level} onChange={(e) => setLevel(e.target.value)} /></Field>
-            </div>
-            {pick === OTHER && <Field label="Other course" hint="Students of other courses join SSG automatically."><Input required value={otherCourse} onChange={(e) => setOtherCourse(e.target.value)} placeholder="e.g. BSCRIM" /></Field>}
-          </>
-        )}
-        {found !== undefined && (course || found) && (blocked ? (
+        {found && <Alert tone="ok">On the school list: <b>{found.full_name}</b>{found.course ? ` · ${found.course}` : ''}. Check the year and section.</Alert>}
+        <Field label="Full name"><Input required={!found} value={name} onChange={(e) => setName(e.target.value)} disabled={!!found} autoComplete="off" placeholder="e.g. Juan Dela Cruz" /></Field>
+        <Field label="Course">
+          {found?.course ? <Input value={found.course} disabled /> : (
+            <Select required={!found} value={pick} onChange={(e) => setPick(e.target.value)}>
+              <option value="" disabled>Choose…</option>
+              {(rules.data?.courses ?? []).map((c) => <option key={c.code} value={c.code}>{c.code} · {c.name}</option>)}
+              <option value={OTHER}>Other course…</option>
+            </Select>
+          )}
+        </Field>
+        {pick === OTHER && !found?.course && <Field label="Other course" hint="Students of other courses join SSG automatically."><Input required value={otherCourse} onChange={(e) => setOtherCourse(e.target.value)} placeholder="e.g. BSCRIM" /></Field>}
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Year level">
+            <Select value={level} onChange={(e) => setLevel(e.target.value)}>
+              <option value="">—</option>
+              {YEARS.map((y) => <option key={y} value={y}>{y === '1' ? '1st' : y === '2' ? '2nd' : y === '3' ? '3rd' : '4th'} year</option>)}
+            </Select>
+          </Field>
+          <Field label="Section">
+            <Select value={section} onChange={(e) => setSection(e.target.value)}>
+              <option value="">—</option>
+              {SECTIONS.map((x) => <option key={x} value={x}>Section {x}</option>)}
+            </Select>
+          </Field>
+        </div>
+        {(course || found) && (blocked ? (
           <Alert>
             {course} students belong to {['SSG', ...(entities.data ?? []).filter((x) => courseOrgIds.includes(x.id)).map((x) => x.short_name)].join(', ')}, set by their course.
             They can’t be added to {me?.short_name}.
@@ -346,8 +399,7 @@ function AddMember({ onClose, entityId, dues, perSemester }: { onClose: () => vo
           They start as <b className="text-ink">to collect</b> (<span className="money">{peso(dues)}</span> {perSemester ? 'this semester' : 'this school year'}). Record the payment when they pay — right after adding, or later from the list.
         </p>
         {err && <Alert>{err}</Alert>}
-        <Button type="submit" busy={busy} disabled={found === undefined || blocked} className="w-full h-[54px]">Add member</Button>
-        {found === undefined && <p className="text-[13px] text-muted text-center -mt-2">Enter the student ID, then tap outside the box to check it.</p>}
+        <Button type="submit" busy={busy} disabled={blocked} className="w-full h-[54px]">Add member</Button>
       </form>
     </Sheet>
   );

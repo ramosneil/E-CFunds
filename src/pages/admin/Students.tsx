@@ -3,7 +3,7 @@ import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-quer
 import { AlertTriangle, ChevronLeft, ChevronRight, FileSpreadsheet, GraduationCap, Pencil, Search, Upload, UserPlus } from 'lucide-react';
 import { supabase, errorText } from '../../lib/supabase';
 import { normStudentNo } from '../../lib/format';
-import { downloadTemplate, parseRoster, type Parsed } from '../../lib/roster';
+import { SECTIONS, YEARS, downloadTemplate, parseRoster, yearSection, type Parsed } from '../../lib/roster';
 import type { Row } from '../../lib/database.types';
 import { Alert, Button, Card, Chip, Empty, Field, Input, PageHeader, Select, Sheet, Spinner } from '../../components/ui';
 import { Segmented } from '../../components/common';
@@ -81,7 +81,7 @@ export function Students() {
           </Select>
           <Select value={year} onChange={(e) => setYear(e.target.value)} aria-label="Year level">
             <option value="">All years</option>
-            {[1, 2, 3, 4, 5, 6].map((y) => <option key={y} value={y}>Year {y}</option>)}
+            {YEARS.map((y) => <option key={y} value={y}>Year {y}</option>)}
           </Select>
         </div>
         <div className="sm:w-[270px]"><Segmented value={status} onChange={setStatus} options={[['active', 'Active'], ['inactive', 'Inactive'], ['all', 'All']]} /></div>
@@ -103,7 +103,7 @@ export function Students() {
                     {!s.is_active && <Chip tone="muted">Inactive</Chip>}
                   </p>
                   <p className="text-[13px] text-muted truncate">
-                    <span className="money">{s.student_no}</span>{s.course ? ` · ${s.course}` : ' · no course'}{s.year_level ? ` ${s.year_level}` : ''}
+                    <span className="money">{s.student_no}</span>{s.course ? ` · ${s.course}` : ' · no course'}{s.year_level ? ` ${yearSection(s.year_level, s.section)}` : ''}
                   </p>
                 </div>
                 <button onClick={() => setEdit(s)} aria-label={`Edit ${s.full_name}`} title="Edit"
@@ -130,12 +130,12 @@ export function Students() {
 }
 
 /** SAS adds ONE student (late enrollee). Same server checks as the import (import_students with one row): Student ID
- *  cleaned + unique, course from the list, year 1–6; joins SSG + their course orgs automatically. If the ID is already
+ *  cleaned + unique, course from the list, year 1–4, section A–D; joins SSG + their course orgs automatically. If the ID is already
  *  on the list, its name/course/year are updated instead. `initial` pre-fills from a sign-up request (Approvals). */
 export function AddStudentSheet({ onClose, onAdded, initial }: { onClose: () => void; onAdded?: () => void; initial?: { student_no?: string | null; full_name?: string | null } }) {
   const qc = useQueryClient();
   const courses = useCourses();
-  const [f, setF] = useState({ student_no: initial?.student_no ?? '', full_name: initial?.full_name ?? '', course: '', year_level: '' });
+  const [f, setF] = useState({ student_no: initial?.student_no ?? '', full_name: initial?.full_name ?? '', course: '', year_level: '', section: '' });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
 
@@ -145,7 +145,7 @@ export function AddStudentSheet({ onClose, onAdded, initial }: { onClose: () => 
     if (no.length < 3) { setErr('Type the Student ID (at least 3 characters).'); return; }
     if (!name) { setErr('Type the full name.'); return; }
     setBusy(true); setErr('');
-    const { data, error } = await supabase.rpc('import_students', { p_rows: [{ student_no: no, full_name: name, course: f.course || null, year_level: f.year_level }] });
+    const { data, error } = await supabase.rpc('import_students', { p_rows: [{ student_no: no, full_name: name, course: f.course || null, year_level: f.year_level, section: f.section }] });
     setBusy(false);
     if (error) { setErr(errorText(error)); return; }
     const res = data as { ok: boolean; added?: number; updated?: number; errors?: { message: string }[] };
@@ -162,17 +162,23 @@ export function AddStudentSheet({ onClose, onAdded, initial }: { onClose: () => 
         <p className="text-[14px] text-muted -mt-1">For a late enrollee. They join SSG and their course organizations for this school year, and can then sign up with this Student ID.</p>
         <Field label="Student ID"><Input required value={f.student_no} onChange={(e) => setF({ ...f, student_no: e.target.value })} placeholder="e.g. 24-1-03178" className="money" autoCapitalize="characters" /></Field>
         <Field label="Full name"><Input required value={f.full_name} maxLength={120} onChange={(e) => setF({ ...f, full_name: e.target.value })} placeholder="e.g. Juan Dela Cruz" /></Field>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-[1.4fr_1fr_1fr] gap-3">
           <Field label="Course">
             <Select value={f.course} onChange={(e) => setF({ ...f, course: e.target.value })}>
               <option value="">No course</option>
               {courses.data?.map((c) => <option key={c.code} value={c.code}>{c.code}</option>)}
             </Select>
           </Field>
-          <Field label="Year level">
+          <Field label="Year">
             <Select value={f.year_level} onChange={(e) => setF({ ...f, year_level: e.target.value })}>
               <option value="">—</option>
-              {[1, 2, 3, 4, 5, 6].map((y) => <option key={y} value={y}>{y}</option>)}
+              {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+            </Select>
+          </Field>
+          <Field label="Section">
+            <Select value={f.section} onChange={(e) => setF({ ...f, section: e.target.value })}>
+              <option value="">—</option>
+              {SECTIONS.map((x) => <option key={x} value={x}>{x}</option>)}
             </Select>
           </Field>
         </div>
@@ -185,7 +191,7 @@ export function AddStudentSheet({ onClose, onAdded, initial }: { onClose: () => 
 
 function EditSheet({ s, courses, onClose }: { s: Student; courses: { code: string; name: string }[]; onClose: () => void }) {
   const qc = useQueryClient();
-  const [f, setF] = useState({ full_name: s.full_name, course: s.course ?? '', year_level: s.year_level ? String(s.year_level) : '', active: s.is_active ? 'yes' : 'no' });
+  const [f, setF] = useState({ full_name: s.full_name, course: s.course ?? '', year_level: s.year_level ? String(s.year_level) : '', section: s.section ?? '', active: s.is_active ? 'yes' : 'no' });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
 
@@ -204,7 +210,7 @@ function EditSheet({ s, courses, onClose }: { s: Student; courses: { code: strin
     }))) return;
     setBusy(true); setErr('');
     const { error } = await supabase.from('students').update({
-      full_name: name, course: f.course || null, year_level: f.year_level ? Number(f.year_level) : null, is_active: f.active === 'yes',
+      full_name: name, course: f.course || null, year_level: f.year_level ? Number(f.year_level) : null, section: f.section || null, is_active: f.active === 'yes',
     }).eq('id', s.id);
     setBusy(false);
     if (error) { setErr(errorText(error)); return; }
@@ -220,17 +226,23 @@ function EditSheet({ s, courses, onClose }: { s: Student; courses: { code: strin
           <Input value={s.student_no} disabled className="money" />
         </Field>
         <Field label="Full name"><Input required value={f.full_name} onChange={(e) => setF({ ...f, full_name: e.target.value })} /></Field>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-[1.4fr_1fr_1fr] gap-3">
           <Field label="Course">
             <Select value={f.course} onChange={(e) => setF({ ...f, course: e.target.value })}>
               <option value="">No course</option>
               {courses.map((c) => <option key={c.code} value={c.code}>{c.code}</option>)}
             </Select>
           </Field>
-          <Field label="Year level">
+          <Field label="Year">
             <Select value={f.year_level} onChange={(e) => setF({ ...f, year_level: e.target.value })}>
               <option value="">—</option>
-              {[1, 2, 3, 4, 5, 6].map((y) => <option key={y} value={y}>{y}</option>)}
+              {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+            </Select>
+          </Field>
+          <Field label="Section">
+            <Select value={f.section} onChange={(e) => setF({ ...f, section: e.target.value })}>
+              <option value="">—</option>
+              {SECTIONS.map((x) => <option key={x} value={x}>{x}</option>)}
             </Select>
           </Field>
         </div>
@@ -242,7 +254,10 @@ function EditSheet({ s, courses, onClose }: { s: Student; courses: { code: strin
   );
 }
 
-function ImportSheet({ courses, onClose }: { courses: string[]; onClose: () => void }) {
+/** Import a student list. mode 'sas' = the school list (import_students); 'club' = a club treasurer adds members
+ *  (import_members — students not on the list are added to it too; already members are skipped). */
+export function ImportSheet({ courses, onClose, mode = 'sas' }: { courses: string[]; onClose: () => void; mode?: 'sas' | 'club' }) {
+  const club = mode === 'club';
   const qc = useQueryClient();
   const [file, setFile] = useState<File | null>(null);
   const [parsed, setParsed] = useState<Parsed | null>(null);
@@ -271,47 +286,65 @@ function ImportSheet({ courses, onClose }: { courses: string[]; onClose: () => v
     if (!f) return;
     if (f.size > 5 * 1024 * 1024) { setErr('That file is over 5 MB. Remove extra sheets or columns and try again.'); return; }
     setReading(true);
-    try { setParsed(await parseRoster(f, courses)); } catch (e) { setErr(e instanceof Error ? e.message : errorText(e)); } finally { setReading(false); }
+    try { setParsed(await parseRoster(f, courses, { nameOptional: club })); } catch (e) { setErr(e instanceof Error ? e.message : errorText(e)); } finally { setReading(false); }
   }
 
   async function run() {
     if (!parsed) return;
     const n = parsed.rows.length;
-    if (!(await confirmAsk({ title: `Import ${n.toLocaleString('en-PH')} student${n === 1 ? '' : 's'}?`,
-      body: 'New Student IDs are added; existing ones get the name, course and year from the file and become active. New students join SSG and their course organizations for this school year.',
-      confirm: 'Import' }))) return;
+    if (!(await confirmAsk(club
+      ? { title: `Add ${n.toLocaleString('en-PH')} member${n === 1 ? '' : 's'}?`, confirm: 'Add members',
+          body: 'Each student becomes a member of your club this semester (to collect) and joins SSG and their course organizations. Students already in your club are skipped.' }
+      : { title: `Import ${n.toLocaleString('en-PH')} student${n === 1 ? '' : 's'}?`, confirm: 'Import',
+          body: 'New Student IDs are added; existing ones get the name, course, year and section from the file and become active. New students join SSG and their course organizations for this school year.' }))) return;
     setBusy(true); setErr('');
-    const { data, error } = await supabase.rpc('import_students', {
-      p_rows: parsed.rows.map((r) => ({ student_no: r.student_no, full_name: r.full_name, course: r.course, year_level: r.year_level })),
-    });
+    const payload = parsed.rows.map((r) => ({ student_no: r.student_no, full_name: r.full_name, course: r.course, year_level: r.year_level, section: r.section }));
+    const { data, error } = club ? await supabase.rpc('import_members', { p_rows: payload }) : await supabase.rpc('import_students', { p_rows: payload });
     setBusy(false);
     if (error) { setErr(errorText(error)); return; }
-    const res = data as { ok: boolean; added?: number; updated?: number; unchanged?: number; errors?: { row: number; message: string }[] };
+    const res = data as { ok: boolean; added?: number; updated?: number; unchanged?: number; already?: number; errors?: { row: number; message: string }[];
+      skipped?: { row: number; student_no: string; message: string }[] };
     if (!res.ok) {   // the database found something the preview didn't: show it on the right lines
       setParsed({ ...parsed, errors: (res.errors ?? []).map((e) => ({ line: parsed.rows[e.row - 1]?.line ?? e.row, message: e.message })) });
       return;
     }
     void qc.invalidateQueries();
-    toast({ title: 'Roster imported', body: `${res.added} added · ${res.updated} updated · ${res.unchanged} unchanged`, tone: 'ok' });
+    if (club) {
+      const skipped = res.skipped ?? [];
+      toast({ title: 'Members added', body: `${res.added} added · ${res.already} already in${skipped.length ? ` · ${skipped.length} skipped` : ''}`, tone: skipped.length ? 'warn' : 'ok', sticky: skipped.length > 0 });
+      if (skipped.length) {   // keep the sheet open and show who was skipped and why
+        setSkippedRows(skipped.map((x) => ({ line: parsed.rows[x.row - 1]?.line ?? x.row, message: `${x.student_no}: ${x.message}` })));
+        return;
+      }
+    } else {
+      toast({ title: 'Roster imported', body: `${res.added} added · ${res.updated} updated · ${res.unchanged} unchanged`, tone: 'ok' });
+    }
     onClose();
   }
 
+  const [skippedRows, setSkippedRows] = useState<{ line: number; message: string }[]>([]);
   const errs = parsed?.errors ?? [];
   const isNew = (no: string) => existing.data && !existing.data.has(no);
   const newCount = existing.data ? ids.filter((x) => !existing.data!.has(x)).length : null;
 
   return (
-    <Sheet open onClose={onClose} title="Import students">
+    <Sheet open onClose={onClose} title={club ? 'Import members' : 'Import students'}>
       <div className="space-y-4">
+        {skippedRows.length > 0 && (
+          <Alert tone="warn">
+            <b>Added — but {skippedRows.length} skipped:</b>
+            <ul className="mt-1 space-y-0.5">{skippedRows.map((x, i) => <li key={i}>Line {x.line}: {x.message}</li>)}</ul>
+          </Alert>
+        )}
         <div className="rounded-[16px] bg-surface2 p-4 text-[14px]">
           <p className="font-semibold mb-1">1. Download the template</p>
-          <p className="text-muted mb-3">Columns: Student ID, Full name, Course, Year level. A registrar file with the same column titles works too.</p>
+          <p className="text-muted mb-3">Columns: Student ID, Full name, Course, Year level, Section (A–D). {club ? 'A class list with the same column titles works too.' : 'A registrar file with the same column titles works too.'}</p>
           <div className="grid grid-cols-2 gap-2 sm:max-w-xs">
-            <Button variant="ghost" className="h-11 px-3 text-[14px] bg-surface" onClick={() => void downloadTemplate('xlsx', courses)}><FileSpreadsheet className="size-4" aria-hidden />Excel</Button>
-            <Button variant="ghost" className="h-11 px-3 text-[14px] bg-surface" onClick={() => void downloadTemplate('csv', courses)}><FileSpreadsheet className="size-4" aria-hidden />CSV</Button>
+            <Button variant="ghost" className="h-11 px-3 text-[14px] bg-surface" onClick={() => void downloadTemplate('xlsx', courses, mode)}><FileSpreadsheet className="size-4" aria-hidden />Excel</Button>
+            <Button variant="ghost" className="h-11 px-3 text-[14px] bg-surface" onClick={() => void downloadTemplate('csv', courses, mode)}><FileSpreadsheet className="size-4" aria-hidden />CSV</Button>
           </div>
         </div>
-        <Field label="2. Choose the filled-in file" hint="Excel (.xlsx) or CSV (.csv), up to 5,000 students.">
+        <Field label="2. Choose the filled-in file" hint={`Excel (.xlsx) or CSV (.csv), up to ${club ? '1,000' : '5,000'} students.`}>
           <input type="file" accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             onChange={(e) => void pick(e.target.files?.[0])}
             className="block w-full text-[14px] file:mr-3 file:h-11 file:px-4 file:rounded-[12px] file:border-0 file:bg-primary-soft file:text-primary file:font-semibold file:cursor-pointer cursor-pointer" />
@@ -348,9 +381,9 @@ function ImportSheet({ courses, onClose }: { courses: string[]; onClose: () => v
                       <div className="min-w-0 flex-1">
                         <p className="font-semibold text-[14px] truncate">{r.full_name || '—'}</p>
                         <p className="text-[13px] text-muted truncate"><span className="money">{r.student_no || '—'}</span>
-                          {' · '}{r.course ?? 'no course'}{r.year_level ? ` ${r.year_level}` : ''}</p>
+                          {' · '}{r.course ?? 'no course'}{r.year_level ? ` ${yearSection(r.year_level, r.section)}` : ''}</p>
                       </div>
-                      <span className="shrink-0">{bad ? <Chip tone="bad">Fix</Chip> : isNew(r.student_no) ? <Chip tone="primary">New</Chip> : existing.data ? <Chip tone="muted">Update</Chip> : null}</span>
+                      <span className="shrink-0">{bad ? <Chip tone="bad">Fix</Chip> : isNew(r.student_no) ? <Chip tone="primary">{club ? 'New student' : 'New'}</Chip> : existing.data ? <Chip tone="muted">{club ? 'On the list' : 'Update'}</Chip> : null}</span>
                     </li>
                   );
                 })}
@@ -358,7 +391,7 @@ function ImportSheet({ courses, onClose }: { courses: string[]; onClose: () => v
               {parsed.rows.length > 100 && <p className="px-3 py-2 text-[13px] text-muted border-t border-line">Showing the first 100 of {parsed.rows.length.toLocaleString('en-PH')}.</p>}
             </div>
             <Button className="w-full h-[54px]" busy={busy} disabled={errs.length > 0} onClick={run}>
-              Import {parsed.rows.length.toLocaleString('en-PH')} student{parsed.rows.length === 1 ? '' : 's'}
+              {club ? 'Add' : 'Import'} {parsed.rows.length.toLocaleString('en-PH')} {club ? 'member' : 'student'}{parsed.rows.length === 1 ? '' : 's'}
             </Button>
           </>
         )}

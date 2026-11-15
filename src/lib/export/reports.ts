@@ -197,12 +197,14 @@ export async function schoolSummary(format: 'pdf' | 'csv', year: Year) {
 // ---------------------------------------------------------------- 3. Members & dues (CSV)
 export async function membersCsv(entity: Entity, year: Year) {
   const rows = await must(supabase.from('memberships')
-    .select('amount_due, is_paid, paid_at, student:students(student_no, full_name, course, year_level)')
+    .select('amount_due, is_paid, paid_at, student:students(student_no, full_name, course, year_level, section)')
     .eq('entity_id', entity.id).eq('school_year_id', year.id));
-  const sorted = [...rows].sort((a, b) => (a.student?.full_name ?? '').localeCompare(b.student?.full_name ?? ''));
+  // Same order as the Members page: by year + section (1A, 1B…), then name.
+  const grp = (x: { student: { year_level: number | null; section: string | null } | null }) => `${x.student?.year_level ?? 9}${x.student?.section ?? 'Z'}`;
+  const sorted = [...rows].sort((a, b) => grp(a).localeCompare(grp(b)) || (a.student?.full_name ?? '').localeCompare(b.student?.full_name ?? ''));
   await downloadCsv(`E-CFunds_${slug(entity.short_name)}_members_${year.label}.csv`,
-    ['Student ID', 'Full name', 'Course', 'Year level', 'Amount due', 'Status', 'Paid on'],
-    sorted.map((m) => [m.student?.student_no, m.student?.full_name, m.student?.course, m.student?.year_level, Number(m.amount_due).toFixed(2), m.is_paid ? 'Paid' : 'Unpaid', m.paid_at ? manilaDate(m.paid_at) : '']));
+    ['Student ID', 'Full name', 'Course', 'Year level', 'Section', 'Amount due', 'Status', 'Paid on'],
+    sorted.map((m) => [m.student?.student_no, m.student?.full_name, m.student?.course, m.student?.year_level, m.student?.section, Number(m.amount_due).toFixed(2), m.is_paid ? 'Paid' : 'Unpaid', m.paid_at ? manilaDate(m.paid_at) : '']));
 }
 
 // ---------------------------------------------------------------- 4. Accredited list (admin)
