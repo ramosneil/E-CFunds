@@ -4,7 +4,7 @@ import { MailCheck } from 'lucide-react';
 import { supabase, errorText, resetEmailClient } from '../../lib/supabase';
 import { Alert, Button, Field, Input } from '../../components/ui';
 import { AuthLayout, Divider, GoogleButton } from './AuthLayout';
-import { APP_AUTH_CALLBACK, isNative, webOrigin } from '../../lib/native';
+import { isNative, webOrigin } from '../../lib/native';
 import { NATIVE_AUTH_ERROR, nativeGoogleSignIn } from '../../lib/nativeAuth';
 import { AndroidAppLink } from '../../components/AndroidAppLink';
 import { IphoneAppHint } from '../../components/IphoneInstall';
@@ -150,26 +150,71 @@ export function Register() {
 }
 
 export function Forgot() {
+  // Password reset by code (Neil, 2026-11-15): the email holds a 6-digit code (template docs/email-templates/
+  // reset-password.html, {{ .Token }}). The code is typed here — no link to open, works in the app and on the web.
   const [email, setEmail] = useState('');
+  const [step, setStep] = useState<'email' | 'code'>('email');
+  const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState(false);
   const [err, setErr] = useState('');
-  async function submit(e: FormEvent) {
-    e.preventDefault();
+  const [wait, setWait] = useState(0);                     // seconds before "Send a new code" works again
+  useEffect(() => {
+    if (wait <= 0) return;
+    const t = setTimeout(() => setWait(wait - 1), 1000);
+    return () => clearTimeout(t);
+  }, [wait]);
+
+  async function send() {
     setBusy(true); setErr('');
-    // Asked in the Android app → the email's button opens the app ("Set a new password", already signed in).
-    // Asked on the website → the link opens the website. Either way the link carries the sign-in (resetEmailClient).
-    const { error } = await resetEmailClient().auth.resetPasswordForEmail(email.trim(), { redirectTo: isNative ? APP_AUTH_CALLBACK : webOrigin() + '/reset' });
+    const { error } = await resetEmailClient().auth.resetPasswordForEmail(email.trim(), { redirectTo: webOrigin() + '/reset' });
     setBusy(false);
-    if (error) setErr(errorText(error)); else setDone(true);
+    if (error) {
+      setErr(/rate limit|too many|seconds/i.test(error.message) ? 'Too many codes asked for. Wait a few minutes, then try again.' : errorText(error));
+      return false;
+    }
+    setStep('code'); setCode(''); setWait(60);
+    return true;
   }
+  async function submitEmail(e: FormEvent) { e.preventDefault(); await send(); }
+  async function submitCode(e: FormEvent) {
+    e.preventDefault();
+    const token = code.replace(/\D/g, '');
+    if (token.length < 6) { setErr('Type the code from the email (6 digits).'); return; }
+    setBusy(true); setErr('');
+    // After the code checks out you are signed in; App.tsx then opens "Set a new password" (/reset).
+    try { sessionStorage.setItem('ecfunds:recovery', '1'); } catch { /* fine */ }
+    const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token, type: 'recovery' });
+    setBusy(false);
+    if (error) {
+      try { sessionStorage.removeItem('ecfunds:recovery'); } catch { /* fine */ }
+      setErr(/expired|invalid/i.test(error.message) ? 'That code is wrong or has expired. Check the newest email, or send a new code.' : errorText(error));
+    }
+  }
+
   return (
-    <AuthLayout title="Reset your password" sub="We'll email you a link to set a new one.">
-      {done ? <Alert tone="ok">If that email has an account, a reset link is on its way.{isNative ? ' Open the email on this phone and tap the button — it brings you back to this app to set the new password.' : ''}</Alert> : (
-        <form onSubmit={submit} className="space-y-4">
+    <AuthLayout title="Reset your password" sub={step === 'email' ? 'We’ll email you a 6-digit code.' : <>We sent a code to <b className="text-ink">{email.trim()}</b>.</>}>
+      {step === 'email' ? (
+        <form onSubmit={submitEmail} className="space-y-4">
           <Field label="Email"><Input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
           {err && <Alert>{err}</Alert>}
-          <Button type="submit" busy={busy} className="w-full h-[54px]">Send reset link</Button>
+          <Button type="submit" busy={busy} className="w-full h-[54px]">Send code</Button>
+        </form>
+      ) : (
+        <form onSubmit={submitCode} className="space-y-4">
+          <Field label="Code from the email" hint="Check spam/promotions too. The newest email’s code is the one that works.">
+            <Input autoComplete="one-time-code" inputMode="numeric" maxLength={10} required value={code}
+              onChange={(e) => setCode(e.target.value.replace(/[^\d ]/g, ''))} placeholder="123456"
+              className="money text-[26px] tracking-[0.3em] h-14 font-semibold text-center" />
+          </Field>
+          {err && <Alert>{err}</Alert>}
+          <Button type="submit" busy={busy} className="w-full h-[54px]">Continue</Button>
+          <div className="flex justify-between text-[14px]">
+            <button type="button" onClick={() => { setStep('email'); setErr(''); }} className="min-h-11 text-primary font-semibold cursor-pointer">Change email</button>
+            <button type="button" disabled={wait > 0 || busy} onClick={() => void send()}
+              className="min-h-11 text-primary font-semibold cursor-pointer disabled:text-muted disabled:cursor-default">
+              {wait > 0 ? `Send a new code (${wait}s)` : 'Send a new code'}
+            </button>
+          </div>
         </form>
       )}
       <Link to="/login" className="block text-center mt-6 text-primary font-semibold">Back to sign in</Link>

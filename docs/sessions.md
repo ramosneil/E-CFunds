@@ -297,3 +297,7 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   `ph.edu.omsc.ecfunds://auth/callback` (same allow-listed link as Google): the email button opens the app, which
   reads `#access_token…&type=recovery`, signs in and opens /reset ("Set a new password"); expired link → /reset with
   the error. Website-asked resets stay on the website. A reset asked in the app must be opened on the same phone.
+- Password reset by **6-digit code** (Neil's idea): Neil set up Gmail SMTP in Supabase (built-in sender can't edit
+  templates); Claude pasted docs/email-templates/reset-password.html into Supabase's Reset password template (subject
+  "Your E-CFunds reset code", `{{ .Token }}`, no link). Forgot screen: email → Send code → code → Continue →
+  verifyOtp(type recovery) → "Set a new password". Works the same in the app and on the web.
