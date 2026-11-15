@@ -12,6 +12,7 @@ import { confirmAsk, promptAsk } from '../../lib/confirm';
 import { useAuth } from '../../lib/auth';
 import { BudgetDecisionCard, useBudgets } from '../../components/budgets';
 import { ExpenseItemList } from '../../components/ItemRows';
+import { AddStudentSheet } from './Students';
 
 export function Approvals() {
   const [params] = useSearchParams();   // the Dashboard's "accounts to approve" link opens ?tab=accounts
@@ -318,6 +319,7 @@ function AccountCard({ p }: { p: Row<'profiles'> }) {
   }
 
   const studentBlocked = role === 'student' && !match.data;
+  const [addingStudent, setAddingStudent] = useState(false);
   return (
     <Card>
       <div className="flex items-start justify-between gap-3">
@@ -352,7 +354,14 @@ function AccountCard({ p }: { p: Row<'profiles'> }) {
         )}
       </div>
       <div className="mt-3"><Field label="Remarks" hint="Required when rejecting."><Input value={remarks} onChange={(e) => setRemarks(e.target.value)} /></Field></div>
-      {studentBlocked && <p className="text-[13px] text-muted mt-2">Add this Student ID first (Students page → Import, or a club adds the student), then approve.</p>}
+      {studentBlocked && !match.isLoading && (
+        <div className="mt-3 rounded-[14px] border border-line p-3 flex flex-wrap items-center gap-3">
+          <p className="text-[13px] text-muted flex-1 min-w-[200px]">This Student ID isn’t on the student list yet (e.g. a late enrollee). Add it, then approve.</p>
+          <Button variant="soft" className="h-11 px-4 text-[14px]" onClick={() => setAddingStudent(true)}>Add to student list</Button>
+        </div>
+      )}
+      {addingStudent && <AddStudentSheet initial={{ student_no: p.requested_student_no, full_name: p.full_name }}
+        onAdded={() => void match.refetch()} onClose={() => setAddingStudent(false)} />}
       {err && <div className="mt-3"><Alert>{err}</Alert></div>}
       <div className="mt-4 grid grid-cols-2 gap-3">
         <Button variant="danger" busy={busy === 'no'} disabled={!!busy} onClick={() => decide(false)}>Reject</Button>

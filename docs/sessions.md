@@ -305,3 +305,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   reset code" with the 6-digit code arrived (seen in the sender's Gmail). Auth log: email limit went 2/h → 30/h.
   Code entry + new password left to Neil (never typed by Claude). Sender is Neil's personal Gmail for now.
 - Neil confirmed: reset by code worked end to end on his side (code → new password saved).
+- SAS can add ONE student (Students → Add student; late enrollees) and, on an account waiting for approval whose Student ID isn't on the list, 'Add to student list' pre-filled from the sign-up → Approve turns on. Both use import_students (same checks, auto SSG + course orgs). Web already had Import (Neil's screenshot was Approvals).

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, ChevronLeft, ChevronRight, FileSpreadsheet, GraduationCap, Pencil, Search, Upload } from 'lucide-react';
+import { AlertTriangle, ChevronLeft, ChevronRight, FileSpreadsheet, GraduationCap, Pencil, Search, Upload, UserPlus } from 'lucide-react';
 import { supabase, errorText } from '../../lib/supabase';
 import { normStudentNo } from '../../lib/format';
 import { downloadTemplate, parseRoster, type Parsed } from '../../lib/roster';
@@ -13,7 +13,7 @@ import { toast } from '../../lib/toast';
 type Student = Row<'students'>;
 const PER_PAGE = 50;
 
-function useCourses() {
+export function useCourses() {
   return useQuery({
     queryKey: ['courses'],
     staleTime: 10 * 60_000,
@@ -36,6 +36,7 @@ export function Students() {
   const [page, setPage] = useState(0);
   const [edit, setEdit] = useState<Student | null>(null);
   const [importing, setImporting] = useState(false);
+  const [adding, setAdding] = useState(false);
 
   useEffect(() => { const t = setTimeout(() => setTerm(q.trim()), 300); return () => clearTimeout(t); }, [q]);
   useEffect(() => { setPage(0); }, [term, course, year, status]);
@@ -63,7 +64,10 @@ export function Students() {
   return (
     <>
       <PageHeader title="Students" sub="Everyone on the student list. Import the registrar’s file to add or update many at once."
-        action={<Button onClick={() => setImporting(true)}><Upload className="size-5" aria-hidden />Import</Button>} />
+        action={<div className="flex items-center gap-2">
+          <Button variant="soft" onClick={() => setAdding(true)} aria-label="Add one student"><UserPlus className="size-5" aria-hidden /><span className="hidden sm:inline">Add student</span></Button>
+          <Button onClick={() => setImporting(true)}><Upload className="size-5" aria-hidden />Import</Button>
+        </div>} />
       <div className="grid gap-3 mb-4 sm:grid-cols-[1fr_auto_auto] items-center">
         <label className="relative block">
           <Search className="size-5 text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden />
@@ -119,8 +123,63 @@ export function Students() {
         </Card>
       )}
       {edit && <EditSheet key={edit.id} s={edit} courses={courses.data ?? []} onClose={() => setEdit(null)} />}
+      {adding && <AddStudentSheet onClose={() => setAdding(false)} />}
       {importing && <ImportSheet courses={(courses.data ?? []).map((c) => c.code)} onClose={() => setImporting(false)} />}
     </>
+  );
+}
+
+/** SAS adds ONE student (late enrollee). Same server checks as the import (import_students with one row): Student ID
+ *  cleaned + unique, course from the list, year 1–6; joins SSG + their course orgs automatically. If the ID is already
+ *  on the list, its name/course/year are updated instead. `initial` pre-fills from a sign-up request (Approvals). */
+export function AddStudentSheet({ onClose, onAdded, initial }: { onClose: () => void; onAdded?: () => void; initial?: { student_no?: string | null; full_name?: string | null } }) {
+  const qc = useQueryClient();
+  const courses = useCourses();
+  const [f, setF] = useState({ student_no: initial?.student_no ?? '', full_name: initial?.full_name ?? '', course: '', year_level: '' });
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    const no = normStudentNo(f.student_no), name = f.full_name.trim().replace(/\s+/g, ' ');
+    if (no.length < 3) { setErr('Type the Student ID (at least 3 characters).'); return; }
+    if (!name) { setErr('Type the full name.'); return; }
+    setBusy(true); setErr('');
+    const { data, error } = await supabase.rpc('import_students', { p_rows: [{ student_no: no, full_name: name, course: f.course || null, year_level: f.year_level }] });
+    setBusy(false);
+    if (error) { setErr(errorText(error)); return; }
+    const res = data as { ok: boolean; added?: number; updated?: number; errors?: { message: string }[] };
+    if (!res.ok) { setErr(res.errors?.map((x) => x.message).join(' · ') ?? 'Could not add the student.'); return; }
+    void qc.invalidateQueries();
+    toast({ title: res.added ? 'Student added' : 'Student updated', body: `${name} · ${no}${res.added ? '' : ' (was already on the list)'}`, tone: 'ok', silent: true });
+    onAdded?.();
+    onClose();
+  }
+
+  return (
+    <Sheet open onClose={onClose} title="Add a student">
+      <form onSubmit={submit} className="space-y-4">
+        <p className="text-[14px] text-muted -mt-1">For a late enrollee. They join SSG and their course organizations for this school year, and can then sign up with this Student ID.</p>
+        <Field label="Student ID"><Input required value={f.student_no} onChange={(e) => setF({ ...f, student_no: e.target.value })} placeholder="e.g. 24-1-03178" className="money" autoCapitalize="characters" /></Field>
+        <Field label="Full name"><Input required value={f.full_name} maxLength={120} onChange={(e) => setF({ ...f, full_name: e.target.value })} placeholder="e.g. Juan Dela Cruz" /></Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Course">
+            <Select value={f.course} onChange={(e) => setF({ ...f, course: e.target.value })}>
+              <option value="">No course</option>
+              {courses.data?.map((c) => <option key={c.code} value={c.code}>{c.code}</option>)}
+            </Select>
+          </Field>
+          <Field label="Year level">
+            <Select value={f.year_level} onChange={(e) => setF({ ...f, year_level: e.target.value })}>
+              <option value="">—</option>
+              {[1, 2, 3, 4, 5, 6].map((y) => <option key={y} value={y}>{y}</option>)}
+            </Select>
+          </Field>
+        </div>
+        {err && <Alert>{err}</Alert>}
+        <Button type="submit" busy={busy} className="w-full h-[54px]">Add student</Button>
+      </form>
+    </Sheet>
   );
 }
 
