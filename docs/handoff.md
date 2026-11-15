@@ -89,7 +89,7 @@ Nothing to install or sign in to. When you have time, as the **treasurer** and *
 3. From now on, expenses ask for the receipt's items — that's what fills the report's tables.
 4. Try one: Home → Financial report → type the cash count → Download PDF. Compare with the old Excel form.
 
-## Sign-in check on the Android app (2026-11-15)
+## Sign-in check on the Android app (2026-11-15) — DONE: Neil confirmed Google sign-in lands on the Dashboard
 1. Open the app → it updates itself ("E-CFunds was updated"), close and reopen once if asked.
 2. Sign out (My account → Sign out), then **Continue with Google** → you should land on your dashboard.
 3. If it still shows the start screen, send Claude a screenshot of it.

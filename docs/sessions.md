@@ -287,3 +287,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - Neil's screenshot: after Google sign-in the app showed **My account** (scrolled down) — it reopened the page where
   he had signed out. Fix (App.tsx `RecoveryRedirect`): on any sign-in/sign-out (not the first load, not a password
   reset) go to `/` and scroll to the top. Auth log confirmed the Google sign-ins themselves succeeded.
+- Neil confirmed on his Android phone: Google sign-in now lands on the Dashboard.
