@@ -65,3 +65,6 @@ input, select, textarea { font: inherit; color: inherit; }
    the message box and Send button. */
 body.chat-open .app-status-card { bottom: auto; top: calc(env(safe-area-inset-top) + 72px); }
 @media (min-width: 1024px) { body.chat-open .app-status-card { top: 16px; } }
+
+/* Pull-to-refresh is E-CFunds' own (PullToRefresh.tsx); stop the phone browser's reload-on-pull so it doesn't fire twice. */
+html, body { overscroll-behavior-y: contain; }

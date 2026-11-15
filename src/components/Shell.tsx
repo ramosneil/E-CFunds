@@ -8,6 +8,7 @@ import { Brand } from '../pages/auth/AuthLayout';
 import { EntityLogo, Loading, Sheet, ThemeToggle } from './ui';
 import { AskTopButton, ChatButton } from './ChatButton';
 import { WebPushBanner } from './WebPushBanner';
+import { PullToRefresh } from './PullToRefresh';
 import { NotificationBell } from './NotificationBell';
 import { useLiveNotifications } from '../lib/notifications';
 import { useLiveScreens } from '../lib/live';
@@ -117,6 +118,7 @@ export function Shell() {
         {/* Bottom padding = bottom menu (76 px + the iPhone home-bar area) + breathing room. */}
         <main className={`flex-1 w-full max-w-6xl mx-auto px-5 sm:px-8 pt-5 lg:pt-0 ${chat ? 'pb-[calc(92px+env(safe-area-inset-bottom))] lg:pb-12' : 'pb-[calc(7rem+env(safe-area-inset-bottom))] lg:pb-28'}`}>
           {!chat && <WebPushBanner uid={profile?.status === 'approved' ? uid : undefined} />}
+          <PullToRefresh />
           <Suspense fallback={<Loading />}><Outlet /></Suspense>
         </main>
       </div>

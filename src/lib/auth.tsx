@@ -54,9 +54,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profileLoading: !!uid && profileQ.isLoading,
     refreshProfile: () => { void profileQ.refetch(); },
     signOut: async () => {
-      // Stop this device's push notifications for this account first (needs the session): Android app + browser.
-      await import('./push').then((m) => m.unregisterPush()).catch(() => {});
-      await import('./webpush').then((m) => m.webPushOff()).catch(() => {});
+      // Neil (2026-11-15): phone notifications keep arriving after signing out, so the device stays registered.
+      // The next person who signs in on it takes it over (save_push_token moves the token); SAS disabling an
+      // account removes its devices. (Turn notifications off in My account to stop them.)
       await supabase.auth.signOut(); qc.clear();
     },
   };

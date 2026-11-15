@@ -21,7 +21,7 @@ export function ConfirmHost() {
           </Field>
         )}
         <div className={`grid gap-3 ${a.alertOnly ? '' : 'grid-cols-2'}`}>
-          {!a.alertOnly && <Button type="button" variant="soft" className="h-12" onClick={() => confirmStore.finish(null)}>Cancel</Button>}
+          {!a.alertOnly && <Button type="button" variant="soft" className="h-12" onClick={() => confirmStore.finish(null)}>{a.cancel ?? 'Cancel'}</Button>}
           <Button type="submit" disabled={!ok}
             className={`h-12 ${a.tone === 'bad' ? '!bg-bad !text-white' : ''}`}>{a.confirm}</Button>
         </div>

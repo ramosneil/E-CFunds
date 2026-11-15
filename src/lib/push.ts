@@ -1,6 +1,6 @@
 // Push notifications (Firebase Cloud Messaging) — reach the phone even when E-CFunds is closed.
-// After sign-in the phone's token is saved (save_push_token); on sign-out it is removed first (drop_push_token), so a
-// signed-out phone receives nothing. The database asks Edge Function `push` to send every new notification.
+// After sign-in the phone's token is saved (save_push_token). Signing out KEEPS it (Neil, 2026-11-15: notifications
+// even when logged out); the next person to sign in on the phone takes it over. The database asks Edge Function `push` to send every new notification.
 // Only app builds made with Firebase (build ≥ PUSH_MIN_BUILD, v1.1.0+) register — older apps keep local notifications.
 import { Capacitor } from '@capacitor/core';
 import { isNative } from './native';

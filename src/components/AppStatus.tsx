@@ -1,10 +1,11 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { Download, RefreshCw, WifiOff } from 'lucide-react';
+import { Download, WifiOff } from 'lucide-react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { isNative } from '../lib/native';
 import { chime } from '../lib/chime';
 import { toast } from '../lib/toast';
 import { noteInBell, otaState } from '../lib/ota';
+import { applyWhenSafe, CHECK_UPDATE_EVENT } from '../lib/autoUpdate';
 import { APK_URL } from './AndroidAppLink';
 
 /** "You're offline" pill (all platforms) + update notices: website "Update available → Reload" and
@@ -43,18 +44,20 @@ function webUpdatedNotice() {
   } catch { /* private mode */ }
 }
 
+/** Website: new versions install by themselves (Neil: no manual "Reload"). Checks every 5 minutes, when the tab comes
+ *  back, and on pull-to-refresh; switches as soon as nobody is typing (applyWhenSafe). "E-CFunds was updated" after. */
 function UpdatePrompt() {
-  const { needRefresh: [needRefresh, setNeedRefresh], updateServiceWorker } = useRegisterSW({
-    onRegisteredSW(_url, reg) { if (reg) setInterval(() => { void reg.update(); }, 60 * 60 * 1000); }, // check hourly
+  const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW({
+    onRegisteredSW(_url, reg) {
+      if (!reg) return;
+      const check = () => { void reg.update().catch(() => { /* offline */ }); };
+      setInterval(() => { if (document.visibilityState === 'visible') check(); }, 5 * 60 * 1000);
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') check(); });
+      window.addEventListener(CHECK_UPDATE_EVENT, check);
+    },
   });
-  useEffect(() => { if (needRefresh) chime(); }, [needRefresh]);
-  if (!needRefresh) return null;
-  return (
-    <Card icon={<RefreshCw className="size-5" aria-hidden />} text={<><b>Update available.</b> Reload to get the newest E-CFunds.</>}>
-      <button onClick={() => setNeedRefresh(false)} className="text-[13px] text-muted font-semibold px-2 h-9 cursor-pointer">Later</button>
-      <button onClick={() => void updateServiceWorker(true)} className="h-9 px-4 rounded-[12px] bg-primary text-on-primary font-semibold text-[14px] cursor-pointer">Reload</button>
-    </Card>
-  );
+  useEffect(() => { if (needRefresh) applyWhenSafe(() => { void updateServiceWorker(true); }); }, [needRefresh, updateServiceWorker]);
+  return null;
 }
 
 /** Android app too old for the newest code (a new APK is needed — rare). */

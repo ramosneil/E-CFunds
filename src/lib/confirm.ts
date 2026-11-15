@@ -4,6 +4,7 @@ export type Ask = {
   title: string;
   body?: string;
   confirm: string;                 // button text, e.g. "Delete conversation"
+  cancel?: string;                 // the other button's text (default "Cancel"), e.g. "Stay"
   tone?: 'bad' | 'primary';
   input?: { label: string; placeholder?: string; minLength?: number };   // ask for text (e.g. a reason)
   alertOnly?: boolean;             // just an OK button

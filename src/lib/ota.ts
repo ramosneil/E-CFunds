@@ -8,6 +8,7 @@
 // Every step's result is kept (otaStatus) and shown in My account, with "Check for updates" / "Restart to update".
 import { LIVE_URL } from './native';
 import { toast } from './toast';
+import { applyWhenSafe, CHECK_UPDATE_EVENT } from './autoUpdate';
 
 const LAST = 'ecfunds:build';
 const READY = 'ecfunds:ota-ready';
@@ -85,11 +86,10 @@ export async function checkForUpdate(): Promise<OtaStatus | null> {
     const have = (await Updater.list()).bundles.find((b) => b.version === m.version && usable(b.status));
     const bundle = have ?? await Updater.download({ url: m.url, version: m.version, checksum: m.sha256 });
     put(READY, JSON.stringify({ id: bundle.id, version: m.version }));
-    setStatus('Update downloaded — it applies the next time you open E-CFunds.', true);
-    if (get(ANNOUNCED) !== m.version) {
-      put(ANNOUNCED, m.version);
-      toast({ title: 'An update is ready', body: 'It applies the next time you open E-CFunds.', tone: 'info' });
-    }
+    setStatus('Update downloaded — switching to it now.', true);
+    put(ANNOUNCED, m.version);
+    // Automatic (Neil): switch as soon as nobody is typing / no sheet is open, or when the app goes to the background.
+    applyWhenSafe(() => { void applyReady(); });
   } catch (e) {
     setStatus(`Update check failed: ${msg(e)}`, false);
     console.warn('[ota]', e);
@@ -111,12 +111,12 @@ export async function startOta() {
   if (await applyReady()) return;
   void checkForUpdate();
 
-  // Back after 5+ minutes away: apply a ready update, otherwise look for one (at most every 30 minutes).
-  let pausedAt = 0, lastCheck = Date.now();
-  await App.addListener('pause', () => { pausedAt = Date.now(); });
+  // Automatic: look again every 5 minutes while open, whenever the app comes back, and on pull-to-refresh.
+  let lastCheck = Date.now();
+  const check = () => { lastCheck = Date.now(); void checkForUpdate(); };
+  setInterval(() => { if (document.visibilityState === 'visible') check(); }, 5 * 60_000);
+  window.addEventListener(CHECK_UPDATE_EVENT, check);
   await App.addListener('resume', () => {
-    const away = pausedAt ? Date.now() - pausedAt : 0;
-    if (away > 5 * 60_000) void applyReady().then((applied) => { if (!applied) void checkForUpdate(); });
-    else if (Date.now() - lastCheck > 30 * 60_000) { lastCheck = Date.now(); void checkForUpdate(); }
+    void applyReady().then((applied) => { if (!applied && Date.now() - lastCheck > 60_000) check(); });
   });
 }

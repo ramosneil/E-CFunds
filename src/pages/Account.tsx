@@ -1,10 +1,10 @@
 import { useEffect, useState, useSyncExternalStore, type FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import { BellOff, BellRing, CheckCircle2, Download, IdCard, KeyRound, LogOut, RefreshCw, Smartphone } from 'lucide-react';
+import { BellOff, BellRing, CheckCircle2, Download, IdCard, KeyRound, LogOut, Smartphone } from 'lucide-react';
 import { isIos, webPushOff, webPushOn, webPushState, type WebPushState } from '../lib/webpush';
 import { askSignOut } from '../lib/confirm';
-import { applyReady, checkForUpdate, otaState } from '../lib/ota';
+import { otaState } from '../lib/ota';
 import { notifyPermission, requestNotify, type PhonePermission } from '../lib/phone';
 import { install } from '../lib/install';
 import { AndroidAppLink } from '../components/AndroidAppLink';
@@ -142,10 +142,9 @@ function InstallCard() {
   );
 }
 
-/** Android app: which version is running, the last update check, and buttons to check / apply now. */
+/** Android app: which version is running and the last automatic update check (no buttons: updates are automatic). */
 function AppUpdateCard() {
   const status = useSyncExternalStore(otaState.subscribe, otaState.status);
-  const [busy, setBusy] = useState(false);
   const when = status ? new Intl.DateTimeFormat('en-PH', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Manila' }).format(new Date(status.at)) : null;
   return (
     <Card>
@@ -155,16 +154,7 @@ function AppUpdateCard() {
         <Row k="Last check" v={when ?? 'Not yet'} />
       </dl>
       {status && <p className={`mt-3 text-[14px] ${status.ok ? 'text-muted' : 'text-bad'}`}>{status.text}</p>}
-      <p className="mt-2 text-[13px] text-muted">New versions download by themselves and switch on the next time you open E-CFunds.</p>
-      {status?.ready && status.ready !== __BUILD_ID__ ? (
-        <Button className="w-full mt-4" onClick={async () => { setBusy(true); if (!(await applyReady())) setBusy(false); }} busy={busy}>
-          <RefreshCw className="size-5" />Restart to update
-        </Button>
-      ) : (
-        <Button variant="soft" className="w-full mt-4" busy={busy} onClick={async () => { setBusy(true); await checkForUpdate(); setBusy(false); }}>
-          <RefreshCw className="size-5" />Check for updates
-        </Button>
-      )}
+      <p className="mt-2 text-[13px] text-muted">Updates install by themselves: E-CFunds checks every few minutes and switches to a new version as soon as you’re not typing. Pull down on any page to refresh.</p>
     </Card>
   );
 }
