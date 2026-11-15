@@ -140,3 +140,12 @@ prevents two approvals racing past a limit.
   each reversal counted as the kind it reverses; checked equal to `get_entity_report` for every org.
 - **Gotcha (migration 36):** calls through the Supabase API run with `pg_safeupdate` — a `DELETE`/`UPDATE` without
   `WHERE` fails there ("DELETE requires a WHERE clause") but NOT in the direct-connection rehearsal. Always add a WHERE.
+
+## Sections + club import (migration 37, 2026-11-15)
+- `students.section` (A–D), `year_level` 1–4. `add_member(…, p_section)`. `import_students` reads `section`.
+- `import_members(jsonb)` — club treasurers (`private.is_club_treasurer()`): all rows checked first
+  (`private.roster_row_errors`), then each via `private.add_member`; returns `{ok, added, already, skipped:[{row,
+  student_no, message}]}`.
+- Applied through the Supabase connector (direct `pg` connection hung); recorded as version 20261115120000. Rehearsal
+  via the connector: `begin; …migration…; …tests…; do $$ raise exception 'RESULTS …' $$` — the error rolls everything
+  back and carries the results (verified with a probe table).

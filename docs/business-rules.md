@@ -268,3 +268,16 @@ None. Both §10 questions were answered in session 3 and moved to §8.
   (or SAS). SSG's own entries supply the SSG Auditor and Governor on every other org's report. Treasurer = the account
   name. SAS Coordinator + header lines: SAS, on the School year page.
 - Who: the org's treasurer and SAS. Not students (they keep Reports/charts).
+
+## Sections, club import, app behaviour (Neil, 2026-11-15; migration 37)
+- Students have a **year level 1–4** and a **section A–D**; members show and group as **1A, 1B … 4D** (then "Year 3 ·
+  no section", then "No year / section"). Treasurers set year/section in Add member; a given year/section updates the
+  student (newest information wins). SAS sets them on the Students page / import.
+- **Clubs can import** a class list (Members → Import): every row checked first; already members are counted;
+  a student who already paid another club this semester is skipped with the reason (1 club per semester).
+- **Updates are automatic** (no manual check): a new version switches in when nobody is typing. **Pull down** to
+  refresh on phones.
+- **Android Back on Home** asks "Log out of E-CFunds?" (Log out / Stay). **5 minutes unused** (no E-CFunds screen
+  active in that browser/app) → signed out on return, everyone.
+- **Notifications continue after signing out** (Neil): the phone/browser stays registered; the next person to sign
+  in on it takes it over. SAS disabling an account removes its devices.

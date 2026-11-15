@@ -111,3 +111,13 @@ Only you do steps 1–3 (they involve your Google password and a secret app pass
    - **Save**. Then close the app-password page.
 5. Tell Claude "SMTP done". Claude then (with your OK, already given) pastes the code template into
    Reset password, deploys the code screen, and sends one test code to nirrukurisuchan@gmail.com.
+
+## Phone checks — sections, import, auto updates, Back, auto log out (2026-11-15)
+0. **Sign in again in Chrome** (the first auto-log-out version signed you out by mistake; fixed).
+1. Treasurer (club) → Members → **Add member**: all fields show at once; type a Student ID that's on the list → the
+   name fills in. Pick Year + Section → the member appears under e.g. **2B**.
+2. Treasurer (club) → Members → **Import** → Excel template → fill a few rows (with Section) → preview → Add.
+3. Android app: **Back** on Home → "Log out of E-CFunds?" → Stay / Log out.
+4. Android app: press **Home**, wait 5+ minutes, open E-CFunds → signed out, and a notification still arrives
+   for that account afterwards.
+5. Pull down on any page → spinner → numbers refresh. Updates now arrive by themselves (no "Check for updates").

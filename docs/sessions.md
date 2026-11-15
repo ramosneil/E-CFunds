@@ -306,3 +306,9 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   Code entry + new password left to Neil (never typed by Claude). Sender is Neil's personal Gmail for now.
 - Neil confirmed: reset by code worked end to end on his side (code → new password saved).
 - SAS can add ONE student (Students → Add student; late enrollees) and, on an account waiting for approval whose Student ID isn't on the list, 'Add to student list' pre-filled from the sign-up → Approve turns on. Both use import_students (same checks, auto SSG + course orgs). Web already had Import (Neil's screenshot was Approvals).
+- Neil's batch: sections A–D + year 1–4 (migration 37), members grouped 1A…4D, all-fields Add member (fills itself
+  from the list), club import (shared ImportSheet, club mode), SAS Students section fields; automatic updates
+  (`src/lib/autoUpdate.ts`, no manual check), pull-to-refresh (`PullToRefresh.tsx`), Android Back → "Log out?",
+  5-minute auto log out (`AutoLogout.tsx`), push kept on sign-out. Bug found live: the first auto-logout version used a
+  per-tab "away since" and signed Neil's Chrome out (another tab was in the background) → replaced by a shared
+  "last active" heartbeat from visible screens. Neil must sign in again in Chrome (his to do).

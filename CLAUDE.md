@@ -21,11 +21,9 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 ## Status (updated 2026-11-15, end of session 7)
 - **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
   student on the roster. Test data was wiped before launch.
-- Database: **36 migrations** live (last `20261115110000_financial_report_safeupdate`). pg_cron on (2 jobs).
+- Database: **37 migrations** live (last `20261115120000_sections_member_import`). pg_cron on (2 jobs).
 - **Session 7 = "finish the functionality" batch, all live** (design pass comes next, Neil's order). Treasurer/student
   screens of it were checked with sample data only → Neil's phone check is in `docs/handoff.md` (Session 7).
-- **"Where the money goes" (transparency) live 2026-11-14:** per-org charts + approved expenses for every role;
-  numbers checked against the live ledger; confirmed on Neil's phone.
 - Android: latest APK **v1.1.1 = build 10**; `ota.json` minNativeBuild = 10.
 - **Confirmed working on Neil's phone:** push notifications with the app closed, app self-update end to end
   (download → reopen → "E-CFunds was updated"), Back button, full screen, Delete conversation, Add member (adds only),
@@ -38,15 +36,11 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   device: **Windows** → Settings → System → Notifications → Google Chrome (was off on Neil's PC); **Android** →
   Settings → Apps → E-CFunds → Notifications (allow, pop-up) + Battery (background activity, auto launch) —
   Oppo/Realme force-stop swiped apps without it. My account's phone card falls back to the push permission (3 s).
-- **Safe test push** (Supabase connector, one SQL): insert a `notifications` row for the person with `read_at = now()`
-  (trigger skips it, bell shows no dot), then `net.http_post(private.push_config.url, {id}, x-push-secret)` in the same
-  statement — the secret never leaves the DB; read `net._http_response` (`{"sent":N}`), then delete the row. The
-  direct-`pg` scratch scripts can hang on connect — prefer the connector.
-- **Web address stays `e-cfunds.vercel.app`; email stays Supabase's built-in sender** — Neil cancelled the school
-  subdomain + Resend plan (2026-11-14, "too complicated"; OMSC IT controls the DNS). Undone: Resend domain deleted,
-  IT draft discarded, `docs/it-request.md` removed (git history has it), VAPID contact = the vercel.app URL.
-  Vercel project now has only `e-cfunds.vercel.app` (school domain removed after Neil turned on Vercel 2FA).
-  Optional: `docs/email-templates/` work with the built-in sender.
+- **Safe test push** (connector, one SQL): insert a `notifications` row with `read_at = now()`, then
+  `net.http_post(private.push_config.url, {id}, x-push-secret)`; read `net._http_response` (`{"sent":N}`), delete the row.
+- **Web address stays `e-cfunds.vercel.app`** (school subdomain + Resend cancelled by Neil, 2026-11-14). **Email
+  goes through Neil's Gmail (custom SMTP, 2026-11-15)** → templates editable; Reset password = 6-digit code
+  (`docs/email-templates/reset-password.html`, `{{ .Token }}`); email limit 30/h.
 - Claude in Chrome on Neil's PC (signed in as SAS admin): never sign in for him; ask before sending/deleting/changing;
   never decide security prompts (2FA); long `=`/`;` values are filtered — use Copy + clipboard, never disguise text.
 - Vercel has **2FA** (Neil's phone): new sign-ins need his code; never ask for recovery codes.
@@ -111,6 +105,11 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   - **Financial Report (SAS form, Folio PDF)**: `get_financial_report` + `src/lib/export/financialReport.ts` +
     `FinancialReportSheet.tsx` (treasurer Home, SAS org page); expense item lines (`ItemRows.tsx`); signatories +
     `report_settings` (School year page). Rules: business-rules "Financial Report".
+  - **Sections A–D, year 1–4** (migration 37): Members grouped 1A…4D; Add member shows all fields, fills from the
+    list; clubs **Import** (`ImportSheet mode="club"` → `import_members`). Rules: business-rules "Sections".
+  - **App:** automatic updates (`src/lib/autoUpdate.ts`, no manual button), pull-to-refresh, Android Back on Home →
+    "Log out?", 5 min unused → signed out (`AutoLogout.tsx`, shared "last active" heartbeat — never per-tab).
+    Sign-out keeps push registered (Neil).
   - **Reminders:** Members "Remind unpaid" (1/day/org). pg_cron (UTC): `weekly-dues-reminders` Mon 00:00 = 8 AM
     Manila, `daily-budget-reminders` daily 00:00 (`select * from cron.job`).
 - iPhone: Home Screen web app (no App Store); printable guide `docs/iphone-install-guide.html`.
@@ -121,9 +120,8 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   — never regenerate; My account card + one-time banner `WebPushBanner.tsx`). Pieces: `notifications` table
   (Realtime) → `src/lib/notifications.ts`; `src/lib/phone.ts` (local notifications); `src/lib/push.ts` (register
   after sign-in, unregister on sign-out); pg_net → Edge Function `push` (secret in `private.push_config`).
-- **App updates:** website "Update available → Reload"; Android self-updates (`src/lib/ota.ts`,
-  `@capgo/capacitor-updater` self-hosted: Vercel builds `/ota/manifest.json` + zip; applies at the next app start;
-  status + "Check for updates" in My account). Raise `ota.json` minNativeBuild only when a change needs a new APK.
+- **App updates (automatic):** website service worker + Android `src/lib/ota.ts` (`@capgo/capacitor-updater`, Vercel
+  builds `/ota/manifest.json` + zip). Raise `ota.json` minNativeBuild only when a change needs a new APK.
 - **Android app:** full screen (status bar hidden, Capacitor SystemBars; hidden again on the next tap after a
   swipe-down, `src/main.tsx`), Back button (`NativeBack.tsx`), exports via share sheet, Google sign-in via
   `ph.edu.omsc.ecfunds://auth/callback` (also read from the launch URL — phones kill the app during Google), email links open the live site. Android screenshots still show the bar.
@@ -177,6 +175,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   (`PUSH_MIN_BUILD` in `src/lib/push.ts`).
 - **Icons/splash:** `node scripts/make-app-assets.mjs` → `npx capacitor-assets generate --android`.
 - **API calls run with pg_safeupdate:** DELETE/UPDATE without WHERE fails live but not in the direct rehearsal.
+  Direct `pg` hangs? Rehearse via the connector: `begin; … ; do $$ raise exception 'RESULTS…' $$` (all rolled back).
 - Testing two roles at once: localhost:3000 vs 127.0.0.1:3000. On e-cfunds.vercel.app the browser pane DOES run the
   service worker, so after a deploy it shows the old build until "Update available → Reload" (or SKIP_WAITING).
   Desktop app: `/mcp` sign-in dialogs don't open — use connectors (claude.ai/settings/connectors) or tokens.
