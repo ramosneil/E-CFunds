@@ -11,6 +11,26 @@ holds no secret keys (only the public Supabase address + publishable key, which 
 | Port | `8080` inside the container |
 | Export file | `release/e-cfunds-docker-image.tar.gz` (~23 MB, not in git) |
 
+## For the teacher — from Docker Hub (easiest)
+
+Public image: **https://hub.docker.com/r/ramosneil/e-cfunds** (tags `1.0.0` and `latest`, no Docker account needed).
+
+```bash
+docker run --rm -p 8080:8080 ramosneil/e-cfunds:1.0.0
+```
+
+Open **http://localhost:8080**. Stop it with `Ctrl+C`.
+
+Publish a new version (on Neil's computer, signed in to Docker Desktop as `ramosneil`):
+
+```bash
+docker compose build
+docker tag e-cfunds:latest ramosneil/e-cfunds:1.0.1
+docker tag e-cfunds:latest ramosneil/e-cfunds:latest
+docker push ramosneil/e-cfunds:1.0.1
+docker push ramosneil/e-cfunds:latest
+```
+
 ## For the teacher — run the image file
 
 Needs Docker Desktop (Windows/Mac) or Docker Engine (Linux).
@@ -44,5 +64,6 @@ docker save e-cfunds:latest e-cfunds:1.0.0 | gzip > release/e-cfunds-docker-imag
 ## Notes / limits
 - "Continue with Google" returns to the address set in Supabase (the Vercel site), not to localhost — use email +
   password inside the container, or add `http://localhost:8080` to Supabase → Authentication → URL Configuration.
+- Docker Hub: pushed 2026-11-17 as ramosneil/e-cfunds:1.0.0 + latest (public); pulled back with no local copy and it served the app.
 - Checked 2026-11-17: all app routes, security headers, asset caching, health check "healthy", offline mode
   (service worker cached 75 files in headless Edge), and the exported file loads and runs on a clean `docker load`.
