@@ -40,3 +40,6 @@ Thumbs.db
 .idea/
 .vercel/
 *.tsbuildinfo
+
+# Docker image export (send to teacher; too big for git)
+release/
