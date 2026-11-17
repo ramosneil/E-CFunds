@@ -128,3 +128,11 @@ Only you do steps 1–3 (they involve your Google password and a secret app pass
 2. DONE 2026-11-17 (Claude, Neil's request): SAS Coordinator = Cristina A. Caponpon, PhD (from Neil's FR sample). — School year page → fill in the **SAS Coordinator** name (Financial Report "Verified by").
 3. Accredited list: every entry is **Expired** (2024–2025) — add this year's accreditations.
 4. Phone: tap a notification while signed out → sign in → it should open what the notification was about.
+
+## Phone checks after the 2026-11-17 update (app updates itself)
+1. **Notifications**: everyone (students, treasurers) opens the updated app and signs in once, then allows notifications
+   — that registers the phone. After that they arrive even when the app is closed or signed out.
+2. With the app **open**, a new notification should also appear in the phone's notification shade.
+3. **Back on the Dashboard** → "Log out of E-CFunds?" shows right away and the app stays open (Stay / Log out).
+4. New budget → Send to SAS → the question appears on top (no Back needed).
+5. Liquidate → Attach files → send; SAS sees the files on the budget card.

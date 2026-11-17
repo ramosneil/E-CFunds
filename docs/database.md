@@ -156,3 +156,11 @@ prevents two approvals racing past a limit.
 - `review_account` plain messages (2nd treasurer, student not on the list).
 - `year_reopenings` (+ audit) and `reopen_school_year(entity, year, reason)` (SAS).
 - App: `src/lib/fetchAll.ts` pages any list past the server's 1,000-row cap.
+
+## Budget math + liquidation files (migration 39 `budget_auto_liquidation_files`, 2026-11-17)
+- `budgets.liquidation_files text[]` (≤ 10; paths in the private `receipts` bucket under `<entity_id>/liq-<budget>/…`).
+- `submit_liquidation(budget, note, files text[] default '{}')`: every file must exist in `receipts` under the org's folder.
+- `review_liquidation` approve → inserts `remittance` (budget-tagged) = least(released − spent, cash on hand).
+- `budget_status` view + `returned` (remittances tagged to it) + `remaining` (total − spent).
+- Rehearsed (rolled back): missing / other-org file refused; good file ok; treasurer can't approve; SAS approve returned
+  ₱230 (capped by cash, unspent was ₱300) → cash 0; anon refused.

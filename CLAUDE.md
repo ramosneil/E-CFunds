@@ -21,7 +21,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 ## Status (updated 2026-11-15, end of session 7)
 - **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
   student on the roster. Test data was wiped before launch.
-- Database: **38 migrations** live (last `20261117010000_audit_fixes`). pg_cron on (2 jobs). Full system check
+- Database: **39 migrations** live (last `20261117090000_budget_auto_liquidation_files`). pg_cron on (2 jobs). Full system check
   2026-11-17: `docs/audit-2026-11-17.md` (all 7 lapses fixed; only SAS edits students; lists page past 1,000 rows).
 - **Session 7 = "finish the functionality" batch, all live** (design pass comes next, Neil's order). Treasurer/student
   screens of it were checked with sample data only → Neil's phone check is in `docs/handoff.md` (Session 7).

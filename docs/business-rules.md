@@ -288,3 +288,11 @@ None. Both §10 questions were answered in session 3 and moved to §8.
   only through Add member / import; they can't edit fees or remove members directly (fees: org dues setting).
 - **Reopen school year** (SAS, org page): undoes a close with a reason (kept, audited); the treasurer whom the close
   turned off gets their account back (if nobody else holds the seat).
+
+## Budgets do the math by themselves (2026-11-17, migration 39)
+- Each budget shows **Budget · Released · Spent · Remaining** (Remaining = budget − approved expenses), live.
+- A new **expense** goes to the newest open (approved) budget by default; the treasurer can pick another or "Not for a budget".
+- **Liquidation** can carry up to **10 files** (photos/PDFs, 10 MB each): receipts, attendance, photos, signed report.
+- When SAS **approves a liquidation**, released-but-unspent cash goes **back to SAS savings automatically** (a remittance
+  tagged to the budget, at most the org's cash on hand). The card says "Unspent ₱X went back to SAS savings".
+- Budgets tab shows **Saved with SAS** and **Cash on hand**; collections, releases, expenses and returns update them.
