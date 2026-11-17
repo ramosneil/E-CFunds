@@ -282,3 +282,9 @@ None. Both §10 questions were answered in session 3 and moved to §8.
   active in that browser/app) → signed out on return, everyone.
 - **Notifications continue after signing out** (Neil): the phone/browser stays registered; the next person to sign
   in on it takes it over. SAS disabling an account removes its devices.
+
+## After the full system check (2026-11-17, migration 38)
+- **Only SAS edits student records** (name, Student ID, course, year, section, active). Treasurers set year/section
+  only through Add member / import; they can't edit fees or remove members directly (fees: org dues setting).
+- **Reopen school year** (SAS, org page): undoes a close with a reason (kept, audited); the treasurer whom the close
+  turned off gets their account back (if nobody else holds the seat).

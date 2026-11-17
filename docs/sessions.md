@@ -313,3 +313,6 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   per-tab "away since" and signed Neil's Chrome out (another tab was in the background) → replaced by a shared
   "last active" heartbeat from visible screens. Neil must sign in again in Chrome (his to do).
 - Neil: 'pull down to update' — a ready version now shows a banner ("Update ready — pull down" / Update button); pulling installs it; it also installs when the screen is left. Tested: pull, leave screen, button.
+- **Full system check 2026-11-17** (`docs/audit-2026-11-17.md`): 85 rolled-back checks with dummy accounts (SAS, 2 club
+  treasurers, student…) + live SAS pass in Neil's Chrome (no console errors). 7 lapses + no "reopen year" → all fixed
+  (migration 38 + app), proven by re-running the same tests live (0 rows). Neil saw the "Update ready" banner work live.

@@ -149,3 +149,10 @@ prevents two approvals racing past a limit.
 - Applied through the Supabase connector (direct `pg` connection hung); recorded as version 20261115120000. Rehearsal
   via the connector: `begin; …migration…; …tests…; do $$ raise exception 'RESULTS …' $$` — the error rolls everything
   back and carries the results (verified with a probe table).
+
+## Audit fixes (migration 38, 2026-11-17)
+- students: UPDATE/INSERT policies SAS-only; `grant update (section)`. memberships: INSERT/UPDATE/DELETE SAS-only
+  (treasurers go through `add_member` / `import_members` / `set_entity_dues`, all SECURITY DEFINER).
+- `review_account` plain messages (2nd treasurer, student not on the list).
+- `year_reopenings` (+ audit) and `reopen_school_year(entity, year, reason)` (SAS).
+- App: `src/lib/fetchAll.ts` pages any list past the server's 1,000-row cap.

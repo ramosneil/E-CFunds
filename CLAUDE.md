@@ -21,7 +21,8 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 ## Status (updated 2026-11-15, end of session 7)
 - **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
   student on the roster. Test data was wiped before launch.
-- Database: **37 migrations** live (last `20261115120000_sections_member_import`). pg_cron on (2 jobs).
+- Database: **38 migrations** live (last `20261117010000_audit_fixes`). pg_cron on (2 jobs). Full system check
+  2026-11-17: `docs/audit-2026-11-17.md` (all 7 lapses fixed; only SAS edits students; lists page past 1,000 rows).
 - **Session 7 = "finish the functionality" batch, all live** (design pass comes next, Neil's order). Treasurer/student
   screens of it were checked with sample data only → Neil's phone check is in `docs/handoff.md` (Session 7).
 - Android: latest APK **v1.1.1 = build 10**; `ota.json` minNativeBuild = 10.
@@ -29,8 +30,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   (download → reopen → "E-CFunds was updated"), Back button, full screen, Delete conversation, Add member (adds only),
   UI-review fixes on every page (treasurer, SAS admin, student): semester dues everywhere, live amount checks,
   Approve/Reject confirm, Ask = ✨ in the phone top bar (floating only on computers).
-- Tools on Neil's PC: UI Design Review, playwright, Mobile App Design/System plugins; Supabase + Figma connectors;
-  GitHub plugin via Windows user variable GITHUB_PERSONAL_ACCESS_TOKEN (expires 2027-02-12).
+- Tools: UI Design Review, playwright, Mobile App Design plugins; Supabase + Figma connectors; GitHub PAT (exp. 2027-02-12).
 - **Notifications confirmed 2026-11-14:** Android phone (background AND swiped away) + Chrome on Neil's PC (site
   closed). iPhone Home Screen app not tested yet. When the push function says `sent: N` but nothing shows, it's the
   device: **Windows** → Settings → System → Notifications → Google Chrome (was off on Neil's PC); **Android** →
@@ -44,7 +44,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Claude in Chrome on Neil's PC (signed in as SAS admin): never sign in for him; ask before sending/deleting/changing;
   never decide security prompts (2FA); long `=`/`;` values are filtered — use Copy + clipboard, never disguise text.
 - Vercel has **2FA** (Neil's phone): new sign-ins need his code; never ask for recovery codes.
-- Open: Neil's phone check + Financial Report setup (handoff). Next: design pass. Unseen: iPhone Home Screen app.
+- Open: handoff (Sports Club reopen?, coordinator, phone checks). Next: design pass. Unseen: iPhone app.
 
 ## Memberships & fees (migrations 15–17, 24)
 - **Organizations are mandatory by course** (tables `courses`, `course_orgs`; SAS can change them):

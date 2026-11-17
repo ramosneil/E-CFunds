@@ -121,3 +121,10 @@ Only you do steps 1–3 (they involve your Google password and a secret app pass
 4. Android app: press **Home**, wait 5+ minutes, open E-CFunds → signed out, and a notification still arrives
    for that account afterwards.
 5. Pull down on any page → spinner → numbers refresh. Updates now arrive by themselves (no "Check for updates").
+
+## After the system check (2026-11-17)
+1. **Sports Club 2026–2027 was closed on Nov 16** (it turned off Christian jay Perucho's treasurer account). If that was
+   a test: SAS → Orgs & clubs → Sports Club → **Reopen 2026–2027** → type the reason. His account comes back.
+2. School year page → fill in the **SAS Coordinator** name (Financial Report "Verified by").
+3. Accredited list: every entry is **Expired** (2024–2025) — add this year's accreditations.
+4. Phone: tap a notification while signed out → sign in → it should open what the notification was about.
