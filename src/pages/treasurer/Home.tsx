@@ -8,7 +8,9 @@ import { supabase } from '../../lib/supabase';
 import { peso } from '../../lib/format';
 import { Card, DuesBar, EntityLogo, HeroCard, SectionTitle, Spinner, Stat } from '../../components/ui';
 import { NoYear, RequestRow } from '../../components/common';
-import { LedgerList, useLedger } from '../admin/EntityDetail';
+import { LedgerList, totalEffect, useLedger } from '../admin/EntityDetail';
+import { ago } from '../../lib/notifications';
+import { kindLabel } from '../../lib/format';
 import { ExportMenu, exportsLib } from '../../components/ExportMenu';
 import { FinancialReportButton } from '../../components/FinancialReportSheet';
 
@@ -47,6 +49,13 @@ export function TreasurerHome() {
           {/* Phone: fund → actions → numbers. Desktop: fund + numbers side by side, actions below. */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
             <HeroCard label={`Total fund · ${year.data.label}`} total={r.total_fund} cash={r.cash_on_hand} saved={r.saved_with_sas}
+              latest={<Latest e={ledger.data?.[0]} />}
+              pending={(Number(r.pending_remittances) + Number(r.pending_releases) + Number(r.pending_expenses)) > 0 && <>
+                <b>Waiting for SAS:</b>{' '}{[
+                  Number(r.pending_remittances) > 0 && `remit ${peso(r.pending_remittances)}`,
+                  Number(r.pending_releases) > 0 && `release ${peso(r.pending_releases)}`,
+                  Number(r.pending_expenses) > 0 && `expenses ${peso(r.pending_expenses)}`,
+                ].filter(Boolean).join(' · ')}. The card updates when SAS decides.</>}
               foot={<>Previous funds {peso(r.previous_funds)} · You can remit up to <b className="text-white money">{peso(r.available_to_remit)}</b></>} />
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 lg:col-span-2 lg:order-3">
               <Action to="/members?show=unpaid" icon={<Wallet className="size-5" />} label="Record payment" gold />
@@ -112,6 +121,16 @@ function useDues(entityId: number | undefined, yearId: number | undefined, perSe
     },
   });
   return { ...q, label };
+}
+
+/** "Latest: Collection +₱20.00 · 5 min" — the last money movement, so the treasurer sees what changed the total. */
+function Latest({ e }: { e?: { kind: string; amount: number; direction: number | null; created_at: string; description: string } }) {
+  if (!e) return <>No transactions yet this school year.</>;
+  const t = totalEffect(e);
+  return (
+    <span className="block truncate">Latest: <b className="text-white">{kindLabel[e.kind] ?? e.kind}</b>{' '}
+      <span className="money">{t === 0 ? peso(e.amount) : peso(t, { sign: true })}</span> · {ago(e.created_at)}{e.description ? ` · ${e.description}` : ''}</span>
+  );
 }
 
 function Action({ to, icon, label, gold }: { to: string; icon: React.ReactNode; label: string; gold?: boolean }) {

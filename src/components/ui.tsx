@@ -1,4 +1,4 @@
-import { useEffect, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react';
+import { useEffect, useRef, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react';
 import { Loader2, Moon, Sun, X } from 'lucide-react';
 import { peso, pct } from '../lib/format';
 import { logoUrl } from '../lib/supabase';
@@ -121,13 +121,53 @@ export function PocketBar({ cash, saved, onHero }: { cash: number; saved: number
   );
 }
 
-export function HeroCard({ label, total, cash, saved, foot }: { label: string; total: number; cash: number; saved: number; foot?: ReactNode }) {
+/** Counts from the old number to the new one (~0.7 s) when it changes; `changed` is on for a moment after. */
+function useCountTo(value: number) {
+  const [shown, setShown] = useState(value);
+  const [changed, setChanged] = useState(false);
+  const from = useRef(value);
+  useEffect(() => {
+    const start = from.current;
+    if (start === value) return;
+    from.current = value;
+    setChanged(true);
+    const off = setTimeout(() => setChanged(false), 1600);
+    if (document.hidden || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { setShown(value); return () => clearTimeout(off); }
+    let raf = 0; const t0 = performance.now();
+    const step = (t: number) => {
+      const k = Math.min(1, (t - t0) / 700), e = 1 - (1 - k) ** 3;
+      setShown(start + (value - start) * e);
+      if (k < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => { cancelAnimationFrame(raf); clearTimeout(off); };
+  }, [value]);
+  return { shown: Math.round(shown * 100) / 100, changed };
+}
+
+/** The big fund card. Numbers refresh by themselves whenever the treasurer or SAS records anything (src/lib/live.ts);
+ *  the "Live" mark says so, the total counts to its new value, and `latest` / `pending` show what moved it. */
+export function HeroCard({ label, total, cash, saved, foot, latest, pending, live = true }: {
+  label: string; total: number; cash: number; saved: number; foot?: ReactNode; latest?: ReactNode; pending?: ReactNode; live?: boolean;
+}) {
+  const { shown, changed } = useCountTo(Number(total) || 0);
   return (
-    <section className="rounded-[24px] p-5 sm:p-6 text-white bg-hero relative overflow-hidden">
-      <p className="micro text-hero-muted">{label}</p>
-      <p className="money font-display font-extrabold text-[34px] sm:text-[40px] leading-tight mt-1">{peso(total)}</p>
+    <section className={cx('rounded-[24px] p-5 sm:p-6 text-white bg-hero relative overflow-hidden transition-shadow duration-700',
+      changed && 'ring-2 ring-pocket-cash/70')}>
+      <div className="flex items-center gap-3">
+        <p className="micro text-hero-muted min-w-0 flex-1">{label}</p>
+        {live && (
+          <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-hero-muted shrink-0" title="Updates by itself when anything is recorded">
+            <span className="relative flex size-2"><span className="absolute inset-0 rounded-full bg-[#4ADE80] motion-safe:animate-ping opacity-60" /><span className="relative size-2 rounded-full bg-[#4ADE80]" /></span>
+            Live
+          </span>
+        )}
+      </div>
+      <p className="money font-display font-extrabold text-[34px] sm:text-[40px] leading-tight mt-1" aria-live="polite">{peso(shown)}</p>
+      {latest && <div className="text-[13px] text-hero-muted mt-0.5">{latest}</div>}
       <div className="mt-4"><PocketBar cash={cash} saved={saved} onHero /></div>
-      {foot && <div className="mt-4 text-[13px] text-hero-muted">{foot}</div>}
+      {pending && <div className="mt-3 rounded-[14px] bg-white/10 px-3 py-2 text-[13px] text-white">{pending}</div>}
+      {foot && <div className="mt-3 text-[13px] text-hero-muted">{foot}</div>}
     </section>
   );
 }

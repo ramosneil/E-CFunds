@@ -322,3 +322,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   pushes arriving while the app is open never reached the shade → now they do. (4) liquidation files. (5) Back: a stale
   "signed out" Back listener minimized the app while the Log out? question opened → one listener with refs.
   (6) Remaining/returned/auto-tag (migration 39). (3) "financial report covered" = on phones the Financial report + Export buttons squeezed the org name ("TREA… J.") → buttons get their own row under the name (treasurer Home + SAS org page).
+- **2026-11-17 Total Fund card**: already refreshed live (live_tick on every money table → live.ts); now it *shows* it: "Live" mark, total counts to the new value + glow, "Latest: Collection +₱20 · just now", "Waiting for SAS: remit/release/expenses". All HeroCards (treasurer, SAS, student) get Live + count.
