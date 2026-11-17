@@ -123,7 +123,10 @@ function NewRequest({ initial, draft, entityId, yearId, onClose }: { initial: Ki
   const budgets = useBudgets(entityId);
   const open = (budgets.data ?? []).filter(isOpen);
   const overdue = (budgets.data ?? []).some((b) => b.is_overdue);
-  const [budgetId, setBudgetId] = useState('');
+  // Expenses go to the newest open budget by default, so its Spent/Remaining update without extra taps (Neil,
+  // 2026-11-17: "automatically deduct to the budget"); the treasurer can still pick another or "Not for a budget".
+  const [budgetPick, setBudgetId] = useState<string | null>(null);
+  const budgetId = budgetPick ?? (kind === 'expense' && open.length ? String(open[0].id) : '');
   const budget = open.find((b) => String(b.id) === budgetId);
   // An expense's amount is the total of its receipt items.
   const a = kind === 'expense' ? itemsTotal(items) : Number(amount);
@@ -236,6 +239,9 @@ function NewRequest({ initial, draft, entityId, yearId, onClose }: { initial: Ki
 function Budgets({ entityId, newOpen, onCloseNew }: { entityId: number; newOpen: boolean; onCloseNew: () => void }) {
   const qc = useQueryClient();
   const budgets = useBudgets(entityId);
+  const year = useCurrentYear();
+  const report = useEntityReport(year.data?.id);
+  const funds = report.data?.find((x) => x.entity_id === entityId);
   const [liq, setLiq] = useState<Budget | null>(null);
   const [err, setErr] = useState('');
 
@@ -251,6 +257,15 @@ function Budgets({ entityId, newOpen, onCloseNew }: { entityId: number; newOpen:
   const canCancel = (b: Budget) => b.status === 'pending' || (b.status === 'approved' && Number(b.released) === 0 && Number(b.spent) === 0 && Number(b.pending_release) === 0);
   return (
     <>
+      {funds && (
+        <Card className="mb-4">
+          <dl className="grid grid-cols-2 gap-3">
+            <div><dt className="micro text-muted">Saved with SAS</dt><dd className="money font-display font-bold text-[20px]">{peso(funds.saved_with_sas)}</dd></div>
+            <div><dt className="micro text-muted">Cash on hand</dt><dd className="money font-display font-bold text-[20px]">{peso(funds.cash_on_hand)}</dd></div>
+          </dl>
+          <p className="text-[13px] text-muted mt-2">Updates by itself: collected dues add to cash on hand, releases move savings to cash, approved expenses take from cash and from their budget, and unspent cash goes back to savings when a liquidation is approved.</p>
+        </Card>
+      )}
       <p className="text-[14px] text-muted mb-4 max-w-2xl">Every release needs an approved budget. After the activity, send the liquidation within 15 days; while one is overdue, no new releases.</p>
       {err && <div className="mb-3"><Alert>{err}</Alert></div>}
       {budgets.isLoading ? <Spinner /> : !all.length ? (

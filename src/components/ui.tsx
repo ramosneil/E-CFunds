@@ -178,7 +178,7 @@ export function ThemeToggle({ className }: { className?: string }) {
 }
 
 /** Bottom sheet on phones, centered dialog on larger screens. */
-export function Sheet({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: string; children: ReactNode }) {
+export function Sheet({ open, onClose, title, children, top }: { open: boolean; onClose: () => void; title: string; children: ReactNode; top?: boolean }) {
   useEffect(() => {
     if (!open) return;
     const k = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -187,7 +187,7 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
   }, [open, onClose]);
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-label={title}>
+    <div className={`fixed inset-0 ${top ? 'z-[75]' : 'z-50'} flex items-end sm:items-center justify-center`} role="dialog" aria-modal="true" aria-label={title}>
       <button aria-label="Close" className="absolute inset-0 bg-black/45 cursor-default" onClick={onClose} />
       <div className="relative w-full sm:max-w-lg max-h-[92dvh] overflow-y-auto bg-surface rounded-t-[24px] sm:rounded-[24px] p-5 pb-[max(20px,env(safe-area-inset-bottom))]">
         <div className="flex items-center justify-between mb-4">

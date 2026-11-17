@@ -2,7 +2,7 @@
 // submit the liquidation. SAS: approve/reject the budget, approve/return the liquidation.
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronDown, Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, Paperclip, Plus, Trash2, X } from 'lucide-react';
 import { supabase, errorText } from '../lib/supabase';
 import { date, peso } from '../lib/format';
 import type { Database } from '../lib/database.types';
@@ -89,7 +89,8 @@ function useTaggedExpenses(budgetId: number, enabled: boolean) {
 }
 
 function Money({ b }: { b: Budget }) {
-  const total = Number(b.total), released = Number(b.released), spent = Number(b.spent);
+  const total = Number(b.total), released = Number(b.released), spent = Number(b.spent), returned = Number(b.returned ?? 0);
+  const remaining = Math.max(0, total - spent);
   const pct = (n: number) => `${Math.min(100, total > 0 ? (n / total) * 100 : 0)}%`;
   return (
     <div className="mt-3">
@@ -97,14 +98,42 @@ function Money({ b }: { b: Budget }) {
         <div className="absolute inset-y-0 left-0 bg-primary/35 rounded-full" style={{ width: pct(released) }} />
         <div className="absolute inset-y-0 left-0 bg-primary rounded-full" style={{ width: pct(spent) }} />
       </div>
-      <dl className="mt-2 grid grid-cols-3 gap-2 text-[13px]">
+      <dl className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[13px]">
         <div><dt className="text-muted">Budget</dt><dd className="money font-semibold">{peso(total)}</dd></div>
         <div><dt className="text-muted">Released</dt><dd className="money font-semibold">{peso(released)}</dd></div>
         <div><dt className="text-muted">Spent</dt><dd className="money font-semibold">{peso(spent)}</dd></div>
+        <div><dt className="text-muted">Remaining</dt><dd className={`money font-semibold ${b.status === 'liquidated' ? '' : 'text-ok'}`}>{peso(remaining)}</dd></div>
       </dl>
+      {returned > 0 && <p className="text-[13px] text-muted mt-1">Unspent <b className="money text-ink">{peso(returned)}</b> went back to SAS savings automatically.</p>}
     </div>
   );
 }
+
+/** Files attached to a liquidation: tap to open (a link that works for 5 minutes; private bucket). */
+function LiquidationFiles({ paths }: { paths: string[] }) {
+  const [err, setErr] = useState('');
+  async function open(path: string) {
+    setErr('');
+    const w = window.open('', '_blank');
+    const { data, error } = await supabase.storage.from('receipts').createSignedUrl(path, 300);
+    if (error || !data) { w?.close(); setErr(errorText(error)); return; }
+    if (w) w.location.href = data.signedUrl; else window.location.href = data.signedUrl;
+  }
+  return (
+    <div className="mt-2">
+      <p className="text-[13px] text-muted">Liquidation files</p>
+      <ul className="flex flex-wrap gap-2 mt-1">
+        {paths.map((p) => (
+          <li key={p}><button type="button" onClick={() => open(p)}
+            className="inline-flex items-center gap-1.5 min-h-11 px-3 rounded-[12px] border border-line text-[13px] font-semibold text-primary hover:bg-surface2 cursor-pointer max-w-[240px]">
+            <Paperclip className="size-4 shrink-0" aria-hidden /><span className="truncate">{fileLabel(p)}</span></button></li>
+        ))}
+      </ul>
+      {err && <p className="text-[13px] text-bad mt-1">{err}</p>}
+    </div>
+  );
+}
+const fileLabel = (path: string) => path.split('/').pop()!.replace(/^\d+-/, '');
 
 /** One budget: title, status, money bar, due date, items (tap to show) and any actions passed in. */
 export function BudgetCard({ b, entity, actions }: { b: Budget; entity?: { name: string; short_name: string; logo_path: string | null }; actions?: ReactNode }) {
@@ -124,6 +153,7 @@ export function BudgetCard({ b, entity, actions }: { b: Budget; entity?: { name:
       {dueLine(b) && <p className="text-[13px] text-muted mt-2">{dueLine(b)}</p>}
       {b.remarks && <p className="text-[13px] mt-2"><span className="text-muted">SAS:</span> {b.remarks}</p>}
       {b.liquidation_note && <p className="text-[13px] mt-1"><span className="text-muted">Liquidation report:</span> {b.liquidation_note}</p>}
+      {(b.liquidation_files?.length ?? 0) > 0 && <LiquidationFiles paths={b.liquidation_files} />}
       <button type="button" onClick={() => setOpen(!open)} aria-expanded={open}
         className="mt-2 inline-flex items-center gap-1 min-h-11 text-[14px] font-semibold text-primary cursor-pointer">
         {open ? 'Hide items' : 'Show items'}<ChevronDown className={`size-4 transition ${open ? 'rotate-180' : ''}`} aria-hidden />
@@ -218,17 +248,37 @@ export function LiquidateSheet({ b, onClose }: { b: Budget; onClose: () => void 
   const qc = useQueryClient();
   const tagged = useTaggedExpenses(b.id, true);
   const [note, setNote] = useState('');
+  const [files, setFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const expenses = (tagged.data ?? []).filter((x) => x.kind === 'expense');
   const unspent = Math.max(0, Number(b.released) - Number(b.spent));
 
+  function addFiles(list: FileList | null) {
+    if (!list) return;
+    const picked = [...files, ...Array.from(list)];
+    const big = picked.find((f) => f.size > 10 * 1024 * 1024);
+    if (big) { setErr(`“${big.name}” is bigger than 10 MB.`); return; }
+    if (picked.length > 10) { setErr('Attach up to 10 files.'); return; }
+    setErr(''); setFiles(picked);
+  }
+
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (note.trim().length < 3) { setErr('Write a short report of the activity.'); return; }
-    if (!(await confirmAsk({ title: 'Send the liquidation to SAS?', body: `Spent ${peso(b.spent)} of ${peso(b.released)} released. SAS checks it against the expense receipts.`, confirm: 'Send', tone: 'primary' }))) return;
+    if (!(await confirmAsk({ title: 'Send the liquidation to SAS?', body: `Spent ${peso(b.spent)} of ${peso(b.released)} released${files.length ? `, with ${files.length} file${files.length > 1 ? 's' : ''}` : ''}. SAS checks it against the receipts.`, confirm: 'Send', tone: 'primary' }))) return;
     setBusy(true); setErr('');
-    const { error } = await supabase.rpc('submit_liquidation', { p_budget_id: b.id, p_note: note.trim() });
+    const paths: string[] = [];
+    try {
+      for (const f of files) {
+        const safe = f.name.replace(/[^\w.-]+/g, '_').slice(-60);
+        const path = `${b.entity_id}/liq-${b.id}/${Date.now()}-${safe}`;
+        const up = await supabase.storage.from('receipts').upload(path, f, { contentType: f.type || 'application/octet-stream' });
+        if (up.error) throw up.error;
+        paths.push(path);
+      }
+    } catch (x) { setBusy(false); setErr(`A file didn’t upload: ${errorText(x)}`); return; }
+    const { error } = await supabase.rpc('submit_liquidation', { p_budget_id: b.id, p_note: note.trim(), p_files: paths });
     setBusy(false);
     if (error) { setErr(errorText(error)); return; }
     void qc.invalidateQueries();
@@ -253,11 +303,35 @@ export function LiquidateSheet({ b, onClose }: { b: Budget; onClose: () => void 
             </ul>
           ) : <p className="text-[13px] text-muted">None yet. File each expense under Requests → Expense and pick this budget, so it counts here.</p>}
         </div>
-        {unspent > 0 && <Alert tone="warn">{peso(unspent)} released but not spent stays in your cash on hand. Remit it to SAS if the activity is over.</Alert>}
+        {unspent > 0 && <Alert tone="warn">{peso(unspent)} was released but not spent. When SAS approves this liquidation it goes back to your savings with SAS automatically — hand that cash to SAS.</Alert>}
         <Field label="Activity report" hint="What happened, what was bought, what was left. SAS reads this with the receipts.">
           <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4} maxLength={1000}
             className="w-full rounded-[14px] bg-surface border border-line focus:border-primary outline-none p-3 text-[15px]" />
         </Field>
+        <div>
+          <p className="text-[14px] font-semibold">Files <span className="text-muted font-normal">(optional, up to 10)</span></p>
+          <p className="text-[13px] text-muted mb-2">Photos or PDFs: receipts, attendance sheet, activity photos, the signed report.</p>
+          {files.length > 0 && (
+            <ul className="space-y-2 mb-2">
+              {files.map((f, i) => (
+                <li key={i} className="flex items-center gap-2 rounded-[12px] bg-surface2 pl-3 text-[14px]">
+                  <Paperclip className="size-4 text-muted shrink-0" aria-hidden />
+                  <span className="flex-1 min-w-0 truncate">{f.name}</span>
+                  <span className="text-[12px] text-muted shrink-0">{(f.size / 1024 / 1024).toFixed(1)} MB</span>
+                  <button type="button" aria-label={`Remove ${f.name}`} onClick={() => setFiles(files.filter((_, j) => j !== i))}
+                    className="size-11 grid place-items-center rounded-full hover:bg-surface cursor-pointer"><X className="size-4" /></button>
+                </li>
+              ))}
+            </ul>
+          )}
+          {files.length < 10 && (
+            <label className="inline-flex items-center gap-2 h-11 px-4 rounded-[14px] border border-line text-primary font-semibold text-[14px] cursor-pointer hover:bg-surface2">
+              <Paperclip className="size-4" aria-hidden />Attach files
+              <input type="file" multiple accept="image/*,application/pdf" className="sr-only"
+                onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }} />
+            </label>
+          )}
+        </div>
         {err && <Alert>{err}</Alert>}
         <Button type="submit" busy={busy} className="w-full h-[54px]">Send liquidation</Button>
       </form>

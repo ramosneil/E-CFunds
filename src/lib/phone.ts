@@ -72,10 +72,17 @@ export async function requestNotify(): Promise<PhonePermission> {
   } catch (e) { console.warn('[phone] push permission request', e); return 'unavailable'; }
 }
 
-/** Post a phone notification (only when E-CFunds isn't on screen). */
+/** A new notification row seen live. With push on this phone, the push itself reaches the shade (also while the
+ *  app is open — push.ts listenPush), so this returns false and the in-app pop-up shows. Without push (old app
+ *  builds) the row goes to the shade here, even while the app is open (Neil, 2026-11-17: "no phone notification"). */
 export async function phoneNotify(n: { id: number; title: string; body?: string | null; link?: string | null }) {
-  if (document.visibilityState === 'visible') return false;
-  if ((await import('./push')).pushActive()) return false;   // push already delivers it
+  if ((await import('./push')).pushActive()) return false;
+  const sent = await shadeNotify(n);
+  return sent && document.visibilityState !== 'visible';    // on screen: the in-app pop-up shows too
+}
+
+/** Put a notification in the phone's notification shade (Android app). */
+export async function shadeNotify(n: { id: number; title: string; body?: string | null; link?: string | null }) {
   const p = await plugin();
   if (!p) return false;
   try {

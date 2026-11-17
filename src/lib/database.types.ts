@@ -182,7 +182,7 @@ export type Database = {
     };
     Views: {
       budget_status: {
-        Row: BudgetRow & { released: number; spent: number; pending_release: number; is_overdue: boolean };
+        Row: BudgetRow & { released: number; spent: number; pending_release: number; is_overdue: boolean; returned: number; remaining: number };
         Relationships: [];
       };
       accredited_list: {
@@ -213,7 +213,7 @@ export type Database = {
       file_budget: { Args: { p_entity_id: number; p_title: string; p_purpose: string; p_activity_date: string; p_items: Json }; Returns: number };
       cancel_budget: { Args: { p_budget_id: number }; Returns: undefined };
       review_budget: { Args: { p_budget_id: number; p_approve: boolean; p_remarks?: string }; Returns: undefined };
-      submit_liquidation: { Args: { p_budget_id: number; p_note: string }; Returns: undefined };
+      submit_liquidation: { Args: { p_budget_id: number; p_note: string; p_files?: string[] }; Returns: undefined };
       review_liquidation: { Args: { p_budget_id: number; p_approve: boolean; p_remarks?: string }; Returns: undefined };
       cancel_request: { Args: { p_request_id: number }; Returns: undefined };
       close_school_year: { Args: { p_entity_id: number; p_school_year_id: number }; Returns: number };
@@ -314,7 +314,7 @@ export type BudgetStatus = 'pending' | 'approved' | 'rejected' | 'cancelled' | '
 export type BudgetRow = {
   id: number; entity_id: number; school_year_id: number; title: string; purpose: string | null; activity_date: string;
   liquidation_due: string; total: number; status: BudgetStatus; filed_by: string | null; filed_at: string;
-  reviewed_by: string | null; reviewed_at: string | null; remarks: string | null; liquidation_note: string | null;
+  reviewed_by: string | null; reviewed_at: string | null; remarks: string | null; liquidation_note: string | null; liquidation_files: string[];
   liquidation_submitted_at: string | null; liquidated_by: string | null; liquidated_at: string | null;
   reminded_7: boolean; reminded_due: boolean; overdue_notified: boolean;
 };

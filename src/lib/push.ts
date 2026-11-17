@@ -20,13 +20,19 @@ async function supported() {
   return (Number((await App.getInfo()).build) || 0) >= PUSH_MIN_BUILD;
 }
 
-/** Ask permission (once, by Android), register with Firebase and save the token for this signed-in person. */
-export async function registerPush() {
+/** Listen for pushes (call at app start, signed in or not). Android shows a push by itself only while E-CFunds is
+ *  closed or in the background; while it is open, the push comes here and is put in the phone's shade too. */
+export async function listenPush() {
   try {
     if (!(await supported())) return;
     const { PushNotifications } = await import('@capacitor/push-notifications');
     if (!listening) {
       listening = true;
+      await PushNotifications.addListener('pushNotificationReceived', (n) => {
+        const data = (n.data ?? {}) as { link?: string; id?: string };
+        void import('./phone').then(({ shadeNotify }) => shadeNotify({
+          id: (Number(data.id) || Date.now() % 1_000_000) * 10, title: n.title ?? 'E-CFunds', body: n.body, link: data.link }));
+      });
       await PushNotifications.addListener('registration', async ({ value }) => {
         try { localStorage.setItem(KEY, value); } catch { /* ignore */ }
         const { error } = await supabase.rpc('save_push_token', { p_token: value, p_platform: 'android' });
@@ -39,6 +45,15 @@ export async function registerPush() {
         if (link) window.dispatchEvent(new CustomEvent('ecfunds:open', { detail: link }));
       });
     }
+  } catch (e) { console.warn('[push] listen', e); }
+}
+
+/** Ask permission (once, by Android), register with Firebase and save the token for this signed-in person. */
+export async function registerPush() {
+  try {
+    if (!(await supported())) return;
+    const { PushNotifications } = await import('@capacitor/push-notifications');
+    await listenPush();
     let perm = await PushNotifications.checkPermissions();
     if (perm.receive === 'prompt' || perm.receive === 'prompt-with-rationale') perm = await PushNotifications.requestPermissions();
     if (perm.receive !== 'granted') return;

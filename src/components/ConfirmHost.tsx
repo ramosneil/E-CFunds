@@ -12,7 +12,8 @@ export function ConfirmHost() {
   const ok = !a.input || text.trim().length >= min;
   const submit = (e: FormEvent) => { e.preventDefault(); if (ok) confirmStore.finish(a.input ? text.trim() : true); };
   return (
-    <Sheet open onClose={() => confirmStore.finish(null)} title={a.title}>
+    // `top`: above any sheet it was asked from (e.g. New budget → "Send to SAS?"), not hidden behind it.
+    <Sheet open top onClose={() => confirmStore.finish(null)} title={a.title}>
       <form onSubmit={submit} className="space-y-4">
         {a.body && <p className="text-[15px] text-muted whitespace-pre-line">{a.body}</p>}
         {a.input && (
