@@ -103,7 +103,8 @@ export function Alert({ tone = 'bad', children }: { tone?: 'bad' | 'ok' | 'warn'
 }
 
 /** Gold = cash on hand (treasurer), blue = saved with SAS. Shown on every money card. */
-export function PocketBar({ cash, saved, onHero }: { cash: number; saved: number; onHero?: boolean }) {
+/** `bare`: just the bar (the fund card shows the two numbers above it). */
+export function PocketBar({ cash, saved, onHero, bare }: { cash: number; saved: number; onHero?: boolean; bare?: boolean }) {
   const total = Math.max(0, cash) + Math.max(0, saved);
   const c = pct(Math.max(0, cash), total);
   return (
@@ -113,10 +114,10 @@ export function PocketBar({ cash, saved, onHero }: { cash: number; saved: number
         {total > 0 && <div className="bg-pocket-cash h-full" style={{ width: `${c}%` }} />}
         {total > 0 && <div className={cx('h-full flex-1', onHero ? 'bg-pocket-saved' : 'bg-primary')} />}
       </div>
-      <div className={cx('mt-2 flex justify-between text-[13px]', onHero ? 'text-hero-muted' : 'text-muted')}>
+      {!bare && <div className={cx('mt-2 flex justify-between text-[13px]', onHero ? 'text-hero-muted' : 'text-muted')}>
         <span className="flex items-center gap-1.5"><i className="size-2 rounded-full bg-pocket-cash" />Cash on hand <b className={cx('money', onHero ? 'text-white' : 'text-ink')}>{peso(cash)}</b></span>
         <span className="flex items-center gap-1.5"><i className={cx('size-2 rounded-full', onHero ? 'bg-pocket-saved' : 'bg-primary')} />Saved <b className={cx('money', onHero ? 'text-white' : 'text-ink')}>{peso(saved)}</b></span>
-      </div>
+      </div>}
     </div>
   );
 }
@@ -145,15 +146,19 @@ function useCountTo(value: number) {
   return { shown: Math.round(shown * 100) / 100, changed };
 }
 
-/** The big fund card. Numbers refresh by themselves whenever the treasurer or SAS records anything (src/lib/live.ts);
- *  the "Live" mark says so, the total counts to its new value, and `latest` / `pending` show what moved it. */
-export function HeroCard({ label, total, cash, saved, foot, latest, pending, live = true }: {
-  label: string; total: number; cash: number; saved: number; foot?: ReactNode; latest?: ReactNode; pending?: ReactNode; live?: boolean;
+/** The big fund card: **Cash on hand** and **Saved with SAS** as the two main numbers (Neil, 2026-11-17: no "Total
+ *  fund"). They refresh by themselves whenever the treasurer or SAS records anything (src/lib/live.ts) — the "Live"
+ *  mark says so, each number counts to its new value with a glow, and `latest` / `pending` show what moved them. */
+export function HeroCard({ label, cash, saved, foot, latest, pending, live = true }: {
+  label: string; total?: number; cash: number; saved: number; foot?: ReactNode; latest?: ReactNode; pending?: ReactNode; live?: boolean;
 }) {
-  // Total, cash AND saved all count to their new values — a remittance or release keeps the total the same but moves
-  // money between cash and savings, and that must be visible too (Neil, 2026-11-17: "not updating").
-  const t = useCountTo(Number(total) || 0), c = useCountTo(Number(cash) || 0), s = useCountTo(Number(saved) || 0);
-  const shown = t.shown, changed = t.changed || c.changed || s.changed;
+  const c = useCountTo(Number(cash) || 0), s = useCountTo(Number(saved) || 0);
+  const changed = c.changed || s.changed;
+  // Each number fills its half of the card and shrinks for big amounts (₱1,234,567.89 still fits on a phone):
+  // size = column width ÷ characters (container units), between 16 and 34 px. Both use the longer one, so they match.
+  const chars = Math.max(peso(c.shown).length, peso(s.shown).length);
+  const big = 'money font-display font-extrabold leading-tight whitespace-nowrap block';
+  const size = { fontSize: `clamp(16px, calc(100cqw / ${(chars * 0.64).toFixed(2)}), 34px)` };
   return (
     <section className={cx('rounded-[24px] p-5 sm:p-6 text-white bg-hero relative overflow-hidden transition-shadow duration-700',
       changed && 'ring-2 ring-pocket-cash/70')}>
@@ -166,9 +171,18 @@ export function HeroCard({ label, total, cash, saved, foot, latest, pending, liv
           </span>
         )}
       </div>
-      <p className="money font-display font-extrabold text-[34px] sm:text-[40px] leading-tight mt-1" aria-live="polite">{peso(shown)}</p>
-      {latest && <div className="text-[13px] text-hero-muted mt-0.5">{latest}</div>}
-      <div className="mt-4"><PocketBar cash={c.shown} saved={s.shown} onHero /></div>
+      <dl className="grid grid-cols-2 gap-4 mt-2" aria-live="polite">
+        <div className="min-w-0 [container-type:inline-size]">
+          <dt className="flex items-center gap-1.5 text-[13px] text-hero-muted"><i className="size-2 rounded-full bg-pocket-cash" aria-hidden />Cash on hand</dt>
+          <dd className={big} style={size}>{peso(c.shown)}</dd>
+        </div>
+        <div className="min-w-0 [container-type:inline-size]">
+          <dt className="flex items-center gap-1.5 text-[13px] text-hero-muted"><i className="size-2 rounded-full bg-pocket-saved" aria-hidden />Saved with SAS</dt>
+          <dd className={big} style={size}>{peso(s.shown)}</dd>
+        </div>
+      </dl>
+      <div className="mt-3"><PocketBar cash={c.shown} saved={s.shown} onHero bare /></div>
+      {latest && <div className="text-[13px] text-hero-muted mt-3">{latest}</div>}
       {pending && <div className="mt-3 rounded-[14px] bg-white/10 px-3 py-2 text-[13px] text-white">{pending}</div>}
       {foot && <div className="mt-3 text-[13px] text-hero-muted">{foot}</div>}
     </section>

@@ -296,3 +296,4 @@ None. Both §10 questions were answered in session 3 and moved to §8.
 - When SAS **approves a liquidation**, released-but-unspent cash goes **back to SAS savings automatically** (a remittance
   tagged to the budget, at most the org's cash on hand). The card says "Unspent ₱X went back to SAS savings".
 - Budgets tab shows **Saved with SAS** and **Cash on hand**; collections, releases, expenses and returns update them.
+- **Fund card** (treasurer Home, SAS dashboard, SAS org page, student Home): shows **Cash on hand** and **Saved with SAS** only — no total (Neil, 2026-11-17).

@@ -138,7 +138,7 @@ export function EntityDetail() {
       {!year.data ? <NoYear admin /> : !r ? <Spinner /> : (
         <>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
-            <HeroCard label={`Total fund · ${year.data.label}`} total={r.total_fund} cash={r.cash_on_hand} saved={r.saved_with_sas}
+            <HeroCard label={`Funds · ${year.data.label}`} total={r.total_fund} cash={r.cash_on_hand} saved={r.saved_with_sas}
               latest={<LatestLine e={ledger.data?.[0]} />}
               foot={<>Previous funds {peso(r.previous_funds)}{r.is_closed ? ' · Year closed' : ''}</>} />
             <div className="grid grid-cols-2 gap-3 content-start">

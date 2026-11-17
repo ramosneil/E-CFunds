@@ -71,7 +71,7 @@ export function AdminDashboard() {
 
       {/* Phone: total → waiting for you → numbers → orgs. Desktop: total | waiting, then numbers and the full-width table. */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr] items-start">
-        <HeroCard label="Total funds, all orgs & clubs" total={s?.total_fund ?? 0} cash={s?.cash_on_hand ?? 0} saved={s?.saved_with_sas ?? 0}
+        <HeroCard label="Funds · all orgs & clubs" total={s?.total_fund ?? 0} cash={s?.cash_on_hand ?? 0} saved={s?.saved_with_sas ?? 0}
           latest={latest.isSuccess && <LatestLine e={latest.data} org={latest.data ? byId.get(latest.data.entity_id)?.short_name : undefined} />}
           foot={<>{s?.organizations ?? 0} organizations · {s?.clubs ?? 0} clubs · {s?.students ?? 0} students</>} />
 

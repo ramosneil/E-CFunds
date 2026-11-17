@@ -95,7 +95,7 @@ export function StudentHome() {
           )}
         </Card>
         <div className="space-y-4">
-          <HeroCard label="All student funds, school-wide" total={s?.total_fund ?? 0} cash={s?.cash_on_hand ?? 0} saved={s?.saved_with_sas ?? 0}
+          <HeroCard label="Student funds · school-wide" total={s?.total_fund ?? 0} cash={s?.cash_on_hand ?? 0} saved={s?.saved_with_sas ?? 0}
             foot={<>{s?.organizations ?? 0} organizations · {s?.clubs ?? 0} clubs</>} />
           <Link to="/reports" className="flex items-center justify-between rounded-[20px] bg-surface border border-line p-5 font-semibold hover:bg-surface2">
             Where each org & club's money went <ChevronRight className="size-5 text-muted" />
