@@ -21,7 +21,14 @@ docker run --rm -p 8080:8080 ramosneil/e-cfunds:1.0.0
 
 Open **http://localhost:8080**. Stop it with `Ctrl+C`.
 
-Publish a new version (on Neil's computer, signed in to Docker Desktop as `ramosneil`):
+**Automatic updates:** every push to `main` that changes the app runs `.github/workflows/docker.yml`, which builds
+the image and uploads `ramosneil/e-cfunds:latest` plus a numbered `1.0.<run>` (1.0.1, 1.0.2…), then starts it once
+to check. It uses the repo secret `DOCKERHUB_TOKEN` (Docker Hub personal access token "GitHub E-CFunds", Read &
+Write, made 2026-11-17). If that token is ever deleted or leaked: make a new one at
+app.docker.com → Settings → Personal access tokens, and replace the secret at GitHub → Settings → Secrets and
+variables → Actions. Teachers get the newest version with `docker pull ramosneil/e-cfunds:latest`.
+
+By hand (only if GitHub can't), on Neil's computer signed in to Docker Desktop as `ramosneil`:
 
 ```bash
 docker compose build
