@@ -13,9 +13,10 @@ export function useMessages(enabled = true) {
     queryKey: ['messages'],
     enabled,
     queryFn: async () => {
-      const { data, error } = await supabase.from('messages').select('*').order('created_at').limit(2000);
-      if (error) throw error;
-      return data;
+      // All messages, page by page (the server sends at most 1,000 per request; oldest first, so the newest
+      // would be the ones cut off).
+      const { fetchAll } = await import('./fetchAll');
+      return fetchAll((from, to) => supabase.from('messages').select('*').order('created_at').order('id').range(from, to));
     },
   });
 }

@@ -91,10 +91,14 @@ function RecoveryRedirect() {
       const now = !!s;
       let recovering = false;
       try { recovering = sessionStorage.getItem('ecfunds:recovery') === '1'; if (recovering) sessionStorage.removeItem('ecfunds:recovery'); } catch { /* fine */ }
-      if (had !== null && now !== had && window.location.pathname !== '/reset') {
+      // Signing in on a deep link (a notification tapped while signed out, e.g. /requests) stays there; signing in
+      // from Home or a sign-in page goes to the Dashboard; signing out always goes to the start.
+      const path = window.location.pathname;
+      const deep = now && !['/', '/login', '/register', '/forgot'].includes(path);
+      if (had !== null && now !== had && path !== '/reset' && !(deep && !recovering)) {
         nav(recovering ? '/reset' : '/', { replace: true });
         window.scrollTo(0, 0);
-      }
+      } else if (had !== null && now !== had && deep) window.scrollTo(0, 0);
       had = now;
     });
     return () => data.subscription.unsubscribe();

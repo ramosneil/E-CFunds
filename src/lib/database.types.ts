@@ -221,6 +221,7 @@ export type Database = {
       enable_account: { Args: { p_profile_id: string; p_remarks?: string }; Returns: undefined };
       import_students: { Args: { p_rows: Json }; Returns: Json };
       import_members: { Args: { p_rows: Json }; Returns: Json };
+      reopen_school_year: { Args: { p_entity_id: number; p_school_year_id: number; p_reason: string }; Returns: string };
       remind_unpaid: { Args: { p_entity_id: number }; Returns: number };
       get_financial_report: { Args: { p_entity_id: number; p_semester_id?: number; p_as_of?: string }; Returns: FinancialReport };
       save_signatories: { Args: { p_entity_id: number; p_head_title: string; p_head_name: string; p_auditor_name: string; p_adviser_name: string }; Returns: undefined };

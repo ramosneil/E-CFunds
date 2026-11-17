@@ -11,18 +11,19 @@ import { Alert, Button, Card, DuesBar, EntityLogo, Field, HeroCard, Input, Selec
 import { BudgetCard, isOpen, releaseLeft, useBudgets } from '../../components/budgets';
 import { IfApproved, NoYear, Segmented } from '../../components/common';
 import { confirmAsk, promptAsk } from '../../lib/confirm';
+import { toast } from '../../lib/toast';
 import { ExportMenu, exportsLib } from '../../components/ExportMenu';
 import { FinancialReportButton } from '../../components/FinancialReportSheet';
+import { fetchAll } from '../../lib/fetchAll';
 
 export function useLedger(entityId: number | undefined, yearId: number | undefined) {
   return useQuery({
     queryKey: ['ledger', entityId, yearId],
     enabled: !!entityId && !!yearId,
     queryFn: async () => {
-      const { data, error } = await supabase.from('ledger_entries').select('*')
-        .eq('entity_id', entityId!).eq('school_year_id', yearId!).order('created_at', { ascending: false }).limit(300);
-      if (error) throw error;
-      return data;
+      // Every entry of the year, page by page (the server sends at most 1,000 per request).
+      return fetchAll((from, to) => supabase.from('ledger_entries').select('*')
+        .eq('entity_id', entityId!).eq('school_year_id', yearId!).order('created_at', { ascending: false }).order('id', { ascending: false }).range(from, to));
     },
   });
 }
@@ -315,11 +316,27 @@ function TurnoverCard({ entityId, yearId, yearLabel, r }: { entityId: number; ye
     if (error) setErr(errorText(error)); else void qc.invalidateQueries();
   }
 
+  async function reopen() {
+    const reason = await promptAsk({ title: `Reopen ${yearLabel} for this org/club?`, confirm: 'Reopen', tone: 'primary',
+      body: 'The org/club can file requests and record payments for this school year again. If the close turned off the treasurer’s account, it is turned back on.',
+      input: { label: 'Reason', placeholder: 'e.g. Closed by mistake during testing', minLength: 3 } });
+    if (!reason) return;
+    setBusy(true); setErr('');
+    const { data, error } = await supabase.rpc('reopen_school_year', { p_entity_id: entityId, p_school_year_id: yearId, p_reason: reason.trim() });
+    setBusy(false);
+    if (error) { setErr(errorText(error)); return; }
+    toast({ title: 'School year reopened', body: data ?? undefined, tone: 'ok', silent: true });
+    void qc.invalidateQueries();
+  }
+
   if (r.is_closed) return (
     <Card>
       <h2 className="font-display text-[17px] font-bold">School year closed</h2>
       <p className="text-[14px] text-muted mt-1 flex items-center gap-2"><CheckCircle2 className="size-5 text-ok" aria-hidden />
         {yearLabel} is closed. <b className="money text-ink">{peso(r.total_fund)}</b> carries over to the next officers.</p>
+      {err && <div className="mt-3"><Alert>{err}</Alert></div>}
+      <Button variant="ghost" className="w-full mt-4" busy={busy} onClick={reopen}>Reopen {yearLabel}</Button>
+      <p className="text-[12.5px] text-muted mt-2">Closed by mistake? Reopening lets the org/club file again and gives the treasurer whom the close turned off their account back. Your reason is kept.</p>
     </Card>
   );
   return (

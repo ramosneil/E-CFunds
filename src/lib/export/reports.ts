@@ -46,7 +46,9 @@ async function reportRow(yearId: number, entityId?: number): Promise<EntityRepor
   return entityId ? rows.filter((r) => r.entity_id === entityId) : rows;
 }
 async function ledgerOf(entityId: number, yearId: number): Promise<Ledger[]> {
-  return must(supabase.from('ledger_entries').select('*').eq('entity_id', entityId).eq('school_year_id', yearId).order('occurred_on').order('id'));
+  const { fetchAll } = await import('../fetchAll');
+  return fetchAll((from, to) => supabase.from('ledger_entries').select('*').eq('entity_id', entityId).eq('school_year_id', yearId)
+    .order('occurred_on').order('id').range(from, to));
 }
 
 /** Months of the school year (Aug–May style) with money in/out per month from the ledger. */
@@ -196,9 +198,10 @@ export async function schoolSummary(format: 'pdf' | 'csv', year: Year) {
 
 // ---------------------------------------------------------------- 3. Members & dues (CSV)
 export async function membersCsv(entity: Entity, year: Year) {
-  const rows = await must(supabase.from('memberships')
+  const { fetchAll } = await import('../fetchAll');
+  const rows = await fetchAll((from, to) => supabase.from('memberships')
     .select('amount_due, is_paid, paid_at, student:students(student_no, full_name, course, year_level, section)')
-    .eq('entity_id', entity.id).eq('school_year_id', year.id));
+    .eq('entity_id', entity.id).eq('school_year_id', year.id).order('id').range(from, to));
   // Same order as the Members page: by year + section (1A, 1B…), then name.
   const grp = (x: { student: { year_level: number | null; section: string | null } | null }) => `${x.student?.year_level ?? 9}${x.student?.section ?? 'Z'}`;
   const sorted = [...rows].sort((a, b) => grp(a).localeCompare(grp(b)) || (a.student?.full_name ?? '').localeCompare(b.student?.full_name ?? ''));

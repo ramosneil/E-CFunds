@@ -17,7 +17,7 @@ export function Receipt() {
     queryKey: ['receipt', no],
     queryFn: async () => {
       const { data, error } = await supabase.from('receipts')
-        .select('*, student:students(student_no, full_name, course, year_level), entity:entities(name, short_name, logo_path), school_year:school_years(label), semester:semesters(term)')
+        .select('*, student:students(student_no, full_name, course, year_level, section), entity:entities(name, short_name, logo_path), school_year:school_years(label), semester:semesters(term)')
         .eq('receipt_no', no).maybeSingle();
       if (error) throw error;
       if (!data?.voided_at) return { rec: data, replacedBy: null as string | null };
@@ -42,7 +42,7 @@ export function Receipt() {
   const term = rec.semester ? `${rec.semester.term === 1 ? '1st' : '2nd'} semester · ` : '';
   const forWhat = `${rec.entity?.short_name ?? ''} membership fee · ${term}SY ${rec.school_year?.label ?? ''}`;
   const student = rec.student;
-  const studentLine = [student?.student_no, [student?.course, student?.year_level].filter(Boolean).join(' ')].filter(Boolean).join(' · ');
+  const studentLine = [student?.student_no, [student?.course, student?.year_level ? `${student.year_level}${student.section ?? ''}` : null].filter(Boolean).join(' ')].filter(Boolean).join(' · ');
 
   async function pdf() {
     if (!rec) return;

@@ -11,6 +11,7 @@ import { NoYear, Segmented } from '../../components/common';
 import { ExportMenu, exportsLib } from '../../components/ExportMenu';
 import { confirmAsk, promptAsk } from '../../lib/confirm';
 import { toast } from '../../lib/toast';
+import { fetchAll } from '../../lib/fetchAll';
 import { SECTIONS, YEARS, yearSection } from '../../lib/roster';
 import { ImportSheet, useCourses } from '../admin/Students';
 
@@ -42,13 +43,14 @@ export function Members() {
     enabled: !!year.data && !!entity && (!perSemester || !!sem),
     queryFn: async () => {
       // Fees are per semester: each semester has its own member list (clubs are chosen again every semester).
-      let qy = supabase.from('memberships')
-        .select('*, student:students(id, student_no, full_name, course, year_level, section)')
-        .eq('entity_id', entityId).eq('school_year_id', year.data!.id);
-      if (perSemester && sem) qy = qy.eq('semester_id', sem.id);
-      const { data, error } = await qy.order('created_at', { ascending: false });
-      if (error) throw error;
-      return data;
+      // Every member, page by page — SSG has every student, past the server's 1,000-rows-per-request limit.
+      return fetchAll((from, to) => {
+        let qy = supabase.from('memberships')
+          .select('*, student:students(id, student_no, full_name, course, year_level, section)')
+          .eq('entity_id', entityId).eq('school_year_id', year.data!.id);
+        if (perSemester && sem) qy = qy.eq('semester_id', sem.id);
+        return qy.order('created_at', { ascending: false }).order('id').range(from, to);
+      });
     },
   });
 
@@ -57,9 +59,8 @@ export function Members() {
     queryKey: ['receipts', entityId, year.data?.id],
     enabled: !!year.data && !!entityId,
     queryFn: async () => {
-      const { data, error } = await supabase.from('receipts').select('membership_id, receipt_no')
-        .eq('entity_id', entityId).eq('school_year_id', year.data!.id).is('voided_at', null);
-      if (error) throw error;
+      const data = await fetchAll((from, to) => supabase.from('receipts').select('membership_id, receipt_no')
+        .eq('entity_id', entityId).eq('school_year_id', year.data!.id).is('voided_at', null).order('id').range(from, to));
       return new Map(data.map((x) => [x.membership_id, x.receipt_no]));
     },
   });
