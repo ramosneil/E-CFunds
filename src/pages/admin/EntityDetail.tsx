@@ -15,6 +15,8 @@ import { toast } from '../../lib/toast';
 import { ExportMenu, exportsLib } from '../../components/ExportMenu';
 import { FinancialReportButton } from '../../components/FinancialReportSheet';
 import { fetchAll } from '../../lib/fetchAll';
+import { ago } from '../../lib/notifications';
+
 
 export function useLedger(entityId: number | undefined, yearId: number | undefined) {
   return useQuery({
@@ -42,6 +44,17 @@ export function totalEffect(e: { kind: string; amount: number; direction: number
 type LedgerRow = { id: number; kind: string; amount: number; direction: number | null; description: string; occurred_on: string; pocket: string | null; reverses_id?: number | null };
 /** Kinds SAS can correct with a reversal (private.reverse_entry). Dues payments use "undo payment" in Members. */
 const REVERSIBLE = new Set(['opening', 'expense', 'adjustment']);
+
+/** "Latest: Collection +₱20.00 · 5 min · Dues…" — the last money movement, shown on the fund card so people see what
+ *  changed the total. `org` (SAS dashboard) names the org/club it belongs to. */
+export function LatestLine({ e, org }: { e?: { kind: string; amount: number; direction: number | null; created_at: string; description: string } | null; org?: string }) {
+  if (!e) return <>No transactions yet this school year.</>;
+  const t = totalEffect(e);
+  return (
+    <span className="block truncate">Latest: {org && <b className="text-white">{org} · </b>}<b className="text-white">{kindLabel[e.kind] ?? e.kind}</b>{' '}
+      <span className="money">{t === 0 ? peso(e.amount) : peso(t, { sign: true })}</span> · {ago(e.created_at)}{e.description ? ` · ${e.description}` : ''}</span>
+  );
+}
 
 export function LedgerList({ entries, onCorrect }: { entries: LedgerRow[]; onCorrect?: (e: LedgerRow) => void }) {
   if (!entries.length) return <p className="text-muted text-[14px] py-6 text-center">No money movements yet this school year.</p>;
@@ -124,6 +137,7 @@ export function EntityDetail() {
         <>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
             <HeroCard label={`Total fund · ${year.data.label}`} total={r.total_fund} cash={r.cash_on_hand} saved={r.saved_with_sas}
+              latest={<LatestLine e={ledger.data?.[0]} />}
               foot={<>Previous funds {peso(r.previous_funds)}{r.is_closed ? ' · Year closed' : ''}</>} />
             <div className="grid grid-cols-2 gap-3 content-start">
               <Stat label="Collections" value={peso(r.collections)} tone={r.collections ? 'ok' : undefined} />

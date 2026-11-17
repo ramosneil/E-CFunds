@@ -8,6 +8,7 @@ import { peso } from '../../lib/format';
 import { Card, DuesBar, EntityLogo, HeroCard, PageHeader, SectionTitle, Spinner, Stat, Chip } from '../../components/ui';
 import { NoYear, RequestRow } from '../../components/common';
 import { ExportMenu, exportsLib } from '../../components/ExportMenu';
+import { LatestLine } from './EntityDetail';
 
 /** People who signed up and are waiting for SAS to approve their account. */
 function usePendingAccounts() {
@@ -21,6 +22,20 @@ function usePendingAccounts() {
   });
 }
 
+/** The newest money movement of the school year, any org/club (refreshes live like everything else). */
+function useLatestEntry(yearId: number | undefined) {
+  return useQuery({
+    queryKey: ['ledger', 'latest', yearId],
+    enabled: !!yearId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('ledger_entries').select('*').eq('school_year_id', yearId!)
+        .order('created_at', { ascending: false }).order('id', { ascending: false }).limit(1).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 export function AdminDashboard() {
   const year = useCurrentYear();
   const y = year.data?.id;
@@ -30,6 +45,7 @@ export function AdminDashboard() {
   const pending = useRequests({ status: 'pending' });
   const accounts = usePendingAccounts();
   const school = useSchoolFinance(y);
+  const latest = useLatestEntry(y);
 
   if (year.isLoading) return <Spinner />;
   if (!year.data) return <><PageHeader title="Dashboard" /><NoYear admin /></>;
@@ -55,6 +71,7 @@ export function AdminDashboard() {
       {/* Phone: total → waiting for you → numbers → orgs. Desktop: total | waiting, then numbers and the full-width table. */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr] items-start">
         <HeroCard label="Total funds, all orgs & clubs" total={s?.total_fund ?? 0} cash={s?.cash_on_hand ?? 0} saved={s?.saved_with_sas ?? 0}
+          latest={latest.isSuccess && <LatestLine e={latest.data} org={latest.data ? byId.get(latest.data.entity_id)?.short_name : undefined} />}
           foot={<>{s?.organizations ?? 0} organizations · {s?.clubs ?? 0} clubs · {s?.students ?? 0} students</>} />
 
         <Card>
