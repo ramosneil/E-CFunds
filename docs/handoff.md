@@ -136,3 +136,7 @@ Only you do steps 1–3 (they involve your Google password and a secret app pass
 3. **Back on the Dashboard** → "Log out of E-CFunds?" shows right away and the app stays open (Stay / Log out).
 4. New budget → Send to SAS → the question appears on top (no Back needed).
 5. Liquidate → Attach files → send; SAS sees the files on the budget card.
+
+### Phone test results (2026-11-17, with Neil, SAS admin + SSG treasurer on Android)
+- Passed: new version loads (fund card Cash on hand + Saved with SAS, no total; header row); Back on Dashboard asks Log out? and the app stays open; inner pages go back one page; push notifications arrive with the app **open** (in the notification list), **closed**, and **signed out** (server: sent 2 each); New budget → Send to SAS question on top (SSG test budget "Hsjshs" ₱10 reached SAS + notification); 5-minute auto logout.
+- Not tested on the phone: Liquidate → Attach files (needs an approved budget). SSG's ₱10 test budget is pending in Approvals — reject it as a test.
