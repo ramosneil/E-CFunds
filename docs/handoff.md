@@ -125,6 +125,6 @@ Only you do steps 1–3 (they involve your Google password and a secret app pass
 ## After the system check (2026-11-17)
 1. DONE 2026-11-17 15:50 (Claude, at Neil's request): Sports Club reopened, reason "Closed by mistake during testing"; Christian jay Perucho approved again. — **Sports Club 2026–2027 was closed on Nov 16** (it turned off Christian jay Perucho's treasurer account). If that was
    a test: SAS → Orgs & clubs → Sports Club → **Reopen 2026–2027** → type the reason. His account comes back.
-2. School year page → fill in the **SAS Coordinator** name (Financial Report "Verified by").
+2. DONE 2026-11-17 (Claude, Neil's request): SAS Coordinator = Cristina A. Caponpon, PhD (from Neil's FR sample). — School year page → fill in the **SAS Coordinator** name (Financial Report "Verified by").
 3. Accredited list: every entry is **Expired** (2024–2025) — add this year's accreditations.
 4. Phone: tap a notification while signed out → sign in → it should open what the notification was about.
