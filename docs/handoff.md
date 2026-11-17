@@ -139,4 +139,4 @@ Only you do steps 1–3 (they involve your Google password and a secret app pass
 
 ### Phone test results (2026-11-17, with Neil, SAS admin + SSG treasurer on Android)
 - Passed: new version loads (fund card Cash on hand + Saved with SAS, no total; header row); Back on Dashboard asks Log out? and the app stays open; inner pages go back one page; push notifications arrive with the app **open** (in the notification list), **closed**, and **signed out** (server: sent 2 each); New budget → Send to SAS question on top (SSG test budget "Hsjshs" ₱10 reached SAS + notification); 5-minute auto logout.
-- Not tested on the phone: Liquidate → Attach files (needs an approved budget). SSG's ₱10 test budget is pending in Approvals — reject it as a test.
+- Liquidate → Attach files: passed on the phone 2026-11-17 22:57 (Sports Club "Gggaha", 1 PDF 465 KB stored under 7/liq-8/; SAS can read it, SSG treasurer cannot; SAS notified). Returned as "Test only" → no money moved. The SSG test budget "Hsjshs" was cancelled by the treasurer.
