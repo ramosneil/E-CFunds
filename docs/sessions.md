@@ -326,3 +326,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - SAS dashboard fund card: "Latest: JOES · Collection +₱20.00 · 3 min · …" (newest entry of the year, any org); each org page too.
 - Fund card (all roles): "Total fund" removed (Neil) → two main numbers **Cash on hand** + **Saved with SAS**, auto-sized to fit (₱1,234,567.89 fits a phone). Labels "Funds · 2026-2027" / "Funds · all orgs & clubs".
 - **Docker image (2026-11-17)**: Dockerfile (node build → nginx-unprivileged), compose.yaml, docker/nginx.conf (= vercel.json rules), .dockerignore (keeps .env out). Export release/e-cfunds-docker-image.tar.gz (23 MB, gitignored) for Neil's teacher; see docs/docker.md.
+- **Docker Hub auto-update** (2026-11-17): .github/workflows/docker.yml pushes ramosneil/e-cfunds:latest + 1.0.<run> on every app push to main (secret DOCKERHUB_TOKEN). First run #1 ✓ → 1.0.1 = 0e98d85. Neil's first token was shown in a screenshot → he replaced it.
