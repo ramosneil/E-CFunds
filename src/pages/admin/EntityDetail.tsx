@@ -350,7 +350,7 @@ function TurnoverCard({ entityId, yearId, yearLabel, r }: { entityId: number; ye
     <Card>
       <h2 className="font-display text-[17px] font-bold">School year closed</h2>
       <p className="text-[14px] text-muted mt-1 flex items-center gap-2"><CheckCircle2 className="size-5 text-ok" aria-hidden />
-        {yearLabel} is closed. <b className="money text-ink">{peso(r.total_fund)}</b> carries over to the next officers.</p>
+        {yearLabel} is closed. Cash on hand <b className="money text-ink">{peso(r.cash_on_hand)}</b> and saved with SAS <b className="money text-ink">{peso(r.saved_with_sas)}</b> carry over to the next officers.</p>
       {err && <div className="mt-3"><Alert>{err}</Alert></div>}
       <Button variant="ghost" className="w-full mt-4" busy={busy} onClick={reopen}>Reopen {yearLabel}</Button>
       <p className="text-[12.5px] text-muted mt-2">Closed by mistake? Reopening lets the org/club file again and gives the treasurer whom the close turned off their account back. Your reason is kept.</p>

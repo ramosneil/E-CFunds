@@ -77,10 +77,10 @@ export async function orgReport(format: 'pdf' | 'csv', entity: Entity, year: Yea
 
   if (format === 'csv') {
     await downloadCsv(`${base}.csv`,
-      ['Date', 'Type', 'Description', 'Pocket', 'Cash change', 'Saved change', 'Total change'],
+      ['Date', 'Type', 'Description', 'Pocket', 'Cash change', 'Saved change'],
       ledger.map((l) => {
         const c = dCash(l), s = dSaved(l);
-        return [l.occurred_on, kindLabel[l.kind] ?? l.kind, l.description, l.pocket ?? '', c.toFixed(2), s.toFixed(2), (c + s).toFixed(2)];
+        return [l.occurred_on, kindLabel[l.kind] ?? l.kind, l.description, l.pocket ?? '', c.toFixed(2), s.toFixed(2)];
       }));
     return;
   }
@@ -90,8 +90,8 @@ export async function orgReport(format: 'pdf' | 'csv', entity: Entity, year: Yea
     orgLogoPath: entity.logo_path, generatedBy: await myName(),
   });
   let y = tiles(doc, top, [
-    { label: 'Total fund', value: peso(rep.total_fund) },
-    { label: 'Previous funds', value: peso(rep.previous_funds) },
+    { label: 'Cash on hand', value: peso(rep.cash_on_hand) },
+    { label: 'Saved with SAS', value: peso(rep.saved_with_sas) },
     { label: 'Collected', value: peso(rep.collections) },
     { label: 'Spent', value: peso(rep.expenses) },
   ]);
@@ -142,11 +142,11 @@ export async function orgReport(format: 'pdf' | 'csv', entity: Entity, year: Yea
   y = sectionTitle(doc, `Ledger (${ledger.length} entr${ledger.length === 1 ? 'y' : 'ies'})`, room(doc, y + 3, 30));
   autoTable(doc, {
     ...tableStyle(), startY: y + 1,
-    head: [['Date', 'Type', 'Description', 'Cash', 'Saved', 'Total']],
-    body: ledger.length ? ledger.map((l) => { const c = dCash(l), s = dSaved(l); return [date(l.occurred_on), kindLabel[l.kind] ?? l.kind, l.description, signed(c), signed(s), signed(c + s)]; })
-      : [[{ content: 'No money movements yet this school year.', colSpan: 6, styles: { halign: 'center', textColor: MUTED } }]],
-    columnStyles: { 0: { cellWidth: 24 }, 1: { cellWidth: 24 }, 3: { halign: 'right', cellWidth: 22 }, 4: { halign: 'right', cellWidth: 22 }, 5: { halign: 'right', cellWidth: 22, fontStyle: 'bold' } },
-    foot: ledger.length ? [['', '', 'Year so far', signed(ledger.reduce((a, l) => a + dCash(l), 0)), signed(ledger.reduce((a, l) => a + dSaved(l), 0)), signed(ledger.reduce((a, l) => a + dCash(l) + dSaved(l), 0))]] : undefined,
+    head: [['Date', 'Type', 'Description', 'Cash', 'Saved']],
+    body: ledger.length ? ledger.map((l) => [date(l.occurred_on), kindLabel[l.kind] ?? l.kind, l.description, signed(dCash(l)), signed(dSaved(l))])
+      : [[{ content: 'No money movements yet this school year.', colSpan: 5, styles: { halign: 'center', textColor: MUTED } }]],
+    columnStyles: { 0: { cellWidth: 24 }, 1: { cellWidth: 24 }, 3: { halign: 'right', cellWidth: 24, fontStyle: 'bold' }, 4: { halign: 'right', cellWidth: 24, fontStyle: 'bold' } },
+    foot: ledger.length ? [['', '', 'Year so far', signed(ledger.reduce((a, l) => a + dCash(l), 0)), signed(ledger.reduce((a, l) => a + dSaved(l), 0))]] : undefined,
     footStyles: { font: 'Inter', fontStyle: 'bold', fillColor: '#F4F6FB', textColor: '#0D1530', halign: 'right' },
   });
   await finish(doc, `${base}.pdf`);
@@ -157,20 +157,20 @@ export async function schoolSummary(format: 'pdf' | 'csv', year: Year) {
   const rows = await reportRow(year.id);
   const sum = (k: keyof EntityReport) => rows.reduce((a, r) => a + Number(r[k] ?? 0), 0);
   const base = `E-CFunds_school-summary_${year.label}`;
-  const header = ['Org / club', 'Type', 'Previous funds', 'Collected', 'Spent', 'Cash on hand', 'Saved with SAS', 'Total fund', 'Members', 'Paid'];
-  const line = (r: EntityReport) => [r.name, r.category, r.previous_funds, r.collections, r.expenses, r.cash_on_hand, r.saved_with_sas, r.total_fund, r.members, r.paid_members];
+  const header = ['Org / club', 'Type', 'Previous funds', 'Collected', 'Spent', 'Cash on hand', 'Saved with SAS', 'Members', 'Paid'];
+  const line = (r: EntityReport) => [r.name, r.category, r.previous_funds, r.collections, r.expenses, r.cash_on_hand, r.saved_with_sas, r.members, r.paid_members];
 
   if (format === 'csv') {
     await downloadCsv(`${base}.csv`, header, [
       ...rows.map((r) => line(r).map((v) => (typeof v === 'number' && !Number.isInteger(v) ? v.toFixed(2) : v))),
-      ['ALL ORGS & CLUBS', '', sum('previous_funds').toFixed(2), sum('collections').toFixed(2), sum('expenses').toFixed(2), sum('cash_on_hand').toFixed(2), sum('saved_with_sas').toFixed(2), sum('total_fund').toFixed(2), sum('members'), sum('paid_members')],
+      ['ALL ORGS & CLUBS', '', sum('previous_funds').toFixed(2), sum('collections').toFixed(2), sum('expenses').toFixed(2), sum('cash_on_hand').toFixed(2), sum('saved_with_sas').toFixed(2), sum('members'), sum('paid_members')],
     ]);
     return;
   }
 
   const { doc, autoTable, top } = await newDoc({ title: 'School-wide fund summary', subtitle: `All organizations and clubs · School year ${year.label}`, generatedBy: await myName() });
   let y = tiles(doc, top, [
-    { label: 'Total funds', value: peso(sum('total_fund')) },
+    { label: 'Collected', value: peso(sum('collections')) },
     { label: 'Cash on hand', value: peso(sum('cash_on_hand')) },
     { label: 'Saved with SAS', value: peso(sum('saved_with_sas')) },
     { label: 'Spent', value: peso(sum('expenses')) },
@@ -187,11 +187,11 @@ export async function schoolSummary(format: 'pdf' | 'csv', year: Year) {
   y = sectionTitle(doc, 'All organizations and clubs', 20);
   autoTable(doc, {
     ...tableStyle(), startY: y + 1,
-    head: [['Org / club', 'Previous', 'Collected', 'Spent', 'Cash', 'Saved', 'Total', 'Paid']],
-    body: rows.map((r) => [r.short_name + (r.is_school_wide ? ' (school-wide)' : ''), peso(r.previous_funds), peso(r.collections), peso(r.expenses), peso(r.cash_on_hand), peso(r.saved_with_sas), peso(r.total_fund), `${r.paid_members}/${r.members}`]),
-    foot: [['All', peso(sum('previous_funds')), peso(sum('collections')), peso(sum('expenses')), peso(sum('cash_on_hand')), peso(sum('saved_with_sas')), peso(sum('total_fund')), `${sum('paid_members')}/${sum('members')}`]],
+    head: [['Org / club', 'Previous', 'Collected', 'Spent', 'Cash', 'Saved', 'Paid']],
+    body: rows.map((r) => [r.short_name + (r.is_school_wide ? ' (school-wide)' : ''), peso(r.previous_funds), peso(r.collections), peso(r.expenses), peso(r.cash_on_hand), peso(r.saved_with_sas), `${r.paid_members}/${r.members}`]),
+    foot: [['All', peso(sum('previous_funds')), peso(sum('collections')), peso(sum('expenses')), peso(sum('cash_on_hand')), peso(sum('saved_with_sas')), `${sum('paid_members')}/${sum('members')}`]],
     footStyles: { font: 'Inter', fontStyle: 'bold', fillColor: '#F4F6FB', textColor: '#0D1530' },
-    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' }, 4: { halign: 'right' }, 5: { halign: 'right' }, 6: { halign: 'right', fontStyle: 'bold' }, 7: { halign: 'center' } },
+    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' }, 4: { halign: 'right', fontStyle: 'bold' }, 5: { halign: 'right', fontStyle: 'bold' }, 6: { halign: 'center' } },
   });
   await finish(doc, `${base}.pdf`);
 }

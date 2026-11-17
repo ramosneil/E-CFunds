@@ -297,3 +297,4 @@ None. Both §10 questions were answered in session 3 and moved to §8.
   tagged to the budget, at most the org's cash on hand). The card says "Unspent ₱X went back to SAS savings".
 - Budgets tab shows **Saved with SAS** and **Cash on hand**; collections, releases, expenses and returns update them.
 - **Fund card** (treasurer Home, SAS dashboard, SAS org page, student Home): shows **Cash on hand** and **Saved with SAS** only — no total (Neil, 2026-11-17).
+- **No "Total fund" anywhere** (Neil, 2026-11-17): fund cards, student Reports, request "If approved" preview, SAS org list, closed-year note and PDF/CSV exports show Cash on hand + Saved with SAS only. The official Financial Report form keeps its own lines (Total Remain Fund etc.).

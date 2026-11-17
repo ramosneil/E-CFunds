@@ -36,9 +36,11 @@ export function Reports() {
                 </div>
                 {r.is_school_wide && <Chip tone="primary">School-wide</Chip>}
               </div>
-              <p className="micro text-muted mt-4">Total fund</p>
-              <p className="money font-display font-bold text-[24px]">{peso(r.total_fund)}</p>
-              <div className="mt-3"><PocketBar cash={r.cash_on_hand} saved={r.saved_with_sas} /></div>
+<dl className="grid grid-cols-2 gap-3 mt-4">
+                <div><dt className="flex items-center gap-1.5 micro text-muted"><i className="size-2 rounded-full bg-pocket-cash" aria-hidden />Cash on hand</dt><dd className="money font-display font-bold text-[20px]">{peso(r.cash_on_hand)}</dd></div>
+                <div><dt className="flex items-center gap-1.5 micro text-muted"><i className="size-2 rounded-full bg-primary" aria-hidden />Saved with SAS</dt><dd className="money font-display font-bold text-[20px]">{peso(r.saved_with_sas)}</dd></div>
+              </dl>
+              <div className="mt-2"><PocketBar cash={r.cash_on_hand} saved={r.saved_with_sas} bare /></div>
               <dl className="mt-4 grid grid-cols-3 gap-2 text-[13px]">
                 <div><dt className="text-muted">Previous</dt><dd className="money font-semibold">{peso(r.previous_funds)}</dd></div>
                 <div><dt className="text-muted">Collected</dt><dd className={`money font-semibold ${r.collections ? 'text-ok' : ''}`}>{peso(r.collections)}</dd></div>

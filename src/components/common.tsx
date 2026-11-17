@@ -46,7 +46,7 @@ export function RequestRow({ r, entityName, action }: { r: Row<'fund_requests'>;
   );
 }
 
-/** "If approved" preview: each pocket before → after, plus the total. */
+/** "If approved" preview: each pocket before → after (no total — Neil, 2026-11-17). */
 export function IfApproved({ kind, amount, cash, saved }: { kind: Row<'fund_requests'>['kind']; amount: number; cash: number; saved: number }) {
   const a = Number.isFinite(amount) ? amount : 0;
   const after = kind === 'remittance' ? { cash: cash - a, saved: saved + a }
@@ -55,22 +55,21 @@ export function IfApproved({ kind, amount, cash, saved }: { kind: Row<'fund_requ
   const rows: [string, number, number, string][] = [
     ['Cash on hand', cash, after.cash, 'bg-pocket-cash'],
     ['Saved with SAS', saved, after.saved, 'bg-primary'],
-    ['Total fund', cash + saved, after.cash + after.saved, ''],
   ];
   return (
     <div className="rounded-[16px] bg-surface2 p-4">
       <p className="micro text-muted mb-2">If approved</p>
       <dl className="space-y-1.5 text-[14px]">
         {rows.map(([k, b, n, dot]) => (
-          <div key={k} className={`flex items-center justify-between gap-3 ${dot ? '' : 'pt-1.5 border-t border-line font-semibold'}`}>
-            <dt className="flex items-center gap-2">{dot && <i className={`size-2 rounded-full ${dot}`} />}{k}</dt>
+          <div key={k} className="flex items-center justify-between gap-3">
+            <dt className="flex items-center gap-2"><i className={`size-2 rounded-full ${dot}`} />{k}</dt>
             <dd className="money">
               <span className="text-muted">{peso(b)}</span> → <b className={n < 0 ? 'text-bad' : n === b ? '' : n > b ? 'text-ok' : 'text-ink'}>{peso(n)}</b>
             </dd>
           </div>
         ))}
       </dl>
-      {kind !== 'expense' && <p className="text-[12px] text-muted mt-2">Moves money between pockets; the total stays the same.</p>}
+      {kind !== 'expense' && <p className="text-[12px] text-muted mt-2">Moves money between cash on hand and savings with SAS.</p>}
     </div>
   );
 }

@@ -116,9 +116,8 @@ export function AdminDashboard() {
                       <div className="flex items-center gap-2">
                         <span className="font-semibold truncate">{r.short_name}</span>
                         {hasPending(r) && <Chip tone="warn">Pending</Chip>}
-                        <span className="money font-semibold ml-auto">{peso(r.total_fund)}</span>
                       </div>
-                      <p className="text-[12.5px] text-muted money mt-0.5">Cash {peso(r.cash_on_hand)} · Saved {peso(r.saved_with_sas)}</p>
+                      <p className="text-[13px] text-muted money mt-0.5">Cash <b className="text-ink">{peso(r.cash_on_hand)}</b> · Saved <b className="text-ink">{peso(r.saved_with_sas)}</b></p>
                       <div className="mt-2"><DuesBar paid={r.paid_members} members={r.members} /></div>
                     </div>
                   </Link>
@@ -133,7 +132,6 @@ export function AdminDashboard() {
                     <th className="micro px-5 py-2 font-semibold">Org / club</th>
                     <th className="micro px-3 py-2 font-semibold text-right">Cash</th>
                     <th className="micro px-3 py-2 font-semibold text-right">Saved</th>
-                    <th className="micro px-3 py-2 font-semibold text-right">Total</th>
                     <th className="micro px-5 py-2 font-semibold w-44 whitespace-nowrap">Dues · this semester</th>
                   </tr>
                 </thead>
@@ -148,9 +146,8 @@ export function AdminDashboard() {
                           {hasPending(r) && <Chip tone="warn">Pending</Chip>}
                         </Link>
                       </td>
-                      <td className="money px-3 py-3 text-right whitespace-nowrap">{peso(r.cash_on_hand)}</td>
-                      <td className="money px-3 py-3 text-right whitespace-nowrap">{peso(r.saved_with_sas)}</td>
-                      <td className="money px-3 py-3 text-right font-semibold whitespace-nowrap">{peso(r.total_fund)}</td>
+                      <td className="money px-3 py-3 text-right font-semibold whitespace-nowrap">{peso(r.cash_on_hand)}</td>
+                      <td className="money px-3 py-3 text-right font-semibold whitespace-nowrap">{peso(r.saved_with_sas)}</td>
                       <td className="px-5 py-3"><DuesBar paid={r.paid_members} members={r.members} /></td>
                     </tr>
                   ))}
