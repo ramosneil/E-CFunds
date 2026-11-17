@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>E-CFunds Technology Stack</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: a paper section (intro → figure → explanations), readable width, E-CFunds colors. */
+:root {
+  --bg: #F3F5FB; --card: #FFFFFF; --box: #F7F8FC; --line: #C9D2E6;
+  --ink: #0D1530; --muted: #56607E; --arrow: #3B4566;
+  --primary: #1D3FAF; --primary-soft: #E6ECFB;
+  --hero: #13297A; --hero-muted: #C9D4F7;
+  --gold: #E0A82E; --gold-soft: #FBF2DC;
+  --ext: #7A4BC2; --ext-soft: #F3EDFC;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #080D1C; --card: #0F1730; --box: #18223F; --line: #33406A;
+  --ink: #EDF0FA; --muted: #A3AECD; --arrow: #B4BFE0;
+  --primary: #8AA4FF; --primary-soft: #1B2A5A;
+  --hero: #1C2D6E; --hero-muted: #C9D4F7;
+  --gold: #F0C14B; --gold-soft: #3A2E10;
+  --ext: #C3A4F5; --ext-soft: #241A3D;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #080D1C; --card: #0F1730; --box: #18223F; --line: #33406A;
+  --ink: #EDF0FA; --muted: #A3AECD; --arrow: #B4BFE0;
+  --primary: #8AA4FF; --primary-soft: #1B2A5A;
+  --hero: #1C2D6E; --hero-muted: #C9D4F7;
+  --gold: #F0C14B; --gold-soft: #3A2E10;
+  --ext: #C3A4F5; --ext-soft: #241A3D;
+  color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15.5px; line-height: 1.65;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; }
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 22px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(26px, 4vw, 34px); font-weight: 800; }
+h2 { font-size: 21px; font-weight: 800; }
+h3 { font-size: 16.5px; font-weight: 700; }
+p { margin: 0; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+button.copy { font: 600 14px var(--font-body); color: var(--primary); background: var(--primary-soft); border: 1px solid transparent; border-radius: 999px; padding: 8px 16px; cursor: pointer; }
+button.copy:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.status { font-size: 13px; color: var(--muted); }
+article { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: clamp(18px, 3vw, 32px); display: grid; gap: 18px; min-width: 0; }
+article .intro { font-size: 16px; max-width: 75ch; }
+figure { margin: 0; display: grid; gap: 10px; min-width: 0; }
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+figcaption { font-size: 14px; color: var(--muted); text-align: center; }
+figcaption b { color: var(--ink); }
+.hint { display: none; font-size: 12px; color: var(--muted); }
+@media (max-width: 760px) { .hint { display: block; } }
+.group { display: grid; gap: 12px; }
+.group > h2 { padding-top: 8px; border-top: 1px solid var(--line); }
+.tech { display: grid; gap: 4px; max-width: 78ch; }
+.tech h3 .ver { font-family: var(--font-body); font-weight: 500; font-size: 13px; color: var(--muted); margin-left: 6px; }
+.tech p { color: var(--ink); }
+.tech .lbl { font-weight: 600; }
+.summary { font-size: 15px; max-width: 78ch; }
+
+svg.dg { display: block; width: 100%; height: auto; color: var(--arrow); font-family: var(--font-body); }
+.dg .row-fe { fill: var(--primary-soft); stroke: var(--primary); stroke-width: 1.2; }
+.dg .row-mo { fill: var(--box); stroke: var(--line); stroke-width: 1.2; }
+.dg .row-be { fill: var(--hero); }
+.dg .row-ex { fill: var(--ext-soft); stroke: var(--ext); stroke-width: 1.2; }
+.dg .row-do { fill: var(--gold-soft); stroke: var(--gold); stroke-width: 1.2; }
+.dg .chip { fill: var(--card); stroke: var(--line); stroke-width: 1; }
+.dg .chipb { fill: rgba(255,255,255,.12); stroke: rgba(255,255,255,.3); stroke-width: 1; }
+.dg .ct { fill: var(--ink); font-size: 12.5px; font-weight: 600; }
+.dg .cs { fill: var(--muted); font-size: 10.5px; }
+.dg .ctw { fill: #FFFFFF; font-size: 12.5px; font-weight: 600; }
+.dg .csw { fill: var(--hero-muted); font-size: 10.5px; }
+.dg .rl { fill: var(--ink); font-size: 14px; font-weight: 700; }
+.dg .rs { fill: var(--muted); font-size: 11.5px; }
+.dg .rlw { fill: #FFFFFF; font-size: 14px; font-weight: 700; }
+.dg .rsw { fill: var(--hero-muted); font-size: 11.5px; }
+.dg .ln { stroke: currentColor; stroke-width: 1.4; fill: none; }
+.dg .lb { fill: var(--muted); font-size: 11px; paint-order: stroke; stroke: var(--card); stroke-width: 4px; stroke-linejoin: round; }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <span class="eyebrow">E-CFunds · Chapter section</span>
+    <h1>Technology Stack</h1>
+  </div>
+  <div class="toolbar">
+    <button class="copy" id="copyBtn" type="button">Copy the text for Word</button>
+    <span class="status" id="copyStatus" role="status"></span>
+  </div>
+
+  <article id="paper">
+    <p class="intro">This section presents the technology stack used to build E-CFunds, the student organization fund monitoring system of Occidental Mindoro State College – Mamburao Campus.
+      It shows the tools that make up each part of the system, from the screens that students, treasurers and the SAS office use, to the database that keeps every peso on record.
+      For each technology, it explains what it is, why the team chose it, and how it helps the system work.</p>
+
+    <figure>
+      <span class="hint">Swipe sideways to see the whole diagram.</span>
+      <div class="scroll">
+      <svg class="dg" viewBox="0 0 980 610" style="min-width:820px" role="img" aria-label="Technology stack of E-CFunds in five layers: frontend (React, TypeScript, Vite, Tailwind CSS, React Router, React Query, PWA, jsPDF, Excel, Lucide), mobile (Capacitor, Android, Capgo updater, push and local notifications), backend on Supabase (PostgreSQL, Row Level Security, Auth, Storage, Realtime, Edge Functions, pg_cron, pg_net), external services (Firebase Cloud Messaging, Web Push, Google Gemini, Gmail SMTP, Google OAuth), and hosting and DevOps (Vercel, GitHub, GitHub Actions, Docker with nginx, Docker Hub).">
+        <defs><marker id="m1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+        <!-- 1 frontend -->
+        <rect class="row-fe" x="10" y="20" width="900" height="112" rx="14"/>
+        <text class="rl" x="30" y="58">Frontend</text><text class="rs" x="30" y="78">web app screens</text><text class="rs" x="30" y="95">(one codebase)</text>
+        <g>
+          <rect class="chip" x="200" y="34" width="132" height="38" rx="8"/><text class="ct" x="266" y="51" text-anchor="middle">React 19</text><text class="cs" x="266" y="65" text-anchor="middle">user interface</text>
+          <rect class="chip" x="340" y="34" width="132" height="38" rx="8"/><text class="ct" x="406" y="51" text-anchor="middle">TypeScript 5.9</text><text class="cs" x="406" y="65" text-anchor="middle">typed language</text>
+          <rect class="chip" x="480" y="34" width="132" height="38" rx="8"/><text class="ct" x="546" y="51" text-anchor="middle">Vite 8</text><text class="cs" x="546" y="65" text-anchor="middle">build tool</text>
+          <rect class="chip" x="620" y="34" width="132" height="38" rx="8"/><text class="ct" x="686" y="51" text-anchor="middle">Tailwind CSS 4</text><text class="cs" x="686" y="65" text-anchor="middle">styling</text>
+          <rect class="chip" x="760" y="34" width="132" height="38" rx="8"/><text class="ct" x="826" y="51" text-anchor="middle">React Router 8</text><text class="cs" x="826" y="65" text-anchor="middle">pages</text>
+          <rect class="chip" x="200" y="80" width="132" height="38" rx="8"/><text class="ct" x="266" y="97" text-anchor="middle">React Query 5</text><text class="cs" x="266" y="111" text-anchor="middle">data &amp; cache</text>
+          <rect class="chip" x="340" y="80" width="132" height="38" rx="8"/><text class="ct" x="406" y="97" text-anchor="middle">PWA (Workbox)</text><text class="cs" x="406" y="111" text-anchor="middle">install · offline</text>
+          <rect class="chip" x="480" y="80" width="132" height="38" rx="8"/><text class="ct" x="546" y="97" text-anchor="middle">jsPDF</text><text class="cs" x="546" y="111" text-anchor="middle">PDF reports</text>
+          <rect class="chip" x="620" y="80" width="132" height="38" rx="8"/><text class="ct" x="686" y="97" text-anchor="middle">Excel files</text><text class="cs" x="686" y="111" text-anchor="middle">import · export</text>
+          <rect class="chip" x="760" y="80" width="132" height="38" rx="8"/><text class="ct" x="826" y="97" text-anchor="middle">Lucide</text><text class="cs" x="826" y="111" text-anchor="middle">icons</text>
+        </g>
+        <!-- 2 mobile -->
+        <rect class="row-mo" x="10" y="160" width="900" height="66" rx="14"/>
+        <text class="rl" x="30" y="190">Mobile</text><text class="rs" x="30" y="209">Android app</text>
+        <rect class="chip" x="200" y="174" width="132" height="38" rx="8"/><text class="ct" x="266" y="191" text-anchor="middle">Capacitor 8</text><text class="cs" x="266" y="205" text-anchor="middle">web → Android</text>
+        <rect class="chip" x="340" y="174" width="132" height="38" rx="8"/><text class="ct" x="406" y="191" text-anchor="middle">Android SDK</text><text class="cs" x="406" y="205" text-anchor="middle">APK</text>
+        <rect class="chip" x="480" y="174" width="132" height="38" rx="8"/><text class="ct" x="546" y="191" text-anchor="middle">Capgo updater</text><text class="cs" x="546" y="205" text-anchor="middle">auto updates</text>
+        <rect class="chip" x="620" y="174" width="132" height="38" rx="8"/><text class="ct" x="686" y="191" text-anchor="middle">Push notifications</text><text class="cs" x="686" y="205" text-anchor="middle">Capacitor plugin</text>
+        <rect class="chip" x="760" y="174" width="132" height="38" rx="8"/><text class="ct" x="826" y="191" text-anchor="middle">Local notifications</text><text class="cs" x="826" y="205" text-anchor="middle">phone alerts</text>
+        <!-- 3 backend -->
+        <rect class="row-be" x="10" y="254" width="900" height="112" rx="14"/>
+        <text class="rlw" x="30" y="292">Backend</text><text class="rsw" x="30" y="312">Supabase</text><text class="rsw" x="30" y="329">(database &amp; server)</text>
+        <g>
+          <rect class="chipb" x="200" y="268" width="132" height="38" rx="8"/><text class="ctw" x="266" y="285" text-anchor="middle">PostgreSQL</text><text class="csw" x="266" y="299" text-anchor="middle">database</text>
+          <rect class="chipb" x="340" y="268" width="132" height="38" rx="8"/><text class="ctw" x="406" y="285" text-anchor="middle">Row Level Security</text><text class="csw" x="406" y="299" text-anchor="middle">access rules</text>
+          <rect class="chipb" x="480" y="268" width="132" height="38" rx="8"/><text class="ctw" x="546" y="285" text-anchor="middle">Supabase Auth</text><text class="csw" x="546" y="299" text-anchor="middle">sign-in</text>
+          <rect class="chipb" x="620" y="268" width="132" height="38" rx="8"/><text class="ctw" x="686" y="285" text-anchor="middle">Storage</text><text class="csw" x="686" y="299" text-anchor="middle">logos · receipts</text>
+          <rect class="chipb" x="760" y="268" width="132" height="38" rx="8"/><text class="ctw" x="826" y="285" text-anchor="middle">Realtime</text><text class="csw" x="826" y="299" text-anchor="middle">live updates</text>
+          <rect class="chipb" x="200" y="314" width="132" height="38" rx="8"/><text class="ctw" x="266" y="331" text-anchor="middle">Edge Functions</text><text class="csw" x="266" y="345" text-anchor="middle">Deno · TypeScript</text>
+          <rect class="chipb" x="340" y="314" width="132" height="38" rx="8"/><text class="ctw" x="406" y="331" text-anchor="middle">pg_cron</text><text class="csw" x="406" y="345" text-anchor="middle">scheduled reminders</text>
+          <rect class="chipb" x="480" y="314" width="132" height="38" rx="8"/><text class="ctw" x="546" y="331" text-anchor="middle">pg_net</text><text class="csw" x="546" y="345" text-anchor="middle">database → push</text>
+          <rect class="chipb" x="620" y="314" width="132" height="38" rx="8"/><text class="ctw" x="686" y="331" text-anchor="middle">SQL migrations</text><text class="csw" x="686" y="345" text-anchor="middle">39 versions</text>
+        </g>
+        <!-- 4 external -->
+        <rect class="row-ex" x="10" y="394" width="900" height="66" rx="14"/>
+        <text class="rl" x="30" y="424">Services</text><text class="rs" x="30" y="443">outside providers</text>
+        <rect class="chip" x="200" y="408" width="132" height="38" rx="8"/><text class="ct" x="266" y="425" text-anchor="middle">Firebase FCM</text><text class="cs" x="266" y="439" text-anchor="middle">Android push</text>
+        <rect class="chip" x="340" y="408" width="132" height="38" rx="8"/><text class="ct" x="406" y="425" text-anchor="middle">Web Push</text><text class="cs" x="406" y="439" text-anchor="middle">browser push</text>
+        <rect class="chip" x="480" y="408" width="132" height="38" rx="8"/><text class="ct" x="546" y="425" text-anchor="middle">Google Gemini</text><text class="cs" x="546" y="439" text-anchor="middle">AI assistant</text>
+        <rect class="chip" x="620" y="408" width="132" height="38" rx="8"/><text class="ct" x="686" y="425" text-anchor="middle">Gmail SMTP</text><text class="cs" x="686" y="439" text-anchor="middle">email codes</text>
+        <rect class="chip" x="760" y="408" width="132" height="38" rx="8"/><text class="ct" x="826" y="425" text-anchor="middle">Google OAuth</text><text class="cs" x="826" y="439" text-anchor="middle">Google sign-in</text>
+        <!-- 5 devops -->
+        <rect class="row-do" x="10" y="488" width="900" height="66" rx="14"/>
+        <text class="rl" x="30" y="518">Hosting &amp;</text><text class="rl" x="30" y="537">DevOps</text>
+        <rect class="chip" x="200" y="502" width="132" height="38" rx="8"/><text class="ct" x="266" y="519" text-anchor="middle">GitHub</text><text class="cs" x="266" y="533" text-anchor="middle">source code</text>
+        <rect class="chip" x="340" y="502" width="132" height="38" rx="8"/><text class="ct" x="406" y="519" text-anchor="middle">GitHub Actions</text><text class="cs" x="406" y="533" text-anchor="middle">APK · Docker builds</text>
+        <rect class="chip" x="480" y="502" width="132" height="38" rx="8"/><text class="ct" x="546" y="519" text-anchor="middle">Vercel</text><text class="cs" x="546" y="533" text-anchor="middle">website hosting</text>
+        <rect class="chip" x="620" y="502" width="132" height="38" rx="8"/><text class="ct" x="686" y="519" text-anchor="middle">Docker + nginx</text><text class="cs" x="686" y="533" text-anchor="middle">container image</text>
+        <rect class="chip" x="760" y="502" width="132" height="38" rx="8"/><text class="ct" x="826" y="519" text-anchor="middle">Docker Hub</text><text class="cs" x="826" y="533" text-anchor="middle">image registry</text>
+        <!-- connectors -->
+        <line class="ln" x1="460" y1="132" x2="460" y2="160" marker-end="url(#m1)"/><text class="lb" x="470" y="150">same code wrapped as an app</text>
+        <line class="ln" x1="460" y1="226" x2="460" y2="254" marker-start="url(#m1)" marker-end="url(#m1)"/><text class="lb" x="470" y="244">HTTPS · WebSocket (supabase-js)</text>
+        <line class="ln" x1="460" y1="366" x2="460" y2="394" marker-start="url(#m1)" marker-end="url(#m1)"/><text class="lb" x="470" y="384">server-to-server (secret keys)</text>
+        <path class="ln" d="M910,521 H950 V76 H912" marker-end="url(#m1)" style="stroke-dasharray:5 4"/>
+        <text class="lb" x="944" y="300" text-anchor="middle" transform="rotate(-90 944 300)">builds, tests and ships every change</text>
+        <text class="rs" x="10" y="590">Versions as used in E-CFunds, November 2026. All services run on their free tiers.</text>
+      </svg>
+      </div>
+      <figcaption><b>Figure 1.</b> Technology stack of E-CFunds</figcaption>
+    </figure>
+
+    <div class="group">
+      <h2>Frontend</h2>
+      <div class="tech"><h3>React<span class="ver">19</span></h3>
+        <p>React is a JavaScript library for building user interfaces from reusable components. We chose it because it is the most widely used front-end library, with many learning resources and ready-made tools.
+        It helps E-CFunds by letting us build each screen (Dashboard, Members, Requests, Reports) once from shared parts, such as the fund card and the receipt, so the website and the Android app look and work the same.</p></div>
+      <div class="tech"><h3>TypeScript<span class="ver">5.9</span></h3>
+        <p>TypeScript is JavaScript with types. We chose it because money data must be exact, and types catch mistakes such as mixing up a peso amount with an ID before the code ever runs.
+        It helps the system by checking every page against the real database structure, so a change in the database shows up as an error in the code instead of a bug for users.</p></div>
+      <div class="tech"><h3>Vite<span class="ver">8</span></h3>
+        <p>Vite is the build tool that runs the app during development and packages it for release. We chose it for its very fast start-up and instant reload while coding.
+        It helps by producing small, optimized files, so E-CFunds loads quickly even on slow mobile data.</p></div>
+      <div class="tech"><h3>Tailwind CSS<span class="ver">4</span></h3>
+        <p>Tailwind CSS is a styling framework of small utility classes. We chose it because it keeps the design consistent and makes light and dark mode simple.
+        It helps E-CFunds look the same on every screen size, from a phone to a desktop monitor, with one shared set of colors and spacing.</p></div>
+      <div class="tech"><h3>React Router and React Query<span class="ver">8 · 5</span></h3>
+        <p>React Router moves between pages, and React Query fetches and caches data from the database. We chose them because they are the standard pair for React apps.
+        Together they keep pages fast, open the right page from a notification, and refresh the numbers the moment something changes.</p></div>
+      <div class="tech"><h3>Progressive Web App (vite-plugin-pwa, Workbox)</h3>
+        <p>A Progressive Web App can be installed from the browser and keeps working with a weak connection. We chose it so students without the Android app still get an app-like experience.
+        It helps by caching the app's files, showing an "offline" notice instead of a blank page, and updating the website automatically.</p></div>
+      <div class="tech"><h3>jsPDF and Excel libraries</h3>
+        <p>jsPDF creates PDF files, and read-excel-file and write-excel-file read and write spreadsheets, all inside the browser. We chose them because reports can be made on the user's device with no extra server.
+        They help E-CFunds produce receipts, the official Financial Report and summary reports as PDF, export ledgers to Excel or CSV, and import student and member lists from Excel.</p></div>
+    </div>
+
+    <div class="group">
+      <h2>Mobile</h2>
+      <div class="tech"><h3>Capacitor<span class="ver">8</span></h3>
+        <p>Capacitor turns a web app into a real Android app that can use phone features. We chose it because it reuses the same React code, so we didn't have to build and maintain a second app.
+        It helps E-CFunds reach the phone's notifications, the Back button, file sharing and downloads, while every feature stays the same as on the website.</p></div>
+      <div class="tech"><h3>Capgo updater</h3>
+        <p>Capgo's updater downloads new versions of the app's code in the background. We chose it so users don't have to reinstall the APK for every fix.
+        It helps by keeping every phone on the latest version automatically, which matters when a money rule or a screen changes.</p></div>
+      <div class="tech"><h3>Push and local notifications</h3>
+        <p>These Capacitor plugins show alerts on the phone. We chose them because treasurers and students need to know right away when a payment is recorded or a request is decided.
+        They help by delivering notifications even when the app is closed or the user is signed out.</p></div>
+    </div>
+
+    <div class="group">
+      <h2>Backend</h2>
+      <div class="tech"><h3>Supabase</h3>
+        <p>Supabase is an online backend that provides a PostgreSQL database, sign-in, file storage, live updates and server functions in one service. We chose it because it gives a complete, secure backend for free, without running our own server.
+        It is the heart of E-CFunds: it stores every record and keeps all users' screens in sync.</p></div>
+      <div class="tech"><h3>PostgreSQL with Row Level Security</h3>
+        <p>PostgreSQL is a reliable relational database; Row Level Security is its built-in rule system that decides which rows each user may see or change. We chose it because financial records need strict, provable rules.
+        It helps E-CFunds keep every money rule inside the database: a treasurer can only touch their own organization, the ledger can never be edited or deleted, and every change is written to an audit log.</p></div>
+      <div class="tech"><h3>Supabase Auth</h3>
+        <p>Supabase Auth handles accounts and sign-in. We chose it because it supports email and password, Google sign-in and email codes out of the box.
+        It helps by letting students sign in with their Student ID and reset a forgotten password with a 6-digit code, while SAS approves each new account.</p></div>
+      <div class="tech"><h3>Supabase Storage</h3>
+        <p>Storage keeps uploaded files. We chose it because it follows the same access rules as the database.
+        It helps E-CFunds keep expense receipts and liquidation files private, so only that organization's treasurer and SAS can open them.</p></div>
+      <div class="tech"><h3>Supabase Realtime</h3>
+        <p>Realtime sends changes to open screens through a live connection. We chose it because fund monitoring must show current numbers.
+        It helps the fund cards, lists and messages update within about two seconds of any transaction, without refreshing the page.</p></div>
+      <div class="tech"><h3>Edge Functions, pg_cron and pg_net</h3>
+        <p>Edge Functions are small server programs written in TypeScript; pg_cron runs scheduled jobs and pg_net lets the database call those functions. We chose them to keep secret keys on the server and to automate tasks.
+        They help E-CFunds send push notifications, answer questions in the assistant, sign students in by Student ID, and send weekly dues and daily budget reminders automatically.</p></div>
+    </div>
+
+    <div class="group">
+      <h2>Outside services</h2>
+      <div class="tech"><h3>Firebase Cloud Messaging and Web Push</h3>
+        <p>Firebase Cloud Messaging delivers notifications to Android phones, and Web Push delivers them to browsers. We chose them because they are the standard, free delivery channels on each platform.
+        They help make sure every payment, request decision and reminder reaches the right person.</p></div>
+      <div class="tech"><h3>Google Gemini</h3>
+        <p>Gemini is Google's AI model. We chose it for its free tier and good answers in plain language.
+        It powers "Ask E-CFunds", the assistant that explains how to use the system and answers questions about the rules.</p></div>
+      <div class="tech"><h3>Gmail SMTP and Google OAuth</h3>
+        <p>Gmail SMTP sends the system's emails, and Google OAuth provides "Continue with Google". We chose them because they are free, trusted and familiar to students.
+        They help users confirm their email, reset passwords with a code, and sign in quickly with a Google account.</p></div>
+    </div>
+
+    <div class="group">
+      <h2>Hosting and DevOps</h2>
+      <div class="tech"><h3>GitHub and GitHub Actions</h3>
+        <p>GitHub stores the source code and its full history; GitHub Actions runs automatic jobs on every change. We chose them because they are free for our project and keep a record of every change.
+        They help E-CFunds by building the Android APK and the Docker image automatically after each update.</p></div>
+      <div class="tech"><h3>Vercel</h3>
+        <p>Vercel hosts the website on a fast global network. We chose it because it deploys automatically from GitHub with free HTTPS.
+        It helps by putting every update online within minutes, and by hosting the update package that the Android app downloads.</p></div>
+      <div class="tech"><h3>Docker, nginx and Docker Hub</h3>
+        <p>Docker packages the app with nginx, a web server, into one container image, and Docker Hub stores that image online. We chose them so anyone can run E-CFunds with a single command, the same way on every computer.
+        They help by making the system easy to install, test and present, and the image is rebuilt automatically after every change.</p></div>
+    </div>
+
+    <p class="summary">In summary, the team chose a stack that is free, secure and easy to maintain. One React and TypeScript codebase serves the website, the Android app and the Docker image, while Supabase keeps all financial rules and records in one protected database. This combination helps E-CFunds deliver accurate, real-time and transparent monitoring of student organization funds.</p>
+  </article>
+</div>
+
+<script>
+(function () {
+  var btn = document.getElementById('copyBtn'), status = document.getElementById('copyStatus'), paper = document.getElementById('paper');
+  function plain() {
+    var out = ['Technology Stack', ''];
+    paper.querySelectorAll('.intro, figcaption, .group > h2, .tech, .summary').forEach(function (el) {
+      if (el.matches('figcaption')) { out.push('[Insert Figure 1 here]', el.textContent.trim(), ''); return; }
+      if (el.matches('.group > h2')) { out.push(el.textContent.trim()); return; }
+      if (el.matches('.tech')) { out.push(el.querySelector('h3').textContent.replace(/\s+/g, ' ').trim()); out.push(el.querySelector('p').textContent.replace(/\s+/g, ' ').trim(), ''); return; }
+      out.push(el.textContent.replace(/\s+/g, ' ').trim(), '');
+    });
+    return out.join('\n');
+  }
+  btn.addEventListener('click', function () {
+    var text = plain();
+    var done = function () { status.textContent = 'Copied. Paste it into Word.'; };
+    var fail = function () {
+      var r = document.createRange(); r.selectNodeContents(paper); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      status.textContent = 'Selected. Press Ctrl+C to copy.';
+    };
+    try { navigator.clipboard.writeText(text).then(done, fail); } catch (e) { fail(); }
+  });
+})();
+</script>
+
+</body>
+</html>
