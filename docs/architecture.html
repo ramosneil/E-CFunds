@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>E-CFunds Architecture</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: one column of stacked tiers (people → apps → backend → outside services), joined by labelled connectors;
+   then numbered flows (real sequences) and a security list. Colors are E-CFunds's own tokens. */
+:root {
+  --bg: #F3F5FB; --surface: #FFFFFF; --surface2: #F7F8FC; --line: #DCE2F0;
+  --ink: #0D1530; --muted: #5A6482;
+  --primary: #1D3FAF; --primary-soft: #E6ECFB;
+  --hero: #13297A; --hero-ink: #FFFFFF; --hero-muted: #C9D4F7;
+  --gold: #F0C14B; --gold-soft: #FBF2DC; --gold-ink: #6B4A00;
+  --ok: #13774A; --ok-soft: #E2F4EA;
+  --ext: #7A4BC2; --ext-soft: #F0E9FB;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #080D1C; --surface: #111934; --surface2: #18223F; --line: #25304F;
+  --ink: #EDF0FA; --muted: #9BA6C6;
+  --primary: #8AA4FF; --primary-soft: #1B2A5A;
+  --hero: #1A2A66; --hero-ink: #FFFFFF; --hero-muted: #C9D4F7;
+  --gold: #F0C14B; --gold-soft: #3A2E10; --gold-ink: #F6D98A;
+  --ok: #4CC38A; --ok-soft: #10301F;
+  --ext: #C3A4F5; --ext-soft: #2A1D45;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #080D1C; --surface: #111934; --surface2: #18223F; --line: #25304F;
+  --ink: #EDF0FA; --muted: #9BA6C6;
+  --primary: #8AA4FF; --primary-soft: #1B2A5A;
+  --hero: #1A2A66; --hero-ink: #FFFFFF; --hero-muted: #C9D4F7;
+  --gold: #F0C14B; --gold-soft: #3A2E10; --gold-ink: #F6D98A;
+  --ok: #4CC38A; --ok-soft: #10301F;
+  --ext: #C3A4F5; --ext-soft: #2A1D45;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; }
+.wrap { max-width: 1080px; margin: 0 auto; display: grid; gap: 14px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(26px, 4vw, 36px); font-weight: 800; letter-spacing: -0.01em; }
+h2 { font-size: 21px; font-weight: 800; }
+h3 { font-size: 15px; font-weight: 700; }
+p { margin: 0; }
+.lede { color: var(--muted); max-width: 70ch; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+code, .mono { font-family: var(--font-mono); font-size: 12.5px; }
+
+header.top { display: grid; gap: 8px; margin-bottom: 10px; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+/* tiers */
+.tier { border-radius: 20px; padding: 18px; display: grid; gap: 12px; }
+.tier > .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.tier > .head .eyebrow { flex: 1 1 auto; }
+.tier.people { background: var(--surface); border: 1px solid var(--line); }
+.tier.apps { background: var(--surface); border: 1px solid var(--line); }
+.tier.backend { background: var(--hero); color: var(--hero-ink); }
+.tier.backend .eyebrow, .tier.backend .note { color: var(--hero-muted); }
+.tier.outside { background: var(--ext-soft); border: 1px solid color-mix(in srgb, var(--ext) 30%, transparent); }
+.tier.outside .eyebrow { color: var(--ext); }
+.tier.ship { background: var(--surface); border: 1px dashed var(--line); }
+
+.row { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.box { border-radius: 14px; padding: 12px 14px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.people .box, .apps .box, .ship .box { background: var(--surface2); border: 1px solid var(--line); }
+.backend .box { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); }
+.outside .box { background: var(--surface); border: 1px solid var(--line); }
+.box .sub { font-size: 13px; color: var(--muted); }
+.backend .box .sub { color: var(--hero-muted); }
+.box ul { margin: 2px 0 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
+.backend .box ul { color: var(--hero-muted); }
+.box li { margin: 1px 0; }
+.tag { display: inline-block; font-size: 11.5px; font-weight: 600; border-radius: 999px; padding: 1px 8px; margin-right: 4px; }
+.tag.gold { background: var(--gold-soft); color: var(--gold-ink); }
+.tag.blue { background: var(--primary-soft); color: var(--primary); }
+.tag.green { background: var(--ok-soft); color: var(--ok); }
+.backend .tag { background: rgba(255,255,255,.14); color: #FFFFFF; }
+.box.db { grid-column: 1 / -1; }
+.box.db .cols { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 6px; }
+
+/* connectors between tiers */
+.link { display: flex; justify-content: center; }
+.link span { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; text-align: center; }
+.link span::before { content: "↕"; color: var(--primary); font-weight: 700; }
+
+/* flows */
+section.flows, section.security { display: grid; gap: 12px; margin-top: 18px; }
+.flowgrid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.flow { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.flow ol { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 8px; }
+.flow li { counter-increment: s; display: grid; grid-template-columns: 24px 1fr; gap: 10px; font-size: 14px; }
+.flow li::before { content: counter(s); width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 12px; font-weight: 700; background: var(--primary-soft); color: var(--primary); }
+.flow li small { display: block; color: var(--muted); font-size: 12.5px; }
+.seclist { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.sec { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; font-size: 14px; display: grid; gap: 2px; }
+.sec b { font-weight: 600; }
+.sec span { color: var(--muted); font-size: 13px; }
+footer { margin-top: 18px; font-size: 13px; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .box { transition: transform .15s ease; } .box:hover { transform: translateY(-1px); } }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">OMSC Mamburao · Office of Student Affairs and Services</span>
+    <h1>E-CFunds system architecture</h1>
+    <p class="lede">How the student organization fund monitoring system is built: who uses it, the three ways to open it,
+      the Supabase backend that holds every peso, and the outside services it relies on. Accurate as of November 17, 2026.</p>
+    <div class="legend">
+      <span><i style="background:var(--surface2);border:1px solid var(--line)"></i>People and apps</span>
+      <span><i style="background:var(--hero)"></i>Backend (Supabase)</span>
+      <span><i style="background:var(--ext-soft);border:1px solid var(--ext)"></i>Outside services</span>
+      <span><i style="background:transparent;border:1px dashed var(--muted)"></i>How updates ship</span>
+    </div>
+  </header>
+
+  <!-- 1. People -->
+  <div class="tier people">
+    <div class="head"><span class="eyebrow">Who uses it</span><span class="sub mono">3 roles, enforced by the database</span></div>
+    <div class="row">
+      <div class="box"><h3>Students</h3><p class="sub">See their dues and receipts, and where each org and club's money went.</p></div>
+      <div class="box"><h3>Treasurers</h3><p class="sub">One per org or club: members, payments, remittances, releases, expenses, budgets, liquidation.</p></div>
+      <div class="box"><h3>SAS Admin</h3><p class="sub">Approves accounts, requests, budgets and liquidations; school year, students, reports.</p></div>
+    </div>
+  </div>
+
+  <div class="link"><span>sign in with email + password, Student ID, or Google</span></div>
+
+  <!-- 2. Apps -->
+  <div class="tier apps">
+    <div class="head"><span class="eyebrow">Ways to open it</span><span class="sub mono">one React 19 + TypeScript codebase</span></div>
+    <div class="row">
+      <div class="box"><h3>Website (PWA)</h3><p class="sub mono">e-cfunds.vercel.app</p>
+        <ul><li>React, Vite, Tailwind, React Query</li><li>Hosted on Vercel</li><li>Installable, works offline (service worker)</li><li>Browser push notifications</li></ul></div>
+      <div class="box"><h3>Android app</h3><p class="sub mono">Capacitor 8 · APK</p>
+        <ul><li>Same code inside a native shell</li><li>Updates itself silently (OTA bundle)</li><li>Phone notifications (Firebase)</li><li>Back = "Log out?", 5-min auto logout</li></ul></div>
+      <div class="box"><h3>Docker image</h3><p class="sub mono">ramosneil/e-cfunds</p>
+        <ul><li>Website served by nginx</li><li>Non-root, about 86 MB</li><li>Rebuilt on every change</li><li>Same live data as the website</li></ul></div>
+    </div>
+  </div>
+
+  <div class="link"><span>HTTPS: data API, Realtime (WebSocket), file uploads, functions</span></div>
+
+  <!-- 3. Backend -->
+  <div class="tier backend">
+    <div class="head"><span class="eyebrow">Backend · Supabase</span><span class="note mono">project nvmlawpojydnouzqilaf</span></div>
+    <div class="row">
+      <div class="box db"><h3>PostgreSQL database</h3>
+        <p class="sub">39 migrations. Every rule about money lives here, so no app can skip it.</p>
+        <div class="cols">
+          <div><span class="tag">Data</span>
+            <ul><li>school years, semesters, courses</li><li>orgs & clubs, students, memberships</li><li>ledger (append-only), receipts</li><li>requests, budgets, liquidation</li><li>messages, notifications, audit log</li></ul></div>
+          <div><span class="tag">Rules</span>
+            <ul><li>Row Level Security on every table</li><li>Actions are functions (record payment, approve request…)</li><li>Two pockets: cash on hand, saved with SAS</li><li>Ledger can't be edited or deleted</li></ul></div>
+          <div><span class="tag">Automatic jobs</span>
+            <ul><li><span class="mono">pg_cron</span>: weekly dues reminders (Mon), daily budget reminders</li><li><span class="mono">pg_net</span>: every new notification calls the push function</li><li>"live tick" on money tables → screens refresh</li></ul></div>
+        </div>
+      </div>
+      <div class="box"><h3>Auth</h3><ul><li>Email + password, Google</li><li>Student ID sign-in</li><li>6-digit reset code by email</li><li>SAS approves each account</li></ul></div>
+      <div class="box"><h3>Storage</h3><ul><li><span class="mono">logos</span>: public</li><li><span class="mono">receipts</span>: private, per org folder (expense receipts, liquidation files)</li></ul></div>
+      <div class="box"><h3>Realtime</h3><ul><li>Fund cards and lists update in about 2 s</li><li>Messages and notifications live</li></ul></div>
+      <div class="box"><h3>Edge Functions</h3><ul><li><span class="mono">push</span>: sends phone and browser notifications</li><li><span class="mono">chat</span>: "Ask E-CFunds" assistant</li><li><span class="mono">student-login</span>: Student ID → session</li></ul></div>
+    </div>
+  </div>
+
+  <div class="link"><span>server-to-server, keys kept as Supabase secrets</span></div>
+
+  <!-- 4. Outside -->
+  <div class="tier outside">
+    <div class="head"><span class="eyebrow">Outside services</span></div>
+    <div class="row">
+      <div class="box"><h3>Firebase Cloud Messaging</h3><p class="sub">Delivers Android notifications, even when the app is closed or signed out.</p></div>
+      <div class="box"><h3>Web Push</h3><p class="sub">Browser notifications (VAPID keys).</p></div>
+      <div class="box"><h3>Google Gemini</h3><p class="sub">Answers questions in "Ask E-CFunds".</p></div>
+      <div class="box"><h3>Gmail SMTP</h3><p class="sub">Sends sign-up and password reset codes (30 per hour).</p></div>
+      <div class="box"><h3>Google sign-in</h3><p class="sub">"Continue with Google" (OAuth).</p></div>
+    </div>
+  </div>
+
+  <div class="link"><span>how a change reaches everyone</span></div>
+
+  <!-- 5. Delivery -->
+  <div class="tier ship">
+    <div class="head"><span class="eyebrow">How updates ship</span><span class="sub mono">GitHub ramosneil/E-CFunds · branch main</span></div>
+    <div class="row">
+      <div class="box"><h3>Vercel</h3><p class="sub">Builds the website on each push, and the update bundle the Android app downloads (<span class="mono">/ota/manifest.json</span>).</p></div>
+      <div class="box"><h3>GitHub Actions</h3><ul><li>Android APK build</li><li>Docker image → Docker Hub (<span class="mono">latest</span>, <span class="mono">1.0.N</span>)</li><li>Keep-alive ping every 3 days</li></ul></div>
+      <div class="box"><h3>Supabase migrations</h3><p class="sub">Database changes are rehearsed, then applied as numbered migrations (<span class="mono">supabase/migrations</span>).</p></div>
+    </div>
+  </div>
+
+  <!-- Flows -->
+  <section class="flows">
+    <h2>Three flows, step by step</h2>
+    <div class="flowgrid">
+      <div class="flow"><h3>A student pays dues</h3>
+        <ol>
+          <li><span>Treasurer taps <b>Record payment</b> on the member.<small>App calls the <span class="mono">record_payment</span> function.</small></span></li>
+          <li><span>Database checks the treasurer's org, marks the dues paid, adds a <b>collection</b> to the ledger and issues a receipt number.</span></li>
+          <li><span>A notification row is created for the student.<small><span class="mono">pg_net</span> → <span class="mono">push</span> function → Firebase / Web Push.</small></span></li>
+          <li><span>A live tick goes out; every open fund card shows the new cash on hand in about 2 seconds.</span></li>
+        </ol>
+      </div>
+      <div class="flow"><h3>Money moves through SAS</h3>
+        <ol>
+          <li><span>Treasurer files a <b>remittance</b>, <b>release</b> or <b>expense</b> (expenses need a receipt photo).</span></li>
+          <li><span>SAS sees it under Approvals and gets a notification.</span></li>
+          <li><span>SAS approves: the database checks the pockets and writes the ledger entry.<small>Cash on hand and saved with SAS change together.</small></span></li>
+          <li><span>The treasurer is notified; the "Waiting for SAS" note clears.</span></li>
+        </ol>
+      </div>
+      <div class="flow"><h3>Activity budget and liquidation</h3>
+        <ol>
+          <li><span>Treasurer files a budget with items; SAS approves it.</span></li>
+          <li><span>Releases and expenses are tagged to the budget; it shows Released, Spent, Remaining.</span></li>
+          <li><span>Within 15 days after the activity, the treasurer liquidates with a report and up to 10 files.</span></li>
+          <li><span>SAS approves: unspent cash goes back to savings with SAS automatically.</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- Security -->
+  <section class="security">
+    <h2>What keeps it safe</h2>
+    <div class="seclist">
+      <div class="sec"><b>Rules in the database</b><span>Row Level Security and checked functions: a treasurer can only touch their own org.</span></div>
+      <div class="sec"><b>Ledger is append-only</b><span>Mistakes are fixed with a correction entry, never by editing or deleting.</span></div>
+      <div class="sec"><b>Audit log</b><span>Every change to money, accounts and budgets is recorded with who and when.</span></div>
+      <div class="sec"><b>Secrets stay on the server</b><span>Apps only hold the public key; service keys live in Supabase and GitHub secrets.</span></div>
+      <div class="sec"><b>Private files</b><span>Receipts and liquidation files open through short-lived links, only for that org and SAS.</span></div>
+      <div class="sec"><b>Session safety</b><span>App logs out after 5 minutes away; sign-in tries are limited.</span></div>
+    </div>
+  </section>
+
+  <footer>E-CFunds · Occidental Mindoro State College, Mamburao Campus · Prepared November 17, 2026.</footer>
+</div>
+
+</body>
+</html>
