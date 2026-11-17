@@ -28,18 +28,19 @@ export function TreasurerHome() {
   if (year.isLoading || entities.isLoading) return <Spinner />;
   return (
     <>
-      <div className="flex items-center gap-3 mb-5">
+      <div className="flex flex-wrap items-center gap-3 mb-5">
         {e && <EntityLogo path={e.logo_path} name={e.name} size={48} />}
-        <div className="min-w-0 flex-1">
+        <div className="min-w-[160px] flex-1">
           <p className="micro text-muted">Treasurer</p>
           <h1 className="font-display text-[24px] sm:text-[28px] font-extrabold leading-tight truncate">{e?.short_name ?? 'Your org'}</h1>
         </div>
-        {e && year.data && <FinancialReportButton entityId={e.id} yearId={year.data.id} className="h-11 px-3 sm:px-4" />}
-        {e && year.data && <ExportMenu options={[
+        {e && year.data && <div className="flex gap-2 w-full sm:w-auto">
+        <FinancialReportButton entityId={e.id} yearId={year.data.id} className="h-11 px-3 sm:px-4 flex-1 sm:flex-none" />
+        <ExportMenu full options={[
           { label: 'Summary report (charts)', kind: 'pdf', run: async () => (await exportsLib()).orgReport('pdf', e, year.data!) },
           { label: 'Ledger', kind: 'csv', run: async () => (await exportsLib()).orgReport('csv', e, year.data!) },
           { label: 'Members & dues', kind: 'csv', run: async () => (await exportsLib()).membersCsv(e, year.data!) },
-        ]} />}
+        ]} /></div>}
       </div>
       {!year.data ? <NoYear /> : !r ? <Spinner /> : (
         <>

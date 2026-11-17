@@ -106,18 +106,19 @@ export function EntityDetail() {
   return (
     <>
       <Link to="/orgs" className="inline-flex items-center gap-1 text-primary font-semibold mb-4"><ArrowLeft className="size-4" />Orgs & clubs</Link>
-      <div className="flex items-center gap-4 mb-5">
+      <div className="flex flex-wrap items-center gap-4 mb-5">
         <EntityLogo path={e.logo_path} name={e.name} size={64} />
-        <div className="min-w-0 flex-1">
+        <div className="min-w-[160px] flex-1">
           <h1 className="font-display text-[26px] font-extrabold leading-tight">{e.short_name}</h1>
           <p className="text-muted truncate">{e.name}</p>
         </div>
-        {year.data && <FinancialReportButton entityId={e.id} yearId={year.data.id} />}
-        {year.data && <ExportMenu options={[
+        {year.data && <div className="flex gap-2 w-full sm:w-auto">
+        <FinancialReportButton entityId={e.id} yearId={year.data.id} className="h-11 px-4 flex-1 sm:flex-none" />
+        <ExportMenu full options={[
           { label: 'Summary report (charts)', kind: 'pdf', run: async () => (await exportsLib()).orgReport('pdf', e, year.data!) },
           { label: 'Ledger', kind: 'csv', run: async () => (await exportsLib()).orgReport('csv', e, year.data!) },
           { label: 'Members & dues', kind: 'csv', run: async () => (await exportsLib()).membersCsv(e, year.data!) },
-        ]} />}
+        ]} /></div>}
       </div>
       {!year.data ? <NoYear admin /> : !r ? <Spinner /> : (
         <>

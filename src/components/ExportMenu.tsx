@@ -5,7 +5,8 @@ import { errorText } from '../lib/supabase';
 export type ExportOption = { label: string; kind: 'pdf' | 'csv' | 'xlsx'; run: () => Promise<void> };
 
 /** "Export" button with a small menu. The export code (and jsPDF) loads only when an option is picked. */
-export function ExportMenu({ options, label = 'Export' }: { options: ExportOption[]; label?: string }) {
+/** `full`: stretches to share a row on phones (e.g. next to Financial report), normal size from sm up. */
+export function ExportMenu({ options, label = 'Export', full }: { options: ExportOption[]; label?: string; full?: boolean }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState('');
@@ -24,9 +25,9 @@ export function ExportMenu({ options, label = 'Export' }: { options: ExportOptio
   }
 
   return (
-    <div ref={ref} className="relative inline-block">
+    <div ref={ref} className={`relative ${full ? 'flex-1 sm:flex-none' : 'inline-block'}`}>
       <button type="button" onClick={() => setOpen((v) => !v)} disabled={!!busy} aria-haspopup="menu" aria-expanded={open}
-        className="inline-flex items-center gap-2 h-11 px-4 rounded-[14px] border border-line bg-surface font-semibold hover:bg-surface2 disabled:opacity-60 cursor-pointer whitespace-nowrap">
+        className={`inline-flex items-center justify-center gap-2 h-11 px-4 rounded-[14px] ${full ? 'w-full sm:w-auto' : ''} border border-line bg-surface font-semibold hover:bg-surface2 disabled:opacity-60 cursor-pointer whitespace-nowrap`}>
         {busy ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <Download className="size-4" aria-hidden />}
         {busy ? 'Preparing…' : label}
       </button>
