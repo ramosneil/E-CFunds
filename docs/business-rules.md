@@ -298,3 +298,4 @@ None. Both §10 questions were answered in session 3 and moved to §8.
 - Budgets tab shows **Saved with SAS** and **Cash on hand**; collections, releases, expenses and returns update them.
 - **Fund card** (treasurer Home, SAS dashboard, SAS org page, student Home): shows **Cash on hand** and **Saved with SAS** only — no total (Neil, 2026-11-17).
 - **No "Total fund" anywhere** (Neil, 2026-11-17): fund cards, student Reports, request "If approved" preview, SAS org list, closed-year note and PDF/CSV exports show Cash on hand + Saved with SAS only. The official Financial Report form keeps its own lines (Total Remain Fund etc.).
+- **Auto logout (5 min away) is Android-app only** since 2026-11-17 (Neil): the website on a computer stays signed in until Sign out.

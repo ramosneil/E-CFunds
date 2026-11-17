@@ -3,6 +3,7 @@ import { useAuth } from '../lib/auth';
 import { isNative } from '../lib/native';
 import { toast } from '../lib/toast';
 
+// Android app only (Neil, 2026-11-17: the website stays signed in, so testing in his Chrome isn't interrupted).
 // Security (Neil, 2026-11-15): when nobody has used E-CFunds for 5 minutes (Home button, another app, tab in the
 // background, phone closed the app), the person is signed out when they come back. Notifications keep arriving.
 //
@@ -21,6 +22,7 @@ export function AutoLogout() {
   const signedIn = !!session;
 
   useEffect(() => {
+    if (!isNative) return;                     // website: no auto logout
     if (!signedIn) { clear(); return; }
     const visible = () => document.visibilityState === 'visible';
     const check = () => {
