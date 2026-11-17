@@ -25,3 +25,4 @@
 > **Decided by Neil (session 4): ASK FIRST.** When a decision is unclear, ask Neil before acting; don't
 > decide alone and log it. This replaces the session-1 "work autonomously" rule wherever they conflict.
 > Settled decisions in `docs/plan.md` / `docs/business-rules.md` still don't need re-asking.
+- **Test every change live in Neil's Chrome** (2026-11-17): after each deploy, check the changed screens on e-cfunds.vercel.app in his Chrome without asking. Suggestions → tell Neil; build only after he approves. Still never sign in / type passwords for him; actions that create permanent records need his OK.
