@@ -57,6 +57,7 @@ export function useEntityReport(yearId: number | undefined) {
   return useQuery({
     queryKey: ['report', yearId, semId ?? null],
     enabled: !!yearId && !sems.isLoading,
+    refetchInterval: 30_000,   // fund cards: backup refresh if the live connection dropped (live.ts is the main path)
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_entity_report', { p_school_year_id: yearId!, ...(semId ? { p_semester_id: semId } : {}) });
       if (error) throw error;
@@ -69,6 +70,7 @@ export function useSchoolSummary(yearId: number | undefined) {
   return useQuery({
     queryKey: ['summary', yearId],
     enabled: !!yearId,
+    refetchInterval: 30_000,
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_school_summary', { p_school_year_id: yearId! });
       if (error) throw error;

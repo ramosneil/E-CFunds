@@ -150,7 +150,10 @@ function useCountTo(value: number) {
 export function HeroCard({ label, total, cash, saved, foot, latest, pending, live = true }: {
   label: string; total: number; cash: number; saved: number; foot?: ReactNode; latest?: ReactNode; pending?: ReactNode; live?: boolean;
 }) {
-  const { shown, changed } = useCountTo(Number(total) || 0);
+  // Total, cash AND saved all count to their new values — a remittance or release keeps the total the same but moves
+  // money between cash and savings, and that must be visible too (Neil, 2026-11-17: "not updating").
+  const t = useCountTo(Number(total) || 0), c = useCountTo(Number(cash) || 0), s = useCountTo(Number(saved) || 0);
+  const shown = t.shown, changed = t.changed || c.changed || s.changed;
   return (
     <section className={cx('rounded-[24px] p-5 sm:p-6 text-white bg-hero relative overflow-hidden transition-shadow duration-700',
       changed && 'ring-2 ring-pocket-cash/70')}>
@@ -165,7 +168,7 @@ export function HeroCard({ label, total, cash, saved, foot, latest, pending, liv
       </div>
       <p className="money font-display font-extrabold text-[34px] sm:text-[40px] leading-tight mt-1" aria-live="polite">{peso(shown)}</p>
       {latest && <div className="text-[13px] text-hero-muted mt-0.5">{latest}</div>}
-      <div className="mt-4"><PocketBar cash={cash} saved={saved} onHero /></div>
+      <div className="mt-4"><PocketBar cash={c.shown} saved={s.shown} onHero /></div>
       {pending && <div className="mt-3 rounded-[14px] bg-white/10 px-3 py-2 text-[13px] text-white">{pending}</div>}
       {foot && <div className="mt-3 text-[13px] text-hero-muted">{foot}</div>}
     </section>

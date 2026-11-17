@@ -27,6 +27,7 @@ function useLatestEntry(yearId: number | undefined) {
   return useQuery({
     queryKey: ['ledger', 'latest', yearId],
     enabled: !!yearId,
+    refetchInterval: 30_000,
     queryFn: async () => {
       const { data, error } = await supabase.from('ledger_entries').select('*').eq('school_year_id', yearId!)
         .order('created_at', { ascending: false }).order('id', { ascending: false }).limit(1).maybeSingle();

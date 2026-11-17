@@ -22,6 +22,7 @@ export function useLedger(entityId: number | undefined, yearId: number | undefin
   return useQuery({
     queryKey: ['ledger', entityId, yearId],
     enabled: !!entityId && !!yearId,
+    refetchInterval: 30_000,   // backup if the live connection dropped (live.ts refreshes it within ~2 s normally)
     queryFn: async () => {
       // Every entry of the year, page by page (the server sends at most 1,000 per request).
       return fetchAll((from, to) => supabase.from('ledger_entries').select('*')
@@ -52,7 +53,8 @@ export function LatestLine({ e, org }: { e?: { kind: string; amount: number; dir
   const t = totalEffect(e);
   return (
     <span className="block truncate">Latest: {org && <b className="text-white">{org} · </b>}<b className="text-white">{kindLabel[e.kind] ?? e.kind}</b>{' '}
-      <span className="money">{t === 0 ? peso(e.amount) : peso(t, { sign: true })}</span> · {ago(e.created_at)}{e.description ? ` · ${e.description}` : ''}</span>
+      <span className="money">{t === 0 ? peso(e.amount) : peso(t, { sign: true })}</span>
+      {e.kind === 'remittance' ? ' cash → saved with SAS' : e.kind === 'release' ? ' saved → cash' : ''} · {ago(e.created_at)}{e.description ? ` · ${e.description}` : ''}</span>
   );
 }
 
