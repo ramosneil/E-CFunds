@@ -316,3 +316,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - **Full system check 2026-11-17** (`docs/audit-2026-11-17.md`): 85 rolled-back checks with dummy accounts (SAS, 2 club
   treasurers, student…) + live SAS pass in Neil's Chrome (no console errors). 7 lapses + no "reopen year" → all fixed
   (migration 38 + app), proven by re-running the same tests live (0 rows). Neil saw the "Update ready" banner work live.
+- Sports Club 2026–2027 reopened by Claude in Neil's Chrome at his request (reason "Closed by mistake during testing"); its treasurer is active again.
