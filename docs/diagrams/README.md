@@ -8,9 +8,12 @@ Two sets, one per PDF:
 | `technology-stack/technology-stack.svg` | the diagram of `../E-CFunds-Technology-Stack.pdf` |
 | `E-CFunds-System-Diagrams.drawio` | draw.io file, one page per diagram (title, diagram, caption) |
 | `E-CFunds-Technology-Stack.drawio` | draw.io file with the tech stack diagram |
+| `E-CFunds-System-Diagrams-editable.drawio` | **editable**: every box, ellipse, arrow, line and label is a real draw.io shape (8 pages) |
+| `E-CFunds-Technology-Stack-editable.drawio` | **editable** tech stack diagram |
 
 **draw.io:** open https://app.diagrams.net → File → Open from → Device → pick a `.drawio` file.
 Or, inside any drawing: File → Import from → Device → pick an `.svg`.
-The diagrams come in as pictures (sharp at any zoom); the title and caption are editable text.
+The plain `.drawio` files hold each diagram as a picture; the `-editable.drawio` files rebuild them as native
+shapes (click any box or arrow to move, recolor or retype it). Fonts show as Helvetica in draw.io.
 
 Each SVG is self-contained (white background, styles inlined), so it also works in Word (Insert → Pictures) and browsers.
