@@ -17,19 +17,18 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Docs: `docs/plan.md` (phases) · `docs/business-rules.md` (rules) · `docs/database.md` (tables, functions,
   migrations, notification events) · `docs/design-system.md` · `docs/handoff.md` (things only Neil can do) ·
   `docs/sessions.md` (what each session did) · `docs/working-rules.md` (Neil's rules in full).
+- Docker: `Dockerfile` + `compose.yaml` (nginx) → Docker Hub `ramosneil/e-cfunds:latest` + `1.0.<run>` on every push
+  to main (`.github/workflows/docker.yml`, secret DOCKERHUB_TOKEN; `docs/docker.md`). Diagrams: `docs/diagrams/`.
 
-## Status (updated 2026-11-15, end of session 7)
+## Status (updated 2026-11-20)
 - **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
   student on the roster. Test data was wiped before launch.
 - Database: **42 migrations** live (last `20261120090100_resolution_requests`). pg_cron on (2 jobs). Full system check
   2026-11-17: `docs/audit-2026-11-17.md` (all 7 lapses fixed; only SAS edits students; lists page past 1,000 rows).
-- **Session 7 = "finish the functionality" batch, all live** (design pass comes next, Neil's order). Treasurer/student
-  screens of it were checked with sample data only → Neil's phone check is in `docs/handoff.md` (Session 7).
+- **2026-11-19/20 batch live:** resolution requests + liquidation, notification delete + exact links, report signatories,
+  member tiles + PDF. Checked with sample data + live SAS view; Neil's phone test of resolution → liquidation pending.
 - Android: latest APK **v1.1.1 = build 10**; `ota.json` minNativeBuild = 10.
-- **Confirmed working on Neil's phone:** push notifications with the app closed, app self-update end to end
-  (download → reopen → "E-CFunds was updated"), Back button, full screen, Delete conversation, Add member (adds only),
-  UI-review fixes on every page (treasurer, SAS admin, student): semester dues everywhere, live amount checks,
-  Approve/Reject confirm, Ask = ✨ in the phone top bar (floating only on computers).
+- **Confirmed on Neil's phone:** push (app open / closed / signed out), self-update, Back, full screen, liquidation files.
 - Tools: UI Design Review, playwright, Mobile App Design plugins; Supabase + Figma connectors; GitHub PAT (exp. 2027-02-12).
 - **Notifications confirmed 2026-11-14:** Android phone (background AND swiped away) + Chrome on Neil's PC (site
   closed). iPhone Home Screen app not tested yet. When the push function says `sent: N` but nothing shows, it's the
@@ -44,7 +43,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Claude in Chrome on Neil's PC (signed in as SAS admin): never sign in for him; ask before sending/deleting/changing;
   never decide security prompts (2FA); long `=`/`;` values are filtered — use Copy + clipboard, never disguise text.
 - Vercel has **2FA** (Neil's phone): new sign-ins need his code; never ask for recovery codes.
-- Open: handoff (Sports Club reopen?, coordinator, phone checks). Next: design pass. Unseen: iPhone app.
+- Open (handoff): phone test of resolution → liquidation; accredited list all expired. Next: design pass. Unseen: iPhone.
 
 ## Memberships & fees (migrations 15–17, 24)
 - **Organizations are mandatory by course** (tables `courses`, `course_orgs`; SAS can change them):
@@ -62,8 +61,8 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 
 ## Core money rules (full spec: `docs/business-rules.md`)
 - Each org/club has one capital fund in 2 pockets: **cash on hand** (treasurer) + **saved with SAS**.
-- Remit = cash → saved; release = saved → cash (budget-based, no cap). Transfers don't change the total.
-- Collections add, expenses subtract (expense needs a receipt photo; SAS approves remits, releases, expenses).
+- Remit = cash → saved; **resolution request** = saved → cash (file only; SAS types the amount). Total unchanged.
+- Collections add; spending = the resolution's **liquidation** (files + amount spent; unspent back to saved). SAS approves.
 - One **append-only ledger**; balances are computed, never stored; corrections are reversals. Ledger and audit
   log refuse UPDATE/DELETE by trigger. "Today" = Manila date. Full payment only.
 - Term = 1 school year; cash remitted before turnover; saved money = next officers' previous funds.
@@ -83,8 +82,8 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Admin: dashboard (waiting-for-you near top, accounts to approve, per-org list on phones / table on computers),
   approvals (confirm before Approve; Reject asks a reason), orgs & logos (treasurer shown per card), accredited list +
   history, school year/semesters, messages + Announcement.
-- Treasurer: home (fund, compact actions, dues this semester → Members "To collect"), members (course-based; add,
-  then record when paid; ⋮ = undo payment), requests (waiting/done groups, File again on rejected).
+- Treasurer: home (fund, actions, dues this semester → Members "To collect"), members (year cards → section tiles →
+  pop-up list; PDF all / year / section; ⋮ = undo payment), requests (Remit + Resolution request; Liquidate).
 - Student: my dues (labelled by semester), reports. Everyone: My account (sign out lives here, with a confirm),
   "Ask E-CFunds" assistant (Gemini via `chat`, RLS-scoped) — ✨ in the phone top bar, floating button on computers.
 - **Where the money goes** (migration 27): `src/components/finance/FinancePanel.tsx` (hand-built SVG per the dataviz
@@ -107,15 +106,14 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
     `report_settings` (School year page). Rules: business-rules "Financial Report".
   - **Sections A–D, year 1–4** (migration 37): Members grouped 1A…4D; Add member shows all fields, fills from the
     list; clubs **Import** (`ImportSheet mode="club"` → `import_members`). Rules: business-rules "Sections".
-  - **App:** updates offered as "Update ready — pull down" (`src/lib/autoUpdate.ts`; pull/Update installs, leaving
-    the screen installs too), pull-to-refresh, Android Back on Home →
-    "Log out?", 5 min unused → signed out (`AutoLogout.tsx`, shared "last active" heartbeat — never per-tab).
-    Sign-out keeps push registered (Neil).
+  - **App:** "Update ready — pull down" (`src/lib/autoUpdate.ts`), pull-to-refresh, Android Back on Home → "Log out?",
+    5 min unused → signed out (Android only; `AutoLogout.tsx`, shared heartbeat). Sign-out keeps push registered.
   - **Reminders:** Members "Remind unpaid" (1/day/org). pg_cron (UTC): `weekly-dues-reminders` Mon 00:00 = 8 AM
     Manila, `daily-budget-reminders` daily 00:00 (`select * from cron.job`).
 - iPhone: Home Screen web app (no App Store); printable guide `docs/iphone-install-guide.html`.
 - **Live screens:** data-free ticks in `live_changes` → open screens re-fetch within ~0.5 s (`src/lib/live.ts`).
-- **Notifications** (migrations 19–20, 22–23, 26; events per role in `docs/database.md`): bell + pop-up + soft chime
+- **Notifications** (migrations 19–20, 22–23, 26, 40; events per role in `docs/database.md`): bell (delete one / all;
+  tap opens the exact item: `?request=` / `?id=` + `useFocusFromParam` in `src/lib/focus.ts`) + pop-up + chime
   (mute per device); phone notifications; **push when the app is closed** — Android via FCM, browsers + iPhone Home
   Screen app via Web Push (`src/lib/webpush.ts`, `public/push-sw.js`, VAPID key pair only in `private.push_config`
   — never regenerate; My account card + one-time banner `WebPushBanner.tsx`). Pieces: `notifications` table
@@ -134,14 +132,15 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - **Anything that moves money asks first** (`confirmAsk`); rejections ask for a reason (`promptAsk`).
 - Touch targets ≥ 44 px; whole cards/rows are tappable; nothing floats over content on phones (no FAB).
 - Phone vs computer: phones get lists/cards, computers get tables; tables must fit at 1440 px.
-- Request icons: Landmark = remit, HandCoins = release, Receipt = expense (`kindIcon` in `common.tsx`).
+- Request icons: Landmark = remit, Signature = resolution (HandCoins / Receipt = old release / expense) (`kindIcon`).
 - `Button`'s `cx` doesn't merge Tailwind classes — a `text-*` in className can lose to the variant's; use a plain
   `<button>` for one-off colours.
 - Shared lookups in `src/lib/data.ts`: `useTreasurers()` (admin), `useSemesters()`, `useEntityReport()`.
 - **How to review a page:** UI Design Review plugin (`/ui-design-review:ui-review`). Admin pages: Claude can open the
   live site in the browser pane where Neil is signed in as SAS admin — view only, never approve/send. Treasurer and
   student pages: ask Neil for phone screenshots (light + dark). Changed components: check with a temporary
-  `preview.html` + `src/__preview.tsx` (sample data; delete before committing).
+  `preview.html` + `src/__preview.tsx` (sample data; delete before committing). Sample data skips the loading state:
+  every hook goes before any early `return` (React #310 crashed live Approvals, 2026-11-20 — fixed in minutes).
 
 ## Stack
 - React 19 + TypeScript + Vite 8 + Tailwind 4 + React Router 8 + React Query + supabase-js (PKCE).
@@ -178,7 +177,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - **API calls run with pg_safeupdate:** DELETE/UPDATE without WHERE fails live but not in the direct rehearsal.
   Direct `pg` hangs? Rehearse via the connector: `begin; … ; do $$ raise exception 'RESULTS…' $$` (all rolled back).
 - Testing two roles at once: localhost:3000 vs 127.0.0.1:3000. On e-cfunds.vercel.app the browser pane DOES run the
-  service worker, so after a deploy it shows the old build until "Update available → Reload" (or SKIP_WAITING).
+  service worker: after a deploy it shows the old build until "Update" (a crashed page shows no banner — open another).
   Desktop app: `/mcp` sign-in dialogs don't open — use connectors (claude.ai/settings/connectors) or tokens.
 - After a push, wait for `https://e-cfunds.vercel.app/ota/manifest.json` `version` = the new commit before checking.
 
