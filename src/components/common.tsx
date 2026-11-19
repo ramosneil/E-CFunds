@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { CalendarX2, HandCoins, Landmark, Paperclip, Receipt } from 'lucide-react';
+import { CalendarX2, HandCoins, Signature, Landmark, Paperclip, Receipt } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { Row } from '../lib/database.types';
 import { categoryLabel, date, kindLabel, peso } from '../lib/format';
@@ -20,9 +20,11 @@ export function NoYear({ admin }: { admin?: boolean }) {
 const kindIcon: Record<string, ReactNode> = {
   // Same icons as the Home actions: bank = remit to SAS, hand with coins = release, receipt = expense.
   remittance: <Landmark className="size-5" />, release: <HandCoins className="size-5" />, expense: <Receipt className="size-5" />,
+  resolution: <Signature className="size-5" />,
 };
 const kindTile: Record<string, string> = {
   remittance: 'bg-primary-soft text-primary', release: 'bg-gold-soft text-gold-text', expense: 'bg-bad-soft text-bad',
+  resolution: 'bg-gold-soft text-gold-text',
 };
 
 /** Icon tile · title · sub · amount · chip (design-system §5, "request row"). */
@@ -34,11 +36,12 @@ export function RequestRow({ r, entityName, action }: { r: Row<'fund_requests'>;
         <p className="font-semibold truncate">{kindLabel[r.kind]}{entityName ? ` · ${entityName}` : ''}</p>
         <p className="text-[13px] text-muted truncate flex items-center gap-1">
           {r.attachment_path && <Paperclip className="size-3.5 shrink-0" aria-label={r.kind === 'expense' ? 'Receipt attached' : 'Proof attached'} />}
-          <span className="truncate">{r.kind === 'expense' && r.category ? `${categoryLabel[r.category]} · ` : ''}{r.description} · {date(r.filed_at)}</span>
+          <span className="truncate">{r.kind === 'expense' && r.category ? `${categoryLabel[r.category]} · ` : ''}{r.kind === 'resolution' && r.file_name ? r.file_name : r.description} · {date(r.filed_at)}</span>
         </p>
       </div>
       <div className="text-right shrink-0">
-        <p className="money font-semibold">{peso(r.amount)}</p>
+        {/* a resolution has no amount until SAS approves it (SAS reads it from the file) */}
+        <p className="money font-semibold">{r.amount == null ? <span className="text-muted font-normal text-[13px]">{r.status === 'pending' ? 'amount by SAS' : '—'}</span> : peso(r.amount)}</p>
         <div className="mt-1"><StatusChip status={r.status} /></div>
       </div>
       {action}

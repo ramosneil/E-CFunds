@@ -299,3 +299,25 @@ None. Both §10 questions were answered in session 3 and moved to §8.
 - **Fund card** (treasurer Home, SAS dashboard, SAS org page, student Home): shows **Cash on hand** and **Saved with SAS** only — no total (Neil, 2026-11-17).
 - **No "Total fund" anywhere** (Neil, 2026-11-17): fund cards, student Reports, request "If approved" preview, SAS org list, closed-year note and PDF/CSV exports show Cash on hand + Saved with SAS only. The official Financial Report form keeps its own lines (Total Remain Fund etc.).
 - **Auto logout (5 min away) is Android-app only** since 2026-11-17 (Neil): the website on a computer stays signed in until Sign out.
+
+## Resolution requests, notifications, signatories, member lists (Neil, 2026-11-19; migrations 40–42)
+- **Requests** (treasurer, every org/club): only **Remit to SAS** and **Resolution request**. Budgets tab, New budget,
+  Release and Expense are gone (old budgets and their ledger entries stay in the history).
+- **Resolution request**: the treasurer attaches the resolution file only (PDF/photo); the amount is written in the file.
+  SAS opens the file and either **approves by typing the amount** (≤ Saved with SAS; moves Saved with SAS → Cash on
+  hand right away, ledger `release`) or **rejects with a reason**. The treasurer can file it again.
+- **Liquidate**: every approved resolution gets Liquidate → up to 10 files (receipts, report, photos) + the **amount
+  spent** (≤ released). SAS approves → the spent amount leaves Cash on hand (ledger `expense`) and the unspent part goes
+  back to Saved with SAS (`remittance`, at most cash on hand); or **returns** it with what to fix, and the treasurer
+  sends it again.
+- **Notifications**: everyone can delete one (trash on the row) or **Delete all** (asks first). Tapping one opens the
+  exact item: SAS → that request / liquidation / account on Approvals (scrolled to and highlighted); treasurer → that
+  request on Requests; student payment → that receipt (`/receipt/m/<membership>`).
+- **Financial Report signatories** (no Mayor/President/Governor picker):
+  - Club: club treasurer, club auditor, SSG auditor, SSG governor, club adviser, SAS coordinator.
+  - Org: org treasurer, Mayor of the org, org auditor, SSG auditor, SSG governor, org adviser, SAS coordinator.
+  - SSG itself: treasurer, governor, auditor, adviser, SAS coordinator. SSG names come from the SSG's report settings.
+- **Members** (clubs and orgs): one card per year level with section tiles (count, paid, progress); tapping a tile
+  opens that section's list. Searching shows the plain grouped list. **PDF (print-ready, A4)**: all members (Export
+  menu), one year level (PDF on the year card) or one section (PDF in the pop-up): letterhead, one table per section
+  (No., Student ID, Name, Course, Yr-Sec, Status, Receipt no.), totals, signature lines, page numbers.

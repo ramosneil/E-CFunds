@@ -140,3 +140,12 @@ Only you do steps 1–3 (they involve your Google password and a secret app pass
 ### Phone test results (2026-11-17, with Neil, SAS admin + SSG treasurer on Android)
 - Passed: new version loads (fund card Cash on hand + Saved with SAS, no total; header row); Back on Dashboard asks Log out? and the app stays open; inner pages go back one page; push notifications arrive with the app **open** (in the notification list), **closed**, and **signed out** (server: sent 2 each); New budget → Send to SAS question on top (SSG test budget "Hsjshs" ₱10 reached SAS + notification); 5-minute auto logout.
 - Liquidate → Attach files: passed on the phone 2026-11-17 22:57 (Sports Club "Gggaha", 1 PDF 465 KB stored under 7/liq-8/; SAS can read it, SSG treasurer cannot; SAS notified). Returned as "Test only" → no money moved. The SSG test budget "Hsjshs" was cancelled by the treasurer.
+
+## Phone checks after the 2026-11-20 update (resolution requests)
+1. Treasurer → Requests → **Resolution request** → attach the resolution file → Send. SAS → Approvals → open the file,
+   type the amount → Approve. Treasurer's **Saved with SAS** goes down and **Cash on hand** goes up by that amount.
+   (Use a small real resolution, or Reject it with a reason if it's only a test — reject moves no money.)
+2. On the approved resolution → **Liquidate** → attach receipts + type the amount spent → SAS approves or returns.
+3. Bell: delete one notification, then **Delete all**; tap a notification → it opens that exact request/receipt.
+4. Members → tap a section tile → its list pops up; PDF for all / one year / one section prints cleanly.
+5. Financial Report: club shows no Mayor line; org shows Mayor; fill in auditor/adviser names if blank.

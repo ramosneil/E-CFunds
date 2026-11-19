@@ -62,6 +62,12 @@ export function useLiveNotifications(uid: string | undefined) {
 export async function markRead(id: number) {
   await supabase.from('notifications').update({ read_at: new Date().toISOString() }).eq('id', id);
 }
+export async function deleteNotification(id: number) {
+  return supabase.from('notifications').delete().eq('id', id);
+}
+export async function deleteAllNotifications() {
+  return supabase.rpc('clear_notifications');
+}
 export async function markAllRead() {
   await supabase.rpc('mark_notifications_read');
 }

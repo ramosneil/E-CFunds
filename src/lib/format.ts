@@ -20,7 +20,7 @@ export function date(d: string | null | undefined): string {
 }
 
 export const kindLabel: Record<string, string> = {
-  remittance: 'Remittance', release: 'Release', expense: 'Expense', collection: 'Collection',
+  remittance: 'Remittance', release: 'Release', expense: 'Expense', resolution: 'Resolution request', collection: 'Collection',
   opening: 'Opening balance', adjustment: 'Adjustment', reversal: 'Reversal',
 };
 

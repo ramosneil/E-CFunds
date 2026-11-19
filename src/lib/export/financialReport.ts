@@ -1,7 +1,7 @@
 // The SAS "Financial Report" form (Neil's sample FR as of 9.15.25.xlsx), generated from get_financial_report.
 // Folio / long bond (8.5 × 13 in), same order and wording as the paper form. Nobody types the numbers: they come
 // from the ledger; only the cash count (bills/coins) is typed at download and is not stored.
-import type { FinancialReport, Signatories } from '../database.types';
+import type { FinancialReport } from '../database.types';
 import { createDoc, logoImage, sealImage, text, INK, MUTED, LINE, SOFT } from './pdf';
 import { saveFile } from './save';
 import { slug } from './csv';
@@ -113,19 +113,31 @@ export async function financialReportPdf(r: FinancialReport, cash: CashCount) {
   y = lastY() + 12;
 
   // ── Signatories ──
+  // Signatories (Neil, 2026-11-19):
+  //   club: treasurer, auditor, SSG auditor, SSG governor, adviser, SAS coordinator (no head)
+  //   org:  treasurer, mayor, auditor, SSG auditor, SSG governor, adviser, SAS coordinator
+  //   SSG itself: treasurer, governor, auditor, adviser, SAS coordinator
   const sig = r.signatories;
   const ssg = r.entity.is_school_wide ? null : r.ssg_signatories;
   const orgName = r.entity.name;
   const ssgName = 'Supreme Student Government';
+  const isClub = r.entity.category === 'club';
   type Block = { label: string; name: string | null | undefined; role: string };
-  const blocks: Block[] = [
+  const coordinator: Block = { label: 'Verified by:', name: s.coordinator_name, role: s.coordinator_title || 'SAS Coordinator' };
+  const blocks: Block[] = r.entity.is_school_wide ? [
     { label: 'Prepared by:', name: r.treasurer_name, role: `Treasurer, ${orgName}` },
+    { label: 'Noted by:', name: sig?.head_name, role: `Governor, ${orgName}` },
     { label: 'Audited and Certified by:', name: sig?.auditor_name, role: `Auditor, ${orgName}` },
-    ...(r.entity.is_school_wide ? [] : [{ label: 'Attested and Audited by:', name: ssg?.auditor_name, role: `Auditor, ${ssgName}` }]),
-    { label: 'Noted by:', name: sig?.head_name, role: `${sig?.head_title || 'Mayor'}, ${orgName}` },
-    ...(r.entity.is_school_wide ? [] : [{ label: '', name: ssg?.head_name, role: `${(ssg as Signatories | null)?.head_title || 'Governor'}, ${ssgName}` }]),
     { label: '', name: sig?.adviser_name, role: `Adviser, ${orgName}` },
-    { label: 'Verified by:', name: s.coordinator_name, role: s.coordinator_title || 'SAS Coordinator' },
+    coordinator,
+  ] : [
+    { label: 'Prepared by:', name: r.treasurer_name, role: `Treasurer, ${orgName}` },
+    ...(isClub ? [] : [{ label: 'Noted by:', name: sig?.head_name, role: `Mayor, ${orgName}` }]),
+    { label: 'Audited and Certified by:', name: sig?.auditor_name, role: `Auditor, ${orgName}` },
+    { label: 'Attested and Audited by:', name: ssg?.auditor_name, role: `Auditor, ${ssgName}` },
+    { label: 'Noted by:', name: ssg?.head_name, role: `Governor, ${ssgName}` },
+    { label: '', name: sig?.adviser_name, role: `Adviser, ${orgName}` },
+    coordinator,
   ];
   const colW = (right - m - 12) / 2;
   for (let i = 0; i < blocks.length; i += 2) {

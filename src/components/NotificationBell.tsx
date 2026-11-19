@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { BadgeCheck, Banknote, Bell, BellRing, CalendarRange, CheckCheck, FileText, Megaphone, MessageSquare, Receipt, RefreshCw, Tag, UserPlus, Users, Volume2, VolumeX, Wallet, X } from 'lucide-react';
-import { ago, display, markAllRead, markRead, useNotifications, type Note } from '../lib/notifications';
+import { BadgeCheck, Banknote, Bell, BellRing, CalendarRange, CheckCheck, FileText, Megaphone, MessageSquare, Receipt, RefreshCw, Tag, Trash2, UserPlus, Users, Volume2, VolumeX, Wallet, X } from 'lucide-react';
+import { ago, deleteAllNotifications, deleteNotification, display, markAllRead, markRead, useNotifications, type Note } from '../lib/notifications';
+import { confirmAsk } from '../lib/confirm';
+import { toast } from '../lib/toast';
 import { isMuted, setMuted, chime } from '../lib/chime';
 
 const ICON = {
@@ -48,6 +50,20 @@ function Panel({ notes, uid, onClose }: { notes: Note[]; uid: string; onClose: (
     if (!n.read_at) { await markRead(n.id); void refresh(); }
     if (n.link) nav(n.link);
   };
+  // Delete one (no question: it's one line) or all (asks first) — Neil, 2026-11-19: "having a lot of notif makes it clogged".
+  const remove = async (n: Note) => {
+    qc.setQueryData<Note[]>(['notifications', uid], (old) => (old ?? []).filter((x) => x.id !== n.id));
+    const { error } = await deleteNotification(n.id);
+    if (error) toast({ title: 'Couldn’t delete it', body: error.message, tone: 'warn' });
+    void refresh();
+  };
+  const removeAll = async () => {
+    if (!(await confirmAsk({ title: `Delete all ${notes.length} notifications?`, body: 'They are removed from your list for good. New ones still arrive.', confirm: 'Delete all', tone: 'bad' }))) return;
+    qc.setQueryData<Note[]>(['notifications', uid], []);
+    const { error } = await deleteAllNotifications();
+    if (error) toast({ title: 'Couldn’t delete them', body: error.message, tone: 'warn' });
+    void refresh();
+  };
   return (
     <div role="dialog" aria-label="Notifications"
       className="fixed inset-x-3 top-[calc(env(safe-area-inset-top)+68px)] sm:absolute sm:inset-x-auto sm:right-0 sm:top-12 z-50 sm:w-[400px] max-h-[min(70vh,560px)] flex flex-col bg-surface border border-line rounded-[20px] shadow-2xl overflow-hidden">
@@ -59,7 +75,9 @@ function Panel({ notes, uid, onClose }: { notes: Note[]; uid: string; onClose: (
           {muted ? <VolumeX className="size-[18px]" /> : <Volume2 className="size-[18px]" />}
         </button>
         <button type="button" onClick={async () => { await markAllRead(); void refresh(); }} disabled={!notes.some((n) => !n.read_at)}
-          className="h-9 px-3 rounded-[10px] text-[13px] font-semibold text-primary hover:bg-primary-soft disabled:opacity-40 disabled:hover:bg-transparent cursor-pointer">Mark all read</button>
+          className="h-9 px-2.5 rounded-[10px] text-[13px] font-semibold text-primary hover:bg-primary-soft disabled:opacity-40 disabled:hover:bg-transparent cursor-pointer">Mark all read</button>
+        <button type="button" onClick={() => void removeAll()} disabled={!notes.length}
+          className="h-9 px-2.5 rounded-[10px] text-[13px] font-semibold text-bad hover:bg-bad-soft disabled:opacity-40 disabled:hover:bg-transparent cursor-pointer">Delete all</button>
         <button type="button" onClick={onClose} aria-label="Close" className="sm:hidden size-9 grid place-items-center rounded-full text-muted hover:bg-surface2"><X className="size-[18px]" /></button>
       </div>
       {notes.length === 0 ? (
@@ -70,8 +88,8 @@ function Panel({ notes, uid, onClose }: { notes: Note[]; uid: string; onClose: (
             const Icon = ICON[n.kind] ?? Bell;
             const d = display(n);
             return (
-              <li key={n.id}>
-                <button type="button" onClick={() => void open(n)} className={`w-full text-left flex gap-3 px-4 py-3 hover:bg-surface2 cursor-pointer ${n.read_at ? '' : 'bg-primary-soft/40'}`}>
+              <li key={n.id} className={`flex items-start ${n.read_at ? '' : 'bg-primary-soft/40'}`}>
+                <button type="button" onClick={() => void open(n)} className="flex-1 min-w-0 text-left flex gap-3 pl-4 pr-1 py-3 hover:bg-surface2 cursor-pointer">
                   <span className="size-9 rounded-full bg-primary-soft text-primary grid place-items-center shrink-0"><Icon className="size-[18px]" aria-hidden /></span>
                   <span className="flex-1 min-w-0">
                     <span className={`block text-[14px] leading-snug ${n.read_at ? '' : 'font-semibold'}`}>{d.title}</span>
@@ -79,6 +97,10 @@ function Panel({ notes, uid, onClose }: { notes: Note[]; uid: string; onClose: (
                     <span className="block text-[12px] text-muted mt-0.5">{ago(n.updated_at)}</span>
                   </span>
                   {!n.read_at && <span className="size-2.5 rounded-full bg-primary mt-1.5 shrink-0" aria-label="Unread" />}
+                </button>
+                <button type="button" onClick={() => void remove(n)} aria-label={`Delete notification: ${d.title}`} title="Delete"
+                  className="size-11 my-1 mr-1 shrink-0 grid place-items-center rounded-full text-muted hover:text-bad hover:bg-bad-soft cursor-pointer">
+                  <Trash2 className="size-4" aria-hidden />
                 </button>
               </li>
             );

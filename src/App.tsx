@@ -35,6 +35,7 @@ const ReportDetail = page(() => import('./pages/student/ReportDetail'), 'ReportD
 const Account = page(() => import('./pages/Account'), 'Account');
 const Messages = page(() => import('./pages/Messages'), 'Messages');
 const Receipt = page(() => import('./pages/Receipt'), 'Receipt');
+const ReceiptOfMembership = page(() => import('./pages/Receipt'), 'ReceiptOfMembership');
 const Privacy = page(() => import('./pages/Privacy'), 'Privacy');
 const Terms = page(() => import('./pages/Terms'), 'Terms');
 
@@ -170,6 +171,7 @@ function Gate() {
           <Route path="reports/:id" element={<ReportDetail />} />
         </>}
         <Route path="receipt/:no" element={<Receipt />} />
+        <Route path="receipt/m/:mid" element={<ReceiptOfMembership />} />
         <Route path="account" element={<Account />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

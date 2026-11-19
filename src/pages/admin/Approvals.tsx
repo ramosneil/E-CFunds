@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useFocusFromParam } from '../../lib/focus';
 import { useSearchParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ClipboardList, Inbox, Paperclip, Search, UserCheck } from 'lucide-react';
+import { FileText, Inbox, Paperclip, Search, UserCheck } from 'lucide-react';
+import { fileLabel, openPrivateFile } from '../../lib/files';
 import { useCurrentYear, useEntities, useEntityReport, useRequests } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
 import { CATEGORIES, categoryLabel, date, kindLabel, peso } from '../../lib/format';
@@ -10,26 +12,29 @@ import { Alert, Button, Card, Chip, Empty, EntityLogo, Field, Input, PageHeader,
 import { IfApproved, RequestRow, Segmented } from '../../components/common';
 import { confirmAsk, promptAsk } from '../../lib/confirm';
 import { useAuth } from '../../lib/auth';
-import { BudgetDecisionCard, useBudgets } from '../../components/budgets';
+import { useBudgets } from '../../components/budgets';
 import { ExpenseItemList } from '../../components/ItemRows';
 import { AddStudentSheet } from './Students';
 
 export function Approvals() {
   const [params] = useSearchParams();   // the Dashboard's "accounts to approve" link opens ?tab=accounts
   const t = params.get('tab');
-  const [tab, setTab] = useState<'requests' | 'budgets' | 'accounts'>(t === 'accounts' || t === 'budgets' ? t : 'requests');
+  const want = params.get('user') ? 'accounts' : params.get('request') ? 'requests' : t === 'accounts' ? 'accounts' : 'requests';
+  const [tab, setTab] = useState<'requests' | 'accounts'>(want);
+  useEffect(() => { setTab(want); }, [want]);   // a notification opened while already on Approvals
+  useFocusFromParam('request', 'req');
+  useFocusFromParam('user', 'user');
   const pending = useRequests({ status: 'pending' });
   const profiles = useProfiles();
-  const budgets = useBudgets();
-  const nReq = pending.data?.length ?? 0;
-  const nBud = (budgets.data ?? []).filter((b) => b.status === 'pending' || b.status === 'liquidation_submitted').length;
+  const liqs = useLiquidations();
+  const nReq = (pending.data?.length ?? 0) + (liqs.data?.length ?? 0);
   const nAcc = (profiles.data ?? []).filter((p) => p.status === 'pending').length;
   return (
     <>
-      <PageHeader title="Approvals" sub="Money requests, activity budgets and new accounts wait here for SAS." />
-      <div className="max-w-lg mb-5"><Segmented value={tab} onChange={setTab}
-        options={[['requests', `Money · ${nReq}`], ['budgets', `Budgets · ${nBud}`], ['accounts', `Accounts · ${nAcc}`]]} /></div>
-      {tab === 'requests' ? <RequestQueue /> : tab === 'budgets' ? <BudgetQueue /> : <AccountQueue />}
+      <PageHeader title="Approvals" sub="Remittances, resolution requests, liquidations and new accounts wait here for SAS." />
+      <div className="max-w-sm mb-5"><Segmented value={tab} onChange={setTab}
+        options={[['requests', `Money · ${nReq}`], ['accounts', `Accounts · ${nAcc}`]]} /></div>
+      {tab === 'requests' ? <RequestQueue /> : <AccountQueue />}
     </>
   );
 }
@@ -43,58 +48,31 @@ function RequestQueue() {
   const byId = new Map(entities.data?.map((e) => [e.id, e]));
   if (pending.isLoading) return <Spinner />;
   const done = (recent.data ?? []).filter((r) => r.status !== 'pending').slice(0, 10);
+  const liqs = useLiquidations().data ?? [];
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.5fr_1fr] items-start">
       <div className="space-y-4">
+        {liqs.map((r) => <div key={'l' + r.id} data-focus={`req-${r.id}`}><LiquidationCard r={r} entity={byId.get(r.entity_id)} /></div>)}
         {pending.data?.length ? pending.data.map((r) => {
           const rep = report.data?.find((x) => x.entity_id === r.entity_id);
-          return <ApprovalCard key={r.id} r={r} entity={byId.get(r.entity_id)} cash={rep?.cash_on_hand ?? 0} saved={rep?.saved_with_sas ?? 0} />;
-        }) : <Card><Empty icon={<Inbox className="size-6" />} title="Nothing to approve">New remittance, release and expense requests from treasurers show up here.</Empty></Card>}
+          return <div key={r.id} data-focus={`req-${r.id}`}><ApprovalCard r={r} entity={byId.get(r.entity_id)} cash={rep?.cash_on_hand ?? 0} saved={rep?.saved_with_sas ?? 0} /></div>;
+        }) : !liqs.length && <Card><Empty icon={<Inbox className="size-6" />} title="Nothing to approve">Remittances, resolution requests and liquidations from treasurers show up here.</Empty></Card>}
       </div>
       <Card>
         <h2 className="font-display text-[17px] font-bold mb-1">Recently decided</h2>
-        {done.length ? <div className="divide-y divide-line">{done.map((r) => <RequestRow key={r.id} r={r} entityName={byId.get(r.entity_id)?.short_name} />)}</div>
+        {done.length ? <div className="divide-y divide-line">{done.map((r) => <div key={r.id} data-focus={`req-${r.id}`}><RequestRow r={r} entityName={byId.get(r.entity_id)?.short_name} /></div>)}</div>
           : <p className="text-muted text-[14px] py-4">No decisions yet.</p>}
       </Card>
     </div>
   );
 }
 
-function BudgetQueue() {
-  const budgets = useBudgets();
-  const entities = useEntities();
-  const byId = new Map(entities.data?.map((e) => [e.id, e]));
-  if (budgets.isLoading) return <Spinner />;
-  const all = budgets.data ?? [];
-  const waiting = all.filter((b) => b.status === 'pending' || b.status === 'liquidation_submitted');
-  const overdue = all.filter((b) => b.is_overdue);
-  const open = all.filter((b) => b.status === 'approved' && !b.is_overdue);
-  return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.5fr_1fr] items-start">
-      <div className="space-y-4">
-        {waiting.length ? waiting.map((b) => <BudgetDecisionCard key={b.id} b={b} entity={byId.get(b.entity_id)} />)
-          : <Card><Empty icon={<ClipboardList className="size-6" />} title="No budgets or liquidations waiting">Activity budgets and liquidation reports from treasurers show up here.</Empty></Card>}
-      </div>
-      <div className="space-y-4">
-        {overdue.length > 0 && (
-          <Card>
-            <h2 className="font-display text-[17px] font-bold mb-1 text-bad">Liquidation overdue · {overdue.length}</h2>
-            <p className="text-[13px] text-muted mb-2">These orgs/clubs get no new releases until they liquidate.</p>
-            <ul className="divide-y divide-line">{overdue.map((b) => <li key={b.id} className="py-2 text-[14px]"><b>{byId.get(b.entity_id)?.short_name}</b> · {b.title} <span className="text-muted">· due {date(b.liquidation_due)}</span></li>)}</ul>
-          </Card>
-        )}
-        <Card>
-          <h2 className="font-display text-[17px] font-bold mb-1">Approved, not yet liquidated</h2>
-          {open.length ? <ul className="divide-y divide-line">{open.map((b) => (
-            <li key={b.id} className="py-2 text-[14px] flex gap-3"><span className="flex-1 min-w-0"><b>{byId.get(b.entity_id)?.short_name}</b> · {b.title}<span className="block text-[13px] text-muted">Due {date(b.liquidation_due)} · released {peso(b.released)} of {peso(b.total)}</span></span></li>
-          ))}</ul> : <p className="text-muted text-[14px] py-2">None.</p>}
-        </Card>
-      </div>
-    </div>
-  );
+function ApprovalCard({ r, entity, cash, saved }: { r: Row<'fund_requests'>; entity?: Row<'entities'>; cash: number; saved: number }) {
+  if (r.kind === 'resolution') return <ResolutionCard r={r} entity={entity} cash={cash} saved={saved} />;
+  return <MoneyRequestCard r={r} entity={entity} cash={cash} saved={saved} />;
 }
 
-function ApprovalCard({ r, entity, cash, saved }: { r: Row<'fund_requests'>; entity?: Row<'entities'>; cash: number; saved: number }) {
+function MoneyRequestCard({ r, entity, cash, saved }: { r: Row<'fund_requests'>; entity?: Row<'entities'>; cash: number; saved: number }) {
   const qc = useQueryClient();
   const [remarks, setRemarks] = useState('');
   const [category, setCategory] = useState<Enum<'expense_category'>>(r.category ?? 'other');
@@ -170,6 +148,144 @@ function ApprovalCard({ r, entity, cash, saved }: { r: Row<'fund_requests'>; ent
   );
 }
 
+// ── Resolution requests and their liquidation (Neil, 2026-11-19) ────────────────────────────────────────────
+/** Resolutions whose liquidation waits for SAS. */
+function useLiquidations() {
+  return useQuery({
+    queryKey: ['requests', 'liquidations'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('fund_requests').select('*').eq('kind', 'resolution').eq('liquidation_status', 'submitted')
+        .order('liquidation_submitted_at');
+      if (error) throw error;
+      return data as Row<'fund_requests'>[];
+    },
+  });
+}
+
+function OrgHead({ entity, title, sub }: { entity?: Row<'entities'>; title: string; sub: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-3">
+      <EntityLogo path={entity?.logo_path ?? null} name={entity?.name ?? ''} size={44} />
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold">{title} · {entity?.short_name}</p>
+        <div className="text-[13px] text-muted mt-0.5 break-words">{sub}</div>
+      </div>
+    </div>
+  );
+}
+
+/** SAS reads the resolution file and types the amount written in it, or rejects with a reason. */
+function ResolutionCard({ r, entity, cash, saved }: { r: Row<'fund_requests'>; entity?: Row<'entities'>; cash: number; saved: number }) {
+  const qc = useQueryClient();
+  const [amount, setAmount] = useState('');
+  const [remarks, setRemarks] = useState('');
+  const [busy, setBusy] = useState<'yes' | 'no' | null>(null);
+  const [err, setErr] = useState('');
+  const a = Number(amount);
+  const over = a > Number(saved);
+  const org = entity?.short_name ?? 'this org';
+
+  async function decide(approve: boolean) {
+    let note = remarks.trim();
+    if (approve) {
+      if (!(a > 0)) { setErr('Type the amount written in the resolution.'); return; }
+      if (over) { setErr(`More than ${org} has saved with SAS (${peso(saved)}).`); return; }
+      if (!(await confirmAsk({ title: `Release ${peso(a)} to ${org}?`, body: `From “${r.file_name ?? 'the resolution'}”. ${peso(a)} moves from ${org}'s savings with SAS to its cash on hand right away.`, confirm: 'Approve', tone: 'primary' }))) return;
+    } else if (note.length < 3) {
+      const reason = await promptAsk({ title: `Reject ${org}'s resolution?`, body: 'The treasurer sees this reason and can send it again.', confirm: 'Reject', tone: 'bad',
+        input: { label: 'Reason', placeholder: 'e.g. No signature of the adviser', minLength: 3 } });
+      if (!reason) return;
+      note = reason.trim();
+    } else if (!(await confirmAsk({ title: `Reject ${org}'s resolution?`, body: `Reason sent to the treasurer: “${note}”`, confirm: 'Reject', tone: 'bad' }))) return;
+    setBusy(approve ? 'yes' : 'no'); setErr('');
+    const { error } = await supabase.rpc('review_resolution', { p_request_id: r.id, p_approve: approve, ...(approve ? { p_amount: a } : {}), p_remarks: note || undefined });
+    setBusy(null);
+    if (error) { setErr(errorText(error)); return; }
+    void qc.invalidateQueries();
+  }
+
+  return (
+    <Card>
+      <OrgHead entity={entity} title="Resolution request" sub={<>{r.file_name} · filed {date(r.filed_at)}</>} />
+      {r.attachment_path && (
+        <Button variant="soft" onClick={async () => { const e = await openPrivateFile(r.attachment_path!); if (e) setErr(e); }} className="mt-3 h-11 px-4 text-[14px]">
+          <FileText className="size-4" aria-hidden />Open the resolution
+        </Button>
+      )}
+      <div className="mt-4">
+        <Field label="Amount in the resolution" hint={<>Read it from the file. {org} has <b className="money text-ink">{peso(saved)}</b> saved with SAS.</>}
+          error={over ? `More than ${org} has saved with SAS (${peso(saved)}).` : null}>
+          <Input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} className="money text-[22px] h-14 font-semibold" placeholder="0.00" />
+        </Field>
+      </div>
+      {a > 0 && !over && <div className="mt-3"><IfApproved kind="release" amount={a} cash={Number(cash)} saved={Number(saved)} /></div>}
+      <div className="mt-4"><Field label="Note to the treasurer" hint="Optional when approving. When rejecting, you'll be asked for a reason."><Input value={remarks} onChange={(e) => setRemarks(e.target.value)} placeholder="Optional note" /></Field></div>
+      {err && <div className="mt-3"><Alert>{err}</Alert></div>}
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <Button variant="danger" busy={busy === 'no'} disabled={!!busy} onClick={() => decide(false)}>Reject</Button>
+        <Button busy={busy === 'yes'} disabled={!!busy || !(a > 0) || over} onClick={() => decide(true)}>Approve</Button>
+      </div>
+    </Card>
+  );
+}
+
+/** SAS checks a resolution's liquidation files and the amount spent; approve moves the money, return asks for fixes. */
+function LiquidationCard({ r, entity }: { r: Row<'fund_requests'>; entity?: Row<'entities'> }) {
+  const qc = useQueryClient();
+  const [busy, setBusy] = useState<'yes' | 'no' | null>(null);
+  const [err, setErr] = useState('');
+  const released = Number(r.amount ?? 0), spent = Number(r.liquidation_spent ?? 0);
+  const org = entity?.short_name ?? 'this org';
+
+  async function decide(approve: boolean) {
+    let note: string | undefined;
+    if (approve) {
+      if (!(await confirmAsk({ title: `Approve ${org}'s liquidation?`, body: `Spent ${peso(spent)} of ${peso(released)} released.${released > spent ? ` ${peso(released - spent)} goes back to ${org}'s savings with SAS.` : ''}`, confirm: 'Approve', tone: 'primary' }))) return;
+    } else {
+      const reason = await promptAsk({ title: `Return ${org}'s liquidation?`, body: 'The treasurer fixes it and sends it again.', confirm: 'Return', tone: 'bad',
+        input: { label: 'What to fix', placeholder: 'e.g. Attach the official receipt for the trophies', minLength: 3 } });
+      if (!reason) return;
+      note = reason.trim();
+    }
+    setBusy(approve ? 'yes' : 'no'); setErr('');
+    const { error } = await supabase.rpc('review_resolution_liquidation', { p_request_id: r.id, p_approve: approve, p_remarks: note });
+    setBusy(null);
+    if (error) { setErr(errorText(error)); return; }
+    void qc.invalidateQueries();
+  }
+
+  return (
+    <Card>
+      <OrgHead entity={entity} title="Liquidation" sub={<>{r.file_name} · sent {r.liquidation_submitted_at ? date(r.liquidation_submitted_at) : ''}</>} />
+      <dl className="mt-3 grid grid-cols-3 gap-2 rounded-[16px] bg-surface2 p-4 text-[13px]">
+        <div><dt className="text-muted">Released</dt><dd className="money font-semibold text-[16px]">{peso(released)}</dd></div>
+        <div><dt className="text-muted">Spent</dt><dd className="money font-semibold text-[16px]">{peso(spent)}</dd></div>
+        <div><dt className="text-muted">Back to savings</dt><dd className="money font-semibold text-[16px]">{peso(Math.max(0, released - spent))}</dd></div>
+      </dl>
+      <p className="text-[14px] font-semibold mt-4 mb-1">Files · {r.liquidation_files.length}</p>
+      <div className="flex flex-wrap gap-2">
+        {r.liquidation_files.map((f) => (
+          <button key={f} type="button" onClick={async () => { const e = await openPrivateFile(f); if (e) setErr(e); }}
+            className="inline-flex items-center gap-1.5 min-h-11 px-3 rounded-[12px] border border-line text-[13px] font-semibold text-primary hover:bg-surface2 cursor-pointer max-w-[260px]">
+            <Paperclip className="size-4 shrink-0" aria-hidden /><span className="truncate">{fileLabel(f)}</span>
+          </button>
+        ))}
+        {r.attachment_path && (
+          <button type="button" onClick={async () => { const e = await openPrivateFile(r.attachment_path!); if (e) setErr(e); }}
+            className="inline-flex items-center gap-1.5 min-h-11 px-3 rounded-[12px] border border-line text-[13px] font-semibold text-muted hover:bg-surface2 cursor-pointer">
+            <FileText className="size-4 shrink-0" aria-hidden />Resolution
+          </button>
+        )}
+      </div>
+      {err && <div className="mt-3"><Alert>{err}</Alert></div>}
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <Button variant="danger" busy={busy === 'no'} disabled={!!busy} onClick={() => decide(false)}>Return</Button>
+        <Button busy={busy === 'yes'} disabled={!!busy} onClick={() => decide(true)}>Approve</Button>
+      </div>
+    </Card>
+  );
+}
+
 /** "Budget: Seminar · ₱1,300 · ₱300 left" under a request that names a budget. */
 function RequestBudget({ id }: { id: number }) {
   const budgets = useBudgets();
@@ -200,7 +316,7 @@ function AccountQueue() {
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.3fr_1fr] items-start">
       <div className="space-y-4">
-        {pending.length ? pending.map((p) => <AccountCard key={p.id} p={p} />)
+        {pending.length ? pending.map((p) => <div key={p.id} data-focus={`user-${p.id}`}><AccountCard p={p} /></div>)
           : <Card><Empty icon={<UserCheck className="size-6" />} title="No accounts waiting">People who sign up appear here for approval.</Empty></Card>}
       </div>
       <AllAccounts others={others} name={name} />

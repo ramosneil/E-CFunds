@@ -83,10 +83,14 @@ export type Database = {
       };
       fund_requests: {
         Row: {
-          amount: number; attachment_path: string | null; description: string; entity_id: number; filed_at: string;
+          amount: number | null; attachment_path: string | null; description: string; entity_id: number; filed_at: string;
           filed_by: string | null; id: number; kind: E['request_kind']; remarks: string | null; reviewed_at: string | null;
           reviewed_by: string | null; school_year_id: number; status: E['request_status'];
           category: E['expense_category'] | null; budget_id: number | null;
+          // resolution requests (migration 41)
+          file_name: string | null; liquidation_status: 'submitted' | 'approved' | 'returned' | null; liquidation_files: string[];
+          liquidation_spent: number | null; liquidation_remarks: string | null; liquidation_submitted_at: string | null;
+          liquidated_at: string | null; liquidated_by: string | null;
         };
         Insert: never; Update: never; Relationships: [];
       };
@@ -206,6 +210,7 @@ export type Database = {
       drop_push_token: { Args: { p_token: string }; Returns: undefined };
       announce: { Args: { p_audience: 'students' | 'treasurers' | 'everyone'; p_title: string; p_body: string }; Returns: number };
       note_app_updated: { Args: { p_build: string }; Returns: undefined };
+      clear_notifications: { Args: Record<string, never>; Returns: number };
       mark_notifications_read: { Args: Record<string, never>; Returns: number };
       accept_terms: { Args: Record<string, never>; Returns: string };
       admin_adjust: { Args: { p_amount: number; p_direction: number; p_entity_id: number; p_pocket: E['pocket']; p_reason: string }; Returns: number };
@@ -245,6 +250,10 @@ export type Database = {
         };
         Returns: undefined;
       };
+      file_resolution: { Args: { p_entity_id: number; p_path: string; p_file_name: string }; Returns: number };
+      review_resolution: { Args: { p_request_id: number; p_approve: boolean; p_amount?: number; p_remarks?: string }; Returns: number };
+      submit_resolution_liquidation: { Args: { p_request_id: number; p_files: string[]; p_spent: number }; Returns: undefined };
+      review_resolution_liquidation: { Args: { p_request_id: number; p_approve: boolean; p_remarks?: string }; Returns: undefined };
       review_request: { Args: { p_approve: boolean; p_remarks?: string; p_request_id: number; p_category?: E['expense_category'] }; Returns: number };
       // Server-function only (service_role); the browser cannot call these two.
       student_login_lookup: { Args: { p_student_no: string }; Returns: { email: string | null; locked_until: string | null }[] };
@@ -264,7 +273,7 @@ export type Database = {
       entity_category: 'organization' | 'club';
       ledger_kind: 'opening' | 'collection' | 'remittance' | 'release' | 'expense' | 'adjustment' | 'reversal';
       pocket: 'cash' | 'saved';
-      request_kind: 'remittance' | 'release' | 'expense';
+      request_kind: 'remittance' | 'release' | 'expense' | 'resolution';
       request_status: 'pending' | 'approved' | 'rejected' | 'cancelled';
       expense_category: 'events' | 'supplies' | 'food' | 'transport' | 'printing' | 'outreach' | 'other';
     };
@@ -302,7 +311,7 @@ export type ReportSettings = {
 export type ReportItem = { particular: string; unit: string; qty: number; unit_price: number; total: number; date: string };
 /** get_financial_report (migration 34): the SAS financial report form, computed from the ledger. */
 export type FinancialReport = {
-  entity: { id: number; name: string; short_name: string; logo_path: string | null; is_school_wide: boolean };
+  entity: { id: number; name: string; short_name: string; logo_path: string | null; is_school_wide: boolean; category?: E['entity_category'] };
   school_year: string; semester_term: number | null; period_start: string; as_of: string;
   previous_fund: number; membership: { paid: number; unpaid: number; rate: number | null; amount: number };
   total_collection: number; subtotal: number;

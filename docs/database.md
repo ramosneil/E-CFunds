@@ -164,3 +164,23 @@ prevents two approvals racing past a limit.
 - `budget_status` view + `returned` (remittances tagged to it) + `remaining` (total − spent).
 - Rehearsed (rolled back): missing / other-org file refused; good file ok; treasurer can't approve; SAS approve returned
   ₱230 (capped by cash, unspent was ₱300) → cash 0; anon refused.
+
+## Notifications delete + exact links (migration 40 `notifications_delete_links`, 2026-11-19)
+- `notifications`: `grant delete` + policy "delete own notifications" (`recipient = auth.uid()`); `clear_notifications()`.
+- Links: account → `/approvals?tab=accounts&user=<id>`; request (SAS) → `/approvals?request=<id>`; request decision
+  (treasurer) → `/requests?id=<id>`; student payment → `/receipt/m/<membership_id>`.
+- Rehearsed (rolled back): own delete 1, someone else's 0, clear all, anon refused.
+
+## Resolution requests + liquidation (migrations 41 `request_kind_resolution`, 42 `resolution_requests`, 2026-11-20)
+- `request_kind` + `'resolution'` (own migration, enum value first).
+- `fund_requests.amount` nullable (check `fund_requests_amount_needed`: only a resolution not yet approved may have no amount);
+  new columns `file_name`, `liquidation_status` (submitted/approved/returned), `liquidation_files text[]`,
+  `liquidation_spent`, `liquidation_remarks`, `liquidation_submitted_at`, `liquidated_at`, `liquidated_by`.
+- `private.org_file_ok(entity, path)`: the file exists in the private `receipts` bucket under the org's folder.
+- `file_resolution(entity, path, file_name)` (treasurer) · `review_resolution(request, approve, amount, remarks)` (SAS;
+  approve needs amount ≤ saved → ledger `release`; reject needs remarks) · `submit_resolution_liquidation(request,
+  files[], spent)` (treasurer; ≤ 10 files, spent ≤ released) · `review_resolution_liquidation(request, approve,
+  remarks)` (SAS; approve → `expense` = spent + `remittance` = unspent capped at cash; return needs remarks).
+- `notify_request` covers resolutions (filed / decided / liquidation sent / decided) with exact links.
+- Rehearsed (22 checks, rolled back): savings ₱560 → approve ₱100 → cash 100 / saved 460 → spent ₱70 → cash 0 /
+  saved 490; over-savings, other org, student, anon refused.

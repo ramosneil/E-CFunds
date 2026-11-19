@@ -21,7 +21,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 ## Status (updated 2026-11-15, end of session 7)
 - **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
   student on the roster. Test data was wiped before launch.
-- Database: **39 migrations** live (last `20261117090000_budget_auto_liquidation_files`). pg_cron on (2 jobs). Full system check
+- Database: **42 migrations** live (last `20261120090100_resolution_requests`). pg_cron on (2 jobs). Full system check
   2026-11-17: `docs/audit-2026-11-17.md` (all 7 lapses fixed; only SAS edits students; lists page past 1,000 rows).
 - **Session 7 = "finish the functionality" batch, all live** (design pass comes next, Neil's order). Treasurer/student
   screens of it were checked with sample data only → Neil's phone check is in `docs/handoff.md` (Session 7).
@@ -100,8 +100,8 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
     (`src/lib/activity.ts` sentences) · **Students** page + Excel/CSV import (`src/lib/roster.ts`, `import_students`).
   - **Receipts** `ORG-YEAR-0001` by trigger on payment; void on undo, never reused; `/receipt/:no` page + PDF (any
     role, RLS decides); Members row link, student "View receipt". Label "Payment receipt" (not a BIR OR).
-  - **Budgets** (`src/components/budgets.tsx`): Requests → Budgets tab, Approvals → Budgets, org page budget vs
-    actual. Releases need an approved budget; overdue liquidation (activity + 15 days) blocks releases.
+  - **Resolution requests** (migrations 41–42, replace budgets/release/expense): treasurer attaches the file, SAS types
+    the amount → Saved → Cash; Liquidate (files + spent) → SAS approves (unspent back to savings). business-rules.
   - **Financial Report (SAS form, Folio PDF)**: `get_financial_report` + `src/lib/export/financialReport.ts` +
     `FinancialReportSheet.tsx` (treasurer Home, SAS org page); expense item lines (`ItemRows.tsx`); signatories +
     `report_settings` (School year page). Rules: business-rules "Financial Report".

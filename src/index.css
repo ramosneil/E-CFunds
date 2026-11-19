@@ -55,6 +55,8 @@ body { font-family: var(--font-sans); font-size: 15px; line-height: 22px; -webki
 .money { font-variant-numeric: tabular-nums; }
 .micro { font-size: 12px; line-height: 16px; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; }
 :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+/* the item a notification points to (src/lib/focus.ts) */
+.focus-flash { outline: 3px solid var(--primary); outline-offset: 3px; border-radius: 18px; transition: outline-color .3s; }
 input, select, textarea { font: inherit; color: inherit; }
 
 /* Pop-up (toast) entrance; reduced motion = no movement. */

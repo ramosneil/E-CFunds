@@ -4,11 +4,10 @@ import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, AlertTriangle, Download, FileText } from 'lucide-react';
 import { supabase, errorText } from '../lib/supabase';
-import { useSemesters } from '../lib/data';
+import { useEntities, useSemesters } from '../lib/data';
 import { peso } from '../lib/format';
 import type { FinancialReport } from '../lib/database.types';
 import { Alert, Button, Card, Field, Input, Select, Sheet, Spinner } from './ui';
-import { Segmented } from './common';
 import { toast } from '../lib/toast';
 
 const DENOMS = [1000, 500, 200, 100, 50, 20] as const;
@@ -52,21 +51,27 @@ export function FinancialReportSheet({ entityId, yearId, onClose }: { entityId: 
       return data as FinancialReport;
     },
   });
-  const r = report.data;
+  // Club or organization decides the signatory lines (Neil, 2026-11-19); the report itself doesn't carry it.
+  const entities = useEntities();
+  const category = entities.data?.find((e) => e.id === entityId)?.category;
+  const r = report.data ? { ...report.data, entity: { ...report.data.entity, category } } : undefined;
+  const kind: 'ssg' | 'club' | 'org' = r?.entity.is_school_wide ? 'ssg' : category === 'club' ? 'club' : 'org';
+  const headTitle = kind === 'ssg' ? 'Governor' : 'Mayor';
 
   // Load the saved signatories once.
   useEffect(() => {
+    const r = report.data;
     if (!r || sigDirty) return;
     const s = r.signatories;
-    setSig({ head_title: s?.head_title ?? (r.entity.is_school_wide ? 'Governor' : 'Mayor'), head_name: s?.head_name ?? '', auditor_name: s?.auditor_name ?? '', adviser_name: s?.adviser_name ?? '' });
-  }, [r, sigDirty]);
+    setSig({ head_title: headTitle, head_name: s?.head_name ?? '', auditor_name: s?.auditor_name ?? '', adviser_name: s?.adviser_name ?? '' });
+  }, [report.data, sigDirty]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   const counted = DENOMS.reduce((t, d) => t + d * (Number(count[d]) || 0), 0) + (Number(coins) || 0);
   const anyCount = DENOMS.some((d) => count[d]) || !!coins;
   const diff = r ? Math.round((counted - Number(r.cash_on_hand)) * 100) / 100 : 0;
 
   async function saveSig() {
-    const { error } = await supabase.rpc('save_signatories', { p_entity_id: entityId, p_head_title: sig.head_title, p_head_name: sig.head_name,
+    const { error } = await supabase.rpc('save_signatories', { p_entity_id: entityId, p_head_title: headTitle, p_head_name: kind === 'club' ? '' : sig.head_name,
       p_auditor_name: sig.auditor_name, p_adviser_name: sig.adviser_name });
     if (error) throw error;
     setSigDirty(false);
@@ -81,7 +86,7 @@ export function FinancialReportSheet({ entityId, yearId, onClose }: { entityId: 
       if (sigDirty) await saveSig();
       const fresh = sigDirty ? (await supabase.rpc('get_financial_report', { p_entity_id: entityId, ...(period !== 'year' ? { p_semester_id: Number(period) } : {}), p_as_of: asOf })).data as FinancialReport : r;
       const { financialReportPdf } = await import('../lib/export/financialReport');
-      await financialReportPdf(fresh ?? r, skipCount ? null : { bills: Object.fromEntries(DENOMS.map((d) => [d, Number(count[d]) || 0])), coins: Number(coins) || 0 });
+      await financialReportPdf(fresh ? { ...fresh, entity: { ...fresh.entity, category } } : r, skipCount ? null : { bills: Object.fromEntries(DENOMS.map((d) => [d, Number(count[d]) || 0])), coins: Number(coins) || 0 });
       toast({ title: 'Financial report ready', body: `${r.entity.short_name} · as of ${asOf}`, tone: 'ok', silent: true });
     } catch (x) { setErr(errorText(x)); } finally { setBusy(false); }
   }
@@ -141,13 +146,18 @@ export function FinancialReportSheet({ entityId, yearId, onClose }: { entityId: 
             <div>
               <p className="text-[14px] font-semibold mb-1">Signatories</p>
               <p className="text-[13px] text-muted mb-2">Saved for the whole school year. Prepared by: {r.treasurer_name ?? 'the treasurer'} (from the account).
-                {!r.entity.is_school_wide && ` SSG names come from the SSG treasurer's report settings${r.ssg_signatories?.head_name ? '' : ' (not set yet — blank lines)'}.`}</p>
+                {kind !== 'ssg' && ` SSG auditor and SSG governor come from the SSG treasurer's report settings${r.ssg_signatories?.head_name ? '' : ' (not set yet — blank lines)'}.`}</p>
+              <ol className="text-[13px] text-muted mb-3 list-decimal pl-5 space-y-0.5">
+                {(kind === 'club'
+                  ? ['Club treasurer', 'Club auditor', 'SSG auditor', 'SSG governor', 'Club adviser', 'SAS coordinator']
+                  : kind === 'org'
+                    ? ['Org treasurer', 'Mayor of the organization', 'Org auditor', 'SSG auditor', 'SSG governor', 'Org adviser', 'SAS coordinator']
+                    : ['SSG treasurer', 'SSG governor', 'SSG auditor', 'SSG adviser', 'SAS coordinator']).map((x) => <li key={x}>{x}</li>)}
+              </ol>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Field label="Head’s title"><Segmented value={sig.head_title === 'Governor' || sig.head_title === 'President' ? sig.head_title : 'Mayor'}
-                  onChange={(v) => { setSig({ ...sig, head_title: v }); setSigDirty(true); }} options={[['Mayor', 'Mayor'], ['President', 'President'], ['Governor', 'Governor']]} /></Field>
-                <Field label={`${sig.head_title} (name)`}><Input value={sig.head_name} maxLength={80} onChange={(e) => { setSig({ ...sig, head_name: e.target.value }); setSigDirty(true); }} placeholder="e.g. Hannah C. Alfaro" /></Field>
-                <Field label="Auditor (name)"><Input value={sig.auditor_name} maxLength={80} onChange={(e) => { setSig({ ...sig, auditor_name: e.target.value }); setSigDirty(true); }} /></Field>
-                <Field label="Adviser (name)"><Input value={sig.adviser_name} maxLength={80} onChange={(e) => { setSig({ ...sig, adviser_name: e.target.value }); setSigDirty(true); }} /></Field>
+                {kind !== 'club' && <Field label={`${headTitle} (name)`}><Input value={sig.head_name} maxLength={80} onChange={(e) => { setSig({ ...sig, head_name: e.target.value }); setSigDirty(true); }} placeholder="e.g. Hannah C. Alfaro" /></Field>}
+                <Field label={`${kind === 'club' ? 'Club' : kind === 'ssg' ? 'SSG' : 'Org'} auditor (name)`}><Input value={sig.auditor_name} maxLength={80} onChange={(e) => { setSig({ ...sig, auditor_name: e.target.value }); setSigDirty(true); }} /></Field>
+                <Field label={`${kind === 'club' ? 'Club' : kind === 'ssg' ? 'SSG' : 'Org'} adviser (name)`}><Input value={sig.adviser_name} maxLength={80} onChange={(e) => { setSig({ ...sig, adviser_name: e.target.value }); setSigDirty(true); }} /></Field>
               </div>
               <p className="text-[13px] text-muted mt-2">Verified by: {r.settings.coordinator_name ?? '(SAS Coordinator — set by SAS)'}</p>
             </div>

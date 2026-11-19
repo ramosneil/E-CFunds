@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronRight, HandCoins, Landmark, Receipt, Wallet } from 'lucide-react';
+import { ChevronRight, Landmark, Receipt, Signature, Wallet } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { useCurrentYear, useEntities, useEntityFinance, useEntityReport, useRequests, useSemesters } from '../../lib/data';
 import { FinancePanel } from '../../components/finance/FinancePanel';
@@ -58,8 +58,8 @@ export function TreasurerHome() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 lg:col-span-2 lg:order-3">
               <Action to="/members?show=unpaid" icon={<Wallet className="size-5" />} label="Record payment" gold />
               <Action to="/requests?new=remittance" icon={<Landmark className="size-5" />} label="Remit to SAS" />
-              <Action to="/requests?new=release" icon={<HandCoins className="size-5" />} label="Ask for release" />
-              <Action to="/requests?new=expense" icon={<Receipt className="size-5" />} label="File expense" />
+              <Action to="/requests?new=resolution" icon={<Signature className="size-5" />} label="Resolution request" />
+              <Action to="/requests" icon={<Receipt className="size-5" />} label="Liquidate" />
             </div>
             <div className="grid grid-cols-2 gap-3 content-start lg:order-2">
               <Stat label="Collected" value={peso(r.collections)} tone={r.collections ? 'ok' : undefined} />

@@ -1,10 +1,28 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Download, ReceiptText } from 'lucide-react';
 import { supabase, errorText } from '../lib/supabase';
 import { date, peso } from '../lib/format';
 import { Alert, Button, Card, Chip, Empty, EntityLogo, Spinner } from '../components/ui';
+
+/** /receipt/m/<membership id> (from a payment notification): opens that membership's current receipt. */
+export function ReceiptOfMembership() {
+  const { mid = '' } = useParams();
+  const navigate = useNavigate();
+  const q = useQuery({
+    queryKey: ['receipt-of', mid],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('receipts').select('receipt_no').eq('membership_id', Number(mid))
+        .order('issued_at', { ascending: false }).limit(1).maybeSingle();
+      if (error) throw error;
+      return data?.receipt_no ?? null;
+    },
+  });
+  useEffect(() => { if (q.data) navigate(`/receipt/${q.data}`, { replace: true }); }, [q.data, navigate]);
+  if (q.isLoading || q.data) return <Spinner />;
+  return <Card><Empty icon={<ReceiptText className="size-6" />} title="Receipt not found">It may have been voided, or it isn’t yours to open.</Empty></Card>;
+}
 
 /** One payment receipt (e.g. SSG-2026-0001). RLS decides who may open it: the student it belongs to, that org/club's
  *  treasurer, or SAS. A voided receipt (payment undone) stays readable, clearly marked, and its number is never reused. */

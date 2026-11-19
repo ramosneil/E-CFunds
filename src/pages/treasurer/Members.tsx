@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router';
-import { BellRing, Info, MoreVertical, Search, Upload, UserPlus, Users } from 'lucide-react';
+import { BellRing, ChevronRight, FileDown, Info, MoreVertical, Search, Upload, UserPlus, Users } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { useCurrentYear, useEntities, useSemesters } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
@@ -37,6 +37,8 @@ export function Members() {
   const courses = useCourses();
   const [busy, setBusy] = useState<number | null>(null);
   const [err, setErr] = useState('');
+  const [openGroup, setOpenGroup] = useState<string | null>(null);   // the year-section shown in the pop-up list
+  const [pdfBusy, setPdfBusy] = useState<string | null>(null);
 
   const members = useQuery({
     queryKey: ['memberships', entityId, year.data?.id, perSemester ? sem?.id : null],
@@ -109,6 +111,37 @@ export function Members() {
       .map(([key, list]) => ({ key, label: label(key), rows: list }));
   }, [rows]);
 
+  // Year level → its section groups, for the tiles (Neil, 2026-11-19: tap a section to see its list).
+  const years = useMemo(() => {
+    const by = new Map<number, typeof groups>();
+    for (const g of groups) {
+      const y = g.key === '~' ? 0 : Number(g.key[0]);
+      by.set(y, [...(by.get(y) ?? []), g]);
+    }
+    return [...by.entries()].sort(([a], [b]) => (a === 0 ? 1 : b === 0 ? -1 : a - b));
+  }, [groups]);
+  const yearName = (y: number) => (y === 0 ? 'No year level' : `${y}${y === 1 ? 'st' : y === 2 ? 'nd' : y === 3 ? 'rd' : 'th'} year`);
+
+  // Print-ready PDF of everyone, one year level, or one section (always the full list, whatever the filter).
+  async function exportPdf(scope: string, pick: (m: NonNullable<typeof members.data>[number]) => boolean, key: string) {
+    if (!entity || !year.data) return;
+    setPdfBusy(key); setErr('');
+    try {
+      const { membersPdf } = await import('../../lib/export/membersPdf');
+      await membersPdf({
+        entity, schoolYear: year.data.label,
+        period: perSemester ? (sem ? `${sem.term === 1 ? '1st' : '2nd'} semester` : 'this semester') : 'whole school year',
+        scope,
+        rows: (members.data ?? []).filter(pick).map((m) => ({
+          student_no: m.student?.student_no ?? '', full_name: m.student?.full_name ?? '', course: m.student?.course ?? null,
+          year_level: m.student?.year_level ?? null, section: m.student?.section ?? null,
+          is_paid: m.is_paid, amount_due: Number(m.amount_due), receipt_no: receipts.data?.get(m.id) ?? null,
+        })),
+      });
+    } catch (x) { setErr(errorText(x)); } finally { setPdfBusy(null); }
+  }
+  const keyOf = (m: NonNullable<typeof members.data>[number]) => yearSection(m.student?.year_level, m.student?.section) || '~';
+
   async function pay(id: number) {
     setBusy(id); setErr('');
     const { error } = await supabase.rpc('record_payment', { p_membership_id: id });
@@ -127,6 +160,37 @@ export function Members() {
     void qc.invalidateQueries();
   }
 
+  const renderRow = (m: NonNullable<typeof members.data>[number]) => (
+              <li key={m.id} className="px-4 sm:px-5 py-3 flex items-center gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold truncate flex items-center gap-2">
+                    <span className="truncate">{m.student?.full_name}</span>
+                    {isClub && m.via_course && <span className="shrink-0 text-[11px] font-semibold px-2 h-5 rounded-full inline-flex items-center bg-primary-soft text-primary" title="Added automatically by the student's course">From course</span>}
+                    {m.carried_over && !m.is_paid && <span className="shrink-0 text-[11px] font-semibold px-2 h-5 rounded-full inline-flex items-center bg-warn-soft text-warn" title="Member last semester. Record the fee if they stay; if they join another club, this listing is removed.">Carried over</span>}
+                  </p>
+                  <p className="text-[13px] text-muted truncate">{m.student?.student_no}{m.student?.course ? ` · ${m.student.course}` : ''}{m.is_paid ? ` · paid ${date(m.paid_at)}` : ''}</p>
+                  {m.is_paid && receipts.data?.get(m.id) && (
+                    <Link to={`/receipt/${receipts.data.get(m.id)}`} className="inline-flex items-center min-h-8 text-[13px] font-semibold text-primary hover:underline money">
+                      Receipt {receipts.data.get(m.id)}
+                    </Link>
+                  )}
+                </div>
+                <span className="money font-semibold hidden sm:block">{peso(m.amount_due)}</span>
+                {m.is_paid ? (
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Chip tone="ok">Paid</Chip>
+                    <button onClick={() => undo(m.id, m.student?.full_name ?? '')} disabled={busy === m.id}
+                      aria-label={`Undo ${m.student?.full_name ?? 'this member'}'s payment`} title="Undo payment"
+                      className="size-11 -mr-2 grid place-items-center rounded-full text-muted hover:bg-surface2 hover:text-ink cursor-pointer disabled:opacity-50">
+                      <MoreVertical className="size-5" aria-hidden />
+                    </button>
+                  </div>
+                ) : (
+                  <Button variant="gold" className="h-10 px-4 text-[14px]" busy={busy === m.id} onClick={() => pay(m.id)}>Record {peso(m.amount_due)}</Button>
+                )}
+              </li>
+  );
+
   if (year.isLoading) return <Spinner />;
   if (!year.data) return <><PageHeader title="Members" /><NoYear /></>;
   const all = members.data ?? [];
@@ -138,7 +202,10 @@ export function Members() {
     <>
       <PageHeader title="Members" sub={entity ? `${entity.short_name} · ${peso(entity.dues_amount)} ${perSemester ? (sem ? `· ${sem.term === 1 ? '1st' : '2nd'} semester` : 'per semester') : 'per school year'}` : undefined}
         action={<div className="flex items-center gap-2">
-          {entity && <ExportMenu label="CSV" options={[{ label: 'Members & dues', kind: 'csv', run: async () => (await exportsLib()).membersCsv(entity, year.data!) }]} />}
+          {entity && <ExportMenu label="Export" options={[
+            { label: 'All members (print-ready)', kind: 'pdf', run: () => exportPdf('All members', () => true, 'all') },
+            { label: 'Members & dues', kind: 'csv', run: async () => (await exportsLib()).membersCsv(entity, year.data!) },
+          ]} />}
           {isClub && <Button variant="soft" aria-label="Import members" onClick={() => setImporting(true)}><Upload className="size-5" /><span className="hidden sm:inline">Import</span></Button>}
           {isClub && <Button aria-label="Add member" onClick={() => setAdding(true)}><UserPlus className="size-5" /><span className="hidden sm:inline">Add member</span></Button>}
         </div>} />
@@ -187,6 +254,41 @@ export function Members() {
           ? 'Add students who join your club. They start as to collect; record the fee when they pay.'
           : 'Members appear here automatically: when a club adds a student, they join SSG and their course organizations.'}</Empty></Card>
       ) : (
+        q.trim() === '' ? (
+        <div className="space-y-4">
+          {years.map(([y, list]) => {
+            const n = list.reduce((t, g) => t + g.rows.length, 0), np = list.reduce((t, g) => t + g.rows.filter((m) => m.is_paid).length, 0);
+            return (
+              <Card key={y}>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="min-w-0 flex-1">
+                    <h2 className="font-display font-bold text-[18px]">{yearName(y)}</h2>
+                    <p className="text-[13px] text-muted">{n} member{n === 1 ? '' : 's'} · {np} paid</p>
+                  </div>
+                  <Button variant="soft" className="h-11 px-3 text-[14px]" busy={pdfBusy === `y${y}`}
+                    onClick={() => exportPdf(yearName(y), (m) => (m.student?.year_level ?? 0) === y, `y${y}`)}>
+                    <FileDown className="size-4" aria-hidden /><span className="hidden sm:inline">PDF</span>
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                  {list.map((g) => {
+                    const gp = g.rows.filter((m) => m.is_paid).length;
+                    return (
+                      <button key={g.key} type="button" onClick={() => setOpenGroup(g.key)}
+                        className="text-left rounded-[14px] border border-line bg-surface2 hover:bg-primary-soft hover:border-primary/40 p-3 cursor-pointer transition">
+                        <span className="flex items-center gap-1 font-display font-extrabold text-[17px]">{g.key === '~' ? 'No section' : /^\d$/.test(g.key) ? `${g.key} · no section` : g.key}<ChevronRight className="size-4 ml-auto text-muted" aria-hidden /></span>
+                        <span className="block text-[12.5px] text-muted mt-0.5">{g.rows.length} · {gp} paid</span>
+                        <span className="block h-1.5 mt-2 rounded-full bg-line overflow-hidden"><span className="block h-full bg-ok" style={{ width: `${g.rows.length ? (gp / g.rows.length) * 100 : 0}%` }} /></span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </Card>
+            );
+          })}
+          {!rows.length && <Card><p className="text-center text-muted py-2">No one in this list.</p></Card>}
+        </div>
+        ) : (
         <div className="space-y-4">
           {groups.map((g) => (
           <Card key={g.key} className="p-0 overflow-hidden">
@@ -195,42 +297,28 @@ export function Members() {
             <span className="text-[13px] text-muted">{g.rows.length} member{g.rows.length === 1 ? '' : 's'} · {g.rows.filter((m) => m.is_paid).length} paid</span>
           </div>
           <ul className="divide-y divide-line">
-            {g.rows.map((m) => (
-              <li key={m.id} className="px-4 sm:px-5 py-3 flex items-center gap-3">
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold truncate flex items-center gap-2">
-                    <span className="truncate">{m.student?.full_name}</span>
-                    {isClub && m.via_course && <span className="shrink-0 text-[11px] font-semibold px-2 h-5 rounded-full inline-flex items-center bg-primary-soft text-primary" title="Added automatically by the student's course">From course</span>}
-                    {m.carried_over && !m.is_paid && <span className="shrink-0 text-[11px] font-semibold px-2 h-5 rounded-full inline-flex items-center bg-warn-soft text-warn" title="Member last semester. Record the fee if they stay; if they join another club, this listing is removed.">Carried over</span>}
-                  </p>
-                  <p className="text-[13px] text-muted truncate">{m.student?.student_no}{m.student?.course ? ` · ${m.student.course}` : ''}{m.is_paid ? ` · paid ${date(m.paid_at)}` : ''}</p>
-                  {m.is_paid && receipts.data?.get(m.id) && (
-                    <Link to={`/receipt/${receipts.data.get(m.id)}`} className="inline-flex items-center min-h-8 text-[13px] font-semibold text-primary hover:underline money">
-                      Receipt {receipts.data.get(m.id)}
-                    </Link>
-                  )}
-                </div>
-                <span className="money font-semibold hidden sm:block">{peso(m.amount_due)}</span>
-                {m.is_paid ? (
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Chip tone="ok">Paid</Chip>
-                    <button onClick={() => undo(m.id, m.student?.full_name ?? '')} disabled={busy === m.id}
-                      aria-label={`Undo ${m.student?.full_name ?? 'this member'}'s payment`} title="Undo payment"
-                      className="size-11 -mr-2 grid place-items-center rounded-full text-muted hover:bg-surface2 hover:text-ink cursor-pointer disabled:opacity-50">
-                      <MoreVertical className="size-5" aria-hidden />
-                    </button>
-                  </div>
-                ) : (
-                  <Button variant="gold" className="h-10 px-4 text-[14px]" busy={busy === m.id} onClick={() => pay(m.id)}>Record {peso(m.amount_due)}</Button>
-                )}
-              </li>
-            ))}
+            {g.rows.map(renderRow)}
           </ul>
           </Card>
           ))}
           {!rows.length && <Card><p className="text-center text-muted py-2">No one matches.</p></Card>}
         </div>
+        )
       )}
+      {openGroup && (() => {
+        const g = groups.find((x) => x.key === openGroup);
+        const label = openGroup === '~' ? 'No year / section' : /^\d$/.test(openGroup) ? `Year ${openGroup} · no section` : `Section ${openGroup}`;
+        return (
+          <Sheet open onClose={() => setOpenGroup(null)} title={`${label} · ${entity?.short_name ?? ''}`}>
+            <div className="flex items-center gap-3 mb-3">
+              <p className="text-[14px] text-muted flex-1">{g ? `${g.rows.length} member${g.rows.length === 1 ? '' : 's'} · ${g.rows.filter((m) => m.is_paid).length} paid` : 'No one here with this filter.'}</p>
+              <Button variant="soft" className="h-11 px-3 text-[14px]" busy={pdfBusy === `g${openGroup}`}
+                onClick={() => exportPdf(label, (m) => keyOf(m) === openGroup, `g${openGroup}`)}><FileDown className="size-4" aria-hidden />PDF</Button>
+            </div>
+            {g && <ul className="divide-y divide-line -mx-5 border-t border-line">{g.rows.map(renderRow)}</ul>}
+          </Sheet>
+        );
+      })()}
       {importing && isClub && <ImportSheet mode="club" courses={(courses.data ?? []).map((c) => c.code)} onClose={() => setImporting(false)} />}
       {adding && entity && isClub && <AddMember onClose={() => setAdding(false)} entityId={entityId} dues={Number(entity.dues_amount)} perSemester={entity.dues_period === 'semester'} />}
     </>
