@@ -45,10 +45,11 @@ function RequestQueue() {
   const year = useCurrentYear();
   const report = useEntityReport(year.data?.id);
   const entities = useEntities();
+  const liquidations = useLiquidations();   // every hook before the early return (React error #310)
   const byId = new Map(entities.data?.map((e) => [e.id, e]));
   if (pending.isLoading) return <Spinner />;
   const done = (recent.data ?? []).filter((r) => r.status !== 'pending').slice(0, 10);
-  const liqs = useLiquidations().data ?? [];
+  const liqs = liquidations.data ?? [];
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.5fr_1fr] items-start">
       <div className="space-y-4">
