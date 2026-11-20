@@ -21,7 +21,8 @@ export function describe(r: AuditRow, names: Names): string {
   const org = names.entity(a.entity_id ?? b.entity_id);
   switch (r.table_name) {
     case 'fund_requests': {
-      const what = `${org}'s ${peso(n(a.amount ?? b.amount))} ${s(kindLabel[s(a.kind ?? b.kind)] ?? a.kind).toLowerCase()}`;
+      const amt = a.amount ?? b.amount;   // a resolution has no amount until SAS reads it from the file
+      const what = `${org}'s ${amt == null ? '' : `${peso(n(amt))} `}${s(kindLabel[s(a.kind ?? b.kind)] ?? a.kind).toLowerCase()}`;
       if (r.action === 'insert') return `Filed ${what}${a.category ? ` (${categoryLabel[s(a.category)]})` : ''}`;
       if (a.status !== b.status) return `${s(a.status) === 'approved' ? 'Approved' : s(a.status) === 'rejected' ? 'Rejected' : s(a.status) === 'cancelled' ? 'Cancelled' : `Set to ${s(a.status)}`} ${what}`;
       return `Updated ${what}`;
