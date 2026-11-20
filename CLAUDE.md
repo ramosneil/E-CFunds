@@ -25,7 +25,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 ## Status (updated 2026-11-20)
 - **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
   student on the roster. Test data was wiped before launch.
-- Database: **43 migrations** live (last `20261120120000_ssg_signers_in_settings`). pg_cron on (2 jobs). Full system check
+- Database: **44 migrations** live (last `20261120140000_liquidation_items`). pg_cron on (2 jobs). Full system check
   2026-11-17: `docs/audit-2026-11-17.md` (all 7 lapses fixed; only SAS edits students; lists page past 1,000 rows).
 - **2026-11-19/20 batch live:** resolution requests + liquidation, notification delete + exact links, report signatories,
   member tiles + PDF. Checked with sample data + live SAS view; Neil's phone test of resolution → liquidation pending.

@@ -330,3 +330,13 @@ None. Both §10 questions were answered in session 3 and moved to §8.
   the SSG sheet types only its adviser.
 - **Message notifications** open the conversation for treasurers too (`/messages/<org>`; the route was missing).
 - **Fund cards** no longer show the "Live" mark; the numbers still update by themselves.
+
+## Liquidation items → Financial Report in the SAS spreadsheet format (Neil, 2026-11-20; migration 44)
+- **Liquidate** asks for the **activity name** (e.g. SimuLIT, Tarpaulin), the receipt files, and each **item**:
+  Particular · Unit · Quantity · Unit price. The **amount spent is the items' total** (worked out by the system,
+  never typed) and must not be more than what was released. A returned liquidation opens with the items sent before.
+- SAS sees the activity name and the item list on the liquidation card before approving.
+- On approval the expense is recorded under the activity name, so the **Financial Report** prints one salmon heading
+  per activity with its numbered items and a Sub Total — the same rows and colours as the SAS spreadsheet form (blue
+  Previous Fund / Total Collection / Sub Total bars, salmon Grand Total, grey Total Remain Fund, orange Cash Breakdown).
+  Empty filler rows of the paper form are left out. Receipt files stay in the system (not printed in the PDF).

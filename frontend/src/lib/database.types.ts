@@ -91,6 +91,7 @@ export type Database = {
           file_name: string | null; liquidation_status: 'submitted' | 'approved' | 'returned' | null; liquidation_files: string[];
           liquidation_spent: number | null; liquidation_remarks: string | null; liquidation_submitted_at: string | null;
           liquidated_at: string | null; liquidated_by: string | null;
+          activity_title: string | null;   // migration 44: liquidation activity name
         };
         Insert: never; Update: never; Relationships: [];
       };
@@ -252,7 +253,7 @@ export type Database = {
       };
       file_resolution: { Args: { p_entity_id: number; p_path: string; p_file_name: string }; Returns: number };
       review_resolution: { Args: { p_request_id: number; p_approve: boolean; p_amount?: number; p_remarks?: string }; Returns: number };
-      submit_resolution_liquidation: { Args: { p_request_id: number; p_files: string[]; p_spent: number }; Returns: undefined };
+      submit_resolution_liquidation: { Args: { p_request_id: number; p_files: string[]; p_spent?: number; p_title?: string; p_items?: Json }; Returns: undefined };
       review_resolution_liquidation: { Args: { p_request_id: number; p_approve: boolean; p_remarks?: string }; Returns: undefined };
       review_request: { Args: { p_approve: boolean; p_remarks?: string; p_request_id: number; p_category?: E['expense_category'] }; Returns: number };
       // Server-function only (service_role); the browser cannot call these two.

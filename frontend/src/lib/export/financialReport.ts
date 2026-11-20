@@ -2,7 +2,7 @@
 // Folio / long bond (8.5 × 13 in), same order and wording as the paper form. Nobody types the numbers: they come
 // from the ledger; only the cash count (bills/coins) is typed at download and is not stored.
 import type { FinancialReport } from '../database.types';
-import { createDoc, logoImage, sealImage, text, INK, MUTED, LINE, SOFT } from './pdf';
+import { createDoc, logoImage, sealImage, text, INK, MUTED, LINE } from './pdf';
 import { saveFile } from './save';
 import { slug } from './csv';
 
@@ -49,66 +49,71 @@ export async function financialReportPdf(r: FinancialReport, cash: CashCount) {
   text(doc, `A.Y ${r.school_year}, ${termLabel(r.semester_term)}`, cx, y, { size: 10, bold: true, align: 'center' }); y += 5;
   text(doc, `As of ${longDate(r.as_of)}`, cx, y, { size: 9, color: MUTED, align: 'center' }); y += 9;
 
-  // Two-column "label …… amount" rows.
-  const line = (label: string, amount: number | null, o: { bold?: boolean; indent?: number; rule?: boolean } = {}) => {
-    if (y > H - 30) { doc.addPage(); y = 20; }
-    text(doc, label, m + (o.indent ?? 0), y, { size: 10, bold: o.bold, maxWidth: right - m - 45 - (o.indent ?? 0) });
-    if (amount !== null) text(doc, money(amount), right, y, { size: 10, bold: o.bold, align: 'right' });
-    if (o.rule) { doc.setDrawColor(LINE); doc.setLineWidth(0.25); doc.line(m, y + 2, right, y + 2); }
-    y += 7;
-  };
+  // ── The money part: one spreadsheet-like table, the same rows and colours as the SAS form (Neil's sample,
+  // 2026-11-20): blue bars for Previous Fund / Total Collection / Sub Total, a salmon heading per activity with its
+  // items (No. · Particular · Unit · Quantity · Unit Price · Total Amount) and Sub Total, salmon Grand Total, grey
+  // Total Remain Fund. Empty filler rows of the paper form are left out.
+  const BLUE = '#1F6E8C', SALMON = '#F4B183', GREY = '#A6A6A6', SKY = '#9DC3E6', RUST = '#C55A11', PEACH = '#FBE2D5', GRID = '#BFBFBF';
+  type Cell = string | { content: string; colSpan?: number; styles?: Record<string, unknown> };
+  const rows: Cell[][] = [];
+  const L = { halign: 'left' as const };
+  const band = (label: string, amount: number | null, fill: string, color = INK) => rows.push([
+    { content: label, colSpan: 5, styles: { ...L, fillColor: fill, textColor: color, fontStyle: 'bold' } },
+    { content: amount === null ? '' : money(amount), styles: { fillColor: fill, textColor: color, fontStyle: 'bold', halign: 'right' } },
+  ]);
+  const plain = (label: string, amount: number | null, o: { bold?: boolean; indent?: boolean; muted?: boolean } = {}) => rows.push([
+    { content: label, colSpan: 5, styles: { ...L, fontStyle: o.bold ? 'bold' : 'normal', textColor: o.muted ? MUTED : INK, ...(o.indent ? { cellPadding: { top: 1.6, bottom: 1.6, left: 7, right: 2 } } : {}) } },
+    { content: amount === null ? '' : money(amount), styles: { halign: 'right', fontStyle: o.bold ? 'bold' : 'normal' } },
+  ]);
   const sem = r.semester_term ? 'Sem' : 'Academic Year';
-  line(`Previous Fund (${sem})`, r.previous_fund, { bold: true, rule: true });
-  line('Collection', null, { bold: true });
+  band(`Previous Fund- (${sem === 'Sem' ? 'Sem/Academic Year' : 'Academic Year'})`, r.previous_fund, BLUE, '#FFFFFF');
+  plain('Collection', null, { bold: true });
   const mem = r.membership;
-  line(`Collected Membership Fee (${mem.paid} x ${mem.rate !== null ? qtyFmt(Number(mem.rate)) : 'various'}, Remaining ${mem.unpaid})`, r.total_collection, { indent: 6 });
-  line('Total Collection', r.total_collection, { bold: true, rule: true });
-  line('Sub Total (Prev. Fund and Collection)', r.subtotal, { bold: true, rule: true });
-  line('Less: Total Expenses', null, { bold: true });
-
-  // ── One table per activity ──
-  const lastY = () => (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
-  const tableBase = {
-    theme: 'grid' as const, margin: { left: m, right: m, top: 20, bottom: 20 }, showHead: 'everyPage' as const,
-    styles: { font: 'Inter', fontSize: 8.5, textColor: INK, lineColor: LINE, lineWidth: 0.15, cellPadding: { top: 1.6, bottom: 1.6, left: 2, right: 2 } },
-    headStyles: { font: 'Inter', fontStyle: 'bold' as const, fillColor: SOFT, textColor: INK, fontSize: 8 },
-    footStyles: { font: 'Inter', fontStyle: 'bold' as const, fillColor: SOFT, textColor: INK },
-  };
-  if (!r.expense_groups.length) {
-    text(doc, 'No approved expenses in this period.', m + 6, y, { size: 9, color: MUTED }); y += 8;
-  }
+  plain(`Collected Membership Fee (${mem.paid} x ${mem.rate !== null ? qtyFmt(Number(mem.rate)) : 'various'} Remaining ${mem.unpaid})`, r.total_collection, { indent: true });
+  band('Total Collection', r.total_collection, BLUE, '#FFFFFF');
+  band('Sub Total (Prev. Fund and Collection)', r.subtotal, BLUE, '#FFFFFF');
+  plain('Less: Total Expenses', null, { bold: true });
+  if (!r.expense_groups.length) plain('No approved expenses in this period.', null, { indent: true, muted: true });
   for (const g of r.expense_groups) {
-    if (y > H - 50) { doc.addPage(); y = 20; }
-    text(doc, g.title, m, y, { size: 10, bold: true, maxWidth: right - m }); y += 2;
-    autoTable(doc, {
-      ...tableBase, startY: y,
-      head: [['No.', 'Particular', 'Unit', 'Quantity', 'Unit Price', 'Total Amount']],
-      body: g.items.map((it, i) => [String(i + 1), it.particular, it.unit, qtyFmt(it.qty), money(it.unit_price), money(it.total)]),
-      foot: [[{ content: 'Sub Total', colSpan: 5 }, money(g.subtotal)]],
-      columnStyles: { 0: { cellWidth: 11, halign: 'center' }, 2: { cellWidth: 17 }, 3: { cellWidth: 19, halign: 'right' }, 4: { cellWidth: 27, halign: 'right' }, 5: { cellWidth: 31, halign: 'right' } },
-      didParseCell: (d) => { if (d.section === 'foot' && d.column.index === 5) d.cell.styles.halign = 'right'; },
-    });
-    y = lastY() + 8;
+    rows.push([{ content: g.title, colSpan: 6, styles: { ...L, fillColor: SALMON, fontStyle: 'bold' } }]);
+    rows.push(['No.', 'Particular', 'Unit', 'Quantity', 'Unit Price', 'Total Amount'].map((h, i) => ({ content: h, styles: { fontStyle: 'bold', halign: i === 0 ? 'center' : 'left' } })));
+    g.items.forEach((it, i) => rows.push([String(i + 1), it.particular, it.unit, qtyFmt(it.qty), money(it.unit_price), money(it.total)]));
+    plain('Sub Total', g.subtotal, { bold: true });
   }
-  if (Math.abs(Number(r.adjustments)) >= 0.005) line('Adjustments by SAS (corrections)', r.adjustments, { rule: true });
-  line('Grand Total (Expenses)', r.total_expenses, { bold: true, rule: true });
-  line(`Total Remain Fund (${r.semester_term ? 'Semester' : 'Academic Year'})`, r.remaining_fund, { bold: true, rule: true });
-  y += 2;
-  line(`Remaining Cash for AY ${r.school_year}${r.semester_term ? `, ${termLabel(r.semester_term).replace('SEMESTER', 'Semester')}` : ''}`, null, { bold: true });
-  line('Cash on hand (with the treasurer)', r.cash_on_hand, { indent: 6 });
-  line('Saved with SAS', r.saved_with_sas, { indent: 6, rule: true });
+  if (Math.abs(Number(r.adjustments)) >= 0.005) plain('Adjustments by SAS (corrections)', r.adjustments);
+  band('Grand Total (Expenses)', r.total_expenses, SALMON);
+  rows.push([
+    { content: `Total Remain Fund (${r.semester_term ? 'Semester' : 'Academic Year'})`, colSpan: 5, styles: { ...L, fillColor: GREY, fontStyle: 'bold' } },
+    { content: money(r.remaining_fund), styles: { fillColor: SKY, fontStyle: 'bold', halign: 'right' } },
+  ]);
+  plain(`Remaining Cash for AY ${r.school_year}${r.semester_term ? `, ${termLabel(r.semester_term).replace('SEMESTER', 'Semester')}` : ''}`, null, { bold: true });
+  plain('Cash on hand (with the treasurer)', r.cash_on_hand, { indent: true });
+  plain('Saved with SAS', r.saved_with_sas, { indent: true });
 
-  // ── Cash breakdown (typed by the treasurer; blank rows to fill in if not given) ──
-  if (y > H - 75) { doc.addPage(); y = 20; }
-  text(doc, 'Cash Breakdown', m, y, { size: 10, bold: true }); y += 2;
-  const rows = DENOMS.map((d, i) => [String(i + 1), money(d), cash ? String(cash.bills[d] || 0) : '', cash ? money(d * (cash.bills[d] || 0)) : '']);
-  rows.push([String(DENOMS.length + 1), 'Coins', '', cash ? money(cash.coins || 0) : '']);
+  const lastY = () => (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
+  const sheet = {
+    theme: 'grid' as const, margin: { left: m, right: m, top: 20, bottom: 20 },
+    styles: { font: 'Inter', fontSize: 8.5, textColor: INK, lineColor: GRID, lineWidth: 0.15, cellPadding: { top: 1.6, bottom: 1.6, left: 2, right: 2 } },
+  };
   autoTable(doc, {
-    ...tableBase, startY: y, tableWidth: 120,
-    head: [['No.', 'Denomination', 'Qty', 'Total']], body: rows,
-    foot: [[{ content: 'TOTAL CASH', colSpan: 3 }, cash ? money(cashTotal(cash)) : '']],
+    ...sheet, startY: y, body: rows as never,
+    columnStyles: { 0: { cellWidth: 11, halign: 'center' }, 2: { cellWidth: 17 }, 3: { cellWidth: 19, halign: 'right' }, 4: { cellWidth: 27, halign: 'right' }, 5: { cellWidth: 31, halign: 'right' } },
+  });
+  y = lastY() + 8;
+
+  // ── Cash breakdown (typed by the treasurer; blank to fill in by hand if not given) ──
+  if (y > H - 75) { doc.addPage(); y = 20; }
+  const cashRows: Cell[][] = [
+    [{ content: 'Cash Breakdown', colSpan: 4, styles: { ...L, fillColor: RUST, textColor: '#FFFFFF', fontStyle: 'bold' } }],
+    ['No.', 'Denomination', 'Qty', 'Total'].map((h, i) => ({ content: h, styles: { fontStyle: 'bold', fillColor: PEACH, halign: i === 0 ? 'center' : i === 1 ? 'left' : 'right' } })),
+    ...DENOMS.map((d, i) => [String(i + 1), d.toLocaleString('en-PH'), cash ? String(cash.bills[d] || 0) : '', cash ? money(d * (cash.bills[d] || 0)) : '']),
+    [String(DENOMS.length + 1), 'coins', '', cash ? money(cash.coins || 0) : ''],
+    [{ content: 'TOTAL CASH', colSpan: 3, styles: { ...L, fillColor: SALMON, fontStyle: 'bold' } },
+     { content: cash ? money(cashTotal(cash)) : '', styles: { fillColor: SALMON, fontStyle: 'bold', halign: 'right' } }],
+  ];
+  autoTable(doc, {
+    ...sheet, startY: y, tableWidth: 120, body: cashRows as never,
     columnStyles: { 0: { cellWidth: 12, halign: 'center' }, 1: { cellWidth: 38 }, 2: { cellWidth: 22, halign: 'right' }, 3: { halign: 'right' } },
-    didParseCell: (d) => { if (d.section === 'foot' && d.column.index === 3) d.cell.styles.halign = 'right'; },
   });
   y = lastY() + 12;
 

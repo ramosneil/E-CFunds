@@ -189,3 +189,13 @@ prevents two approvals racing past a limit.
 - `report_settings.ssg_governor_name`, `ssg_auditor_name` (≤ 80 chars), started from the SSG's saved signatories;
   `save_report_settings` accepts both keys (SAS only). `get_financial_report` returns them in `settings`.
 - Rehearsed (rolled back): SAS saves + trims, report returns them, empty value clears only that key, treasurer refused.
+
+## Liquidation items (migration 44 `liquidation_items`, 2026-11-20)
+- `fund_requests.activity_title` (≤ 120). `submit_resolution_liquidation(request, files[], spent default null,
+  title default null, items jsonb default null)`: with items (1–30; particular, unit, qty > 0, unit_price ≥ 0) the
+  title is required and spent = Σ round(qty × unit_price, 2); lines replace earlier ones in `expense_items`
+  (request_id = the resolution). Without items it works as before (old app versions).
+- `review_resolution_liquidation` approve → the `expense` ledger entry's description = the activity name, so
+  `get_financial_report` groups the items under it (no report function change).
+- Rehearsed (8 checks, rolled back): over released / no title / qty 0 refused; old-style call ok; ₱28 from 2 items;
+  approve → expense "SimuLIT" ₱28 + ₱2 back to savings; report group SimuLIT, 2 items, subtotal ₱28; anon can't run it.

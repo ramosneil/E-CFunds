@@ -152,3 +152,9 @@ Only you do steps 1–3 (they involve your Google password and a secret app pass
 
 ## Project folders changed (2026-11-20)
 - The app now lives in `frontend/`: run `npm run dev` inside `C:\xampp\htdocs\E-CFunds\frontend`. If you use Android Studio, open `frontend\android` (the old `android` folder is gone).
+
+## Phone check — liquidation items (2026-11-20)
+1. Treasurer → Requests → an approved resolution → **Liquidate**: type the activity name, add each receipt item (the amount spent fills itself), attach the receipts → Send.
+2. SAS → Approvals: the liquidation card shows the activity name and the items → Approve (or Return).
+3. Financial report → Download PDF: the activity appears as a salmon heading with its items and Sub Total, like the SAS spreadsheet.
+4. School year page: type the real **SSG governor** and **SSG auditor** names → Save (they print on every report).

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useSearchParams } from 'react-router';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileText, Paperclip, Plus, Receipt, RotateCcw, Signature, X } from 'lucide-react';
 import { useFocusFromParam } from '../../lib/focus';
 import { useAuth } from '../../lib/auth';
@@ -13,6 +13,7 @@ import { IfApproved, NoYear, RequestRow, Segmented } from '../../components/comm
 import { confirmAsk } from '../../lib/confirm';
 import { toast } from '../../lib/toast';
 import { fileLabel, openPrivateFile, uploadOrgFile } from '../../lib/files';
+import { ItemRows, blankItem, itemsPayload, itemsProblem, itemsTotal, type ItemLine } from '../../components/ItemRows';
 
 // Treasurer requests (Neil, 2026-11-19): REMIT cash on hand to SAS, or send a RESOLUTION REQUEST — the signed resolution
 // file only (its amount is written in the file; SAS reads it and types it when approving). An approved resolution is
@@ -243,11 +244,23 @@ function LiquidateResolution({ r, entityId, onClose }: { r: Req; entityId: numbe
   const qc = useQueryClient();
   const released = Number(r.amount ?? 0);
   const [files, setFiles] = useState<File[]>([]);
-  const [spent, setSpent] = useState(r.liquidation_spent != null ? String(r.liquidation_spent) : '');
+  // Activity name + receipt items (Neil, 2026-11-20): printed on the Financial Report like the SAS form.
+  // The amount spent is the items' total — nothing else to type.
+  const [title, setTitle] = useState(r.activity_title ?? '');
+  const [lines, setLines] = useState<ItemLine[] | null>(r.liquidation_status === 'returned' ? null : [blankItem()]);
+  const earlier = useQuery({   // a returned liquidation starts from the items sent before
+    queryKey: ['expense-items', r.id], enabled: lines === null,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('expense_items').select('particular, unit, qty, unit_price').eq('request_id', r.id).order('line_no');
+      if (error) throw error;
+      return data as { particular: string; unit: string; qty: number; unit_price: number }[];
+    },
+  });
+  const items = lines ?? (earlier.data?.length ? earlier.data.map((i) => ({ particular: i.particular, unit: i.unit, qty: String(i.qty), price: String(i.unit_price) })) : [blankItem()]);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
-  const s = Number(spent);
-  const valid = spent.trim() !== '' && s >= 0 && s <= released;
+  const s = itemsTotal(items);
+  const valid = s <= released;
 
   function add(list: FileList | null) {
     if (!list) return;
@@ -260,17 +273,20 @@ function LiquidateResolution({ r, entityId, onClose }: { r: Req; entityId: numbe
 
   async function submit(e: FormEvent) {
     e.preventDefault();
+    if (!title.trim()) { setErr('Type the activity name (e.g. Intramurals).'); return; }
+    const problem = itemsProblem(items);
+    if (problem) { setErr(problem); return; }
+    if (!valid) { setErr(`The items add up to ${peso(s)}, more than the ${peso(released)} released.`); return; }
     if (!files.length) { setErr('Attach the receipts or the liquidation report.'); return; }
-    if (!valid) { setErr(`Type the amount spent (₱0 to ${peso(released)}).`); return; }
-    if (!(await confirmAsk({ title: 'Send the liquidation to SAS?', body: `Spent ${peso(s)} of ${peso(released)} released, with ${files.length} file${files.length > 1 ? 's' : ''}.${released > s ? ` ${peso(released - s)} goes back to your savings with SAS when it is approved.` : ''}`, confirm: 'Send', tone: 'primary' }))) return;
+    if (!(await confirmAsk({ title: 'Send the liquidation to SAS?', body: `${title.trim()}: spent ${peso(s)} of ${peso(released)} released (${itemsPayload(items).length} item${itemsPayload(items).length === 1 ? '' : 's'}), with ${files.length} file${files.length > 1 ? 's' : ''}.${released > s ? ` ${peso(released - s)} goes back to your savings with SAS when it is approved.` : ''}`, confirm: 'Send', tone: 'primary' }))) return;
     setBusy(true); setErr('');
     try {
       const paths: string[] = [];
       for (const f of files) paths.push(await uploadOrgFile(entityId, `liq-r${r.id}`, f));
-      const { error } = await supabase.rpc('submit_resolution_liquidation', { p_request_id: r.id, p_files: paths, p_spent: s });
+      const { error } = await supabase.rpc('submit_resolution_liquidation', { p_request_id: r.id, p_files: paths, p_title: title.trim(), p_items: itemsPayload(items) });
       if (error) throw error;
       void qc.invalidateQueries();
-      toast({ title: 'Liquidation sent to SAS', body: r.file_name ?? 'Resolution', tone: 'ok', silent: true });
+      toast({ title: 'Liquidation sent to SAS', body: title.trim(), tone: 'ok', silent: true });
       onClose();
     } catch (x) { setErr(errorText(x)); } finally { setBusy(false); }
   }
@@ -282,12 +298,18 @@ function LiquidateResolution({ r, entityId, onClose }: { r: Req; entityId: numbe
         {r.liquidation_status === 'returned' && <Alert tone="warn">SAS returned it: {r.liquidation_remarks}</Alert>}
         <dl className="grid grid-cols-3 gap-2 rounded-[16px] bg-surface2 p-4 text-[13px]">
           <div><dt className="text-muted">Released</dt><dd className="money font-semibold text-[16px]">{peso(released)}</dd></div>
-          <div><dt className="text-muted">Spent</dt><dd className="money font-semibold text-[16px]">{valid ? peso(s) : '—'}</dd></div>
+          <div><dt className="text-muted">Spent (items)</dt><dd className={`money font-semibold text-[16px] ${valid ? '' : 'text-bad'}`}>{peso(s)}</dd></div>
           <div><dt className="text-muted">Back to savings</dt><dd className="money font-semibold text-[16px]">{valid ? peso(released - s) : '—'}</dd></div>
         </dl>
-        <Field label="Amount spent" hint={`From the receipts. ₱0 to ${peso(released)}.`} error={spent.trim() !== '' && !valid ? `Must be between ₱0 and ${peso(released)}.` : null}>
-          <Input inputMode="decimal" value={spent} onChange={(e) => setSpent(e.target.value)} className="money text-[22px] h-14 font-semibold" placeholder="0.00" />
+        {!valid && <Alert>The items add up to {peso(s)}, more than the {peso(released)} released.</Alert>}
+        <Field label="Activity name" hint="The heading on the Financial Report, e.g. SimuLIT, Intramurals, Tarpaulin.">
+          <Input value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Intramurals" />
         </Field>
+        <div>
+          <p className="text-[14px] font-semibold">Items on the receipts</p>
+          <p className="text-[13px] text-muted mb-2">One line per item: Particular, Unit, Quantity, Unit price. The total is worked out for you.</p>
+          {lines === null && earlier.isLoading ? <Spinner label="Loading the items you sent" /> : <ItemRows lines={items} onChange={setLines} disabled={busy} />}
+        </div>
         <div>
           <p className="text-[14px] font-semibold">Files <span className="text-muted font-normal">(required, up to 10)</span></p>
           <p className="text-[13px] text-muted mb-2">Photos or PDFs: official receipts, liquidation report, attendance, activity photos.</p>

@@ -230,6 +230,33 @@ function ResolutionCard({ r, entity, cash, saved }: { r: Row<'fund_requests'>; e
   );
 }
 
+/** The receipt items the treasurer listed (they go on the Financial Report under the activity name). */
+function LiquidationItems({ id }: { id: number }) {
+  const q = useQuery({
+    queryKey: ['expense-items', id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('expense_items').select('line_no, particular, unit, qty, unit_price').eq('request_id', id).order('line_no');
+      if (error) throw error;
+      return data as { line_no: number; particular: string; unit: string; qty: number; unit_price: number }[];
+    },
+  });
+  if (!q.data?.length) return null;
+  return (
+    <div className="mt-4">
+      <p className="text-[14px] font-semibold mb-1">Items · {q.data.length}</p>
+      <ul className="divide-y divide-line rounded-[14px] border border-line text-[13.5px]">
+        {q.data.map((i) => (
+          <li key={i.line_no} className="flex gap-3 px-3 py-2">
+            <span className="text-muted w-5 shrink-0 text-right">{i.line_no}</span>
+            <span className="min-w-0 flex-1 break-words">{i.particular} <span className="text-muted">· {Number(i.qty)} {i.unit} × {peso(i.unit_price)}</span></span>
+            <span className="money font-semibold shrink-0">{peso(Math.round(i.qty * i.unit_price * 100) / 100)}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 /** SAS checks a resolution's liquidation files and the amount spent; approve moves the money, return asks for fixes. */
 function LiquidationCard({ r, entity }: { r: Row<'fund_requests'>; entity?: Row<'entities'> }) {
   const qc = useQueryClient();
@@ -257,12 +284,13 @@ function LiquidationCard({ r, entity }: { r: Row<'fund_requests'>; entity?: Row<
 
   return (
     <Card>
-      <OrgHead entity={entity} title="Liquidation" sub={<>{r.file_name} · sent {r.liquidation_submitted_at ? date(r.liquidation_submitted_at) : ''}</>} />
+      <OrgHead entity={entity} title={`Liquidation${r.activity_title ? ` · ${r.activity_title}` : ''}`} sub={<>{r.file_name} · sent {r.liquidation_submitted_at ? date(r.liquidation_submitted_at) : ''}</>} />
       <dl className="mt-3 grid grid-cols-3 gap-2 rounded-[16px] bg-surface2 p-4 text-[13px]">
         <div><dt className="text-muted">Released</dt><dd className="money font-semibold text-[16px]">{peso(released)}</dd></div>
         <div><dt className="text-muted">Spent</dt><dd className="money font-semibold text-[16px]">{peso(spent)}</dd></div>
         <div><dt className="text-muted">Back to savings</dt><dd className="money font-semibold text-[16px]">{peso(Math.max(0, released - spent))}</dd></div>
       </dl>
+      <LiquidationItems id={r.id} />
       <p className="text-[14px] font-semibold mt-4 mb-1">Files · {r.liquidation_files.length}</p>
       <div className="flex flex-wrap gap-2">
         {r.liquidation_files.map((f) => (
