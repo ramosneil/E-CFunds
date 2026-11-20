@@ -4,10 +4,54 @@ import { ChevronDown, History } from 'lucide-react';
 import { useEntities } from '../../lib/data';
 import { supabase } from '../../lib/supabase';
 import { describe, thingLabel, type AuditRow } from '../../lib/activity';
+import { peso } from '../../lib/format';
 import { Button, Card, Empty, Input, PageHeader, Select, Spinner } from '../../components/ui';
 
 const PAGE = 50;
 const when = new Intl.DateTimeFormat('en-PH', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Manila' });
+
+// "What changed" in plain words (Neil, 2026-11-20: no raw Before/After data). The full rows stay in audit_log.
+type Names = { entity: (id: unknown) => string; person: (id: unknown) => string };
+const HIDDEN = new Set(['id', 'created_at', 'updated_at', 'updated_by', 'search', 'school_year_id', 'semester_id', 'student_id', 'membership_id', 'request_id']);
+const LABELS: Record<string, string> = {
+  entity_id: 'Org / club', filed_by: 'Filed by', reviewed_by: 'Reviewed by', reviewed_at: 'Reviewed', filed_at: 'Filed',
+  is_paid: 'Paid', paid_at: 'Paid on', amount_due: 'Amount due', file_name: 'File', attachment_path: 'Attachment',
+  liquidation_status: 'Liquidation', liquidation_spent: 'Amount spent', liquidation_files: 'Liquidation files',
+  liquidation_remarks: 'Liquidation note', liquidated_by: 'Liquidation checked by', liquidated_at: 'Liquidation checked',
+  liquidation_submitted_at: 'Liquidation sent', full_name: 'Name', student_no: 'Student ID', year_level: 'Year level',
+};
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const label = (k: string) => LABELS[k] ?? (k.charAt(0).toUpperCase() + k.slice(1)).replace(/_id$/, '').replace(/_/g, ' ');
+function show(k: string, v: unknown, names: Names): string {
+  if (v === null || v === undefined || v === '') return '—';
+  if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+  if (k === 'entity_id') return names.entity(v);
+  if (typeof v === 'string' && UUID.test(v)) return names.person(v);
+  if (Array.isArray(v)) return v.length ? `${v.length} file${v.length === 1 ? '' : 's'}` : 'none';
+  if (/amount|spent|total|due/.test(k) && !Number.isNaN(Number(v))) return peso(Number(v));
+  if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(v)) return when.format(new Date(v));
+  if (typeof v === 'string' && /path$/.test(k)) return v.split('/').pop() ?? v;
+  if (typeof v === 'object') return '(details)';
+  return String(v);
+}
+function Changes({ r, names }: { r: AuditRow; names: Names }) {
+  const before = (r.before_row ?? {}) as Record<string, unknown>, after = (r.after_row ?? {}) as Record<string, unknown>;
+  const lines = r.action === 'update'
+    ? Object.keys({ ...before, ...after }).filter((k) => !HIDDEN.has(k) && JSON.stringify(before[k]) !== JSON.stringify(after[k]))
+      .map((k) => ({ k, text: <>{show(k, before[k], names)} <span className="text-muted">→</span> <b>{show(k, after[k], names)}</b></> }))
+    : Object.entries(r.action === 'delete' ? before : after).filter(([k, v]) => !HIDDEN.has(k) && v !== null && v !== '' && !(Array.isArray(v) && !v.length))
+      .slice(0, 10).map(([k, v]) => ({ k, text: <b>{show(k, v, names)}</b> }));
+  return (
+    <div className="px-4 sm:px-5 pb-4 pl-9 sm:pl-10">
+      <p className="micro text-muted mb-1.5">{r.action === 'update' ? 'What changed' : r.action === 'delete' ? 'What was removed' : 'Details'}</p>
+      {lines.length ? (
+        <ul className="space-y-1 text-[13.5px]">
+          {lines.map(({ k, text }) => <li key={k} className="break-words"><span className="text-muted">{label(k)}:</span> {text}</li>)}
+        </ul>
+      ) : <p className="text-[13.5px] text-muted">Nothing else to show.</p>}
+    </div>
+  );
+}
 
 /** SAS: every change in E-CFunds (audit_log — written by database triggers, never edited), newest first. */
 export function ActivityLog() {
@@ -88,16 +132,7 @@ export function ActivityLog() {
                   </span>
                   <ChevronDown className={`size-4 text-muted shrink-0 mt-1 transition ${open === r.id ? 'rotate-180' : ''}`} aria-hidden />
                 </button>
-                {open === r.id && (
-                  <div className="px-4 sm:px-5 pb-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-[12px]">
-                    {(['before_row', 'after_row'] as const).map((k) => (
-                      <div key={k} className="rounded-[12px] bg-surface2 p-3 overflow-x-auto">
-                        <p className="micro text-muted mb-1">{k === 'before_row' ? 'Before' : 'After'}</p>
-                        <pre className="whitespace-pre-wrap break-all font-mono text-[11.5px]">{r[k] ? JSON.stringify(r[k], null, 1) : '—'}</pre>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {open === r.id && <Changes r={r} names={names} />}
               </li>
             ))}
           </ul>

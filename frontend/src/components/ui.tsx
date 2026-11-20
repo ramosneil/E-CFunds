@@ -147,10 +147,10 @@ function useCountTo(value: number) {
 }
 
 /** The big fund card: **Cash on hand** and **Saved with SAS** as the two main numbers (Neil, 2026-11-17: no "Total
- *  fund"). They refresh by themselves whenever the treasurer or SAS records anything (src/lib/live.ts) — the "Live"
- *  mark says so, each number counts to its new value with a glow, and `latest` / `pending` show what moved them. */
-export function HeroCard({ label, cash, saved, foot, latest, pending, live = true }: {
-  label: string; total?: number; cash: number; saved: number; foot?: ReactNode; latest?: ReactNode; pending?: ReactNode; live?: boolean;
+ *  fund"). They refresh by themselves whenever the treasurer or SAS records anything (src/lib/live.ts) — each
+ *  number counts to its new value with a glow, and `latest` / `pending` show what moved them. */
+export function HeroCard({ label, cash, saved, foot, latest, pending }: {
+  label: string; total?: number; cash: number; saved: number; foot?: ReactNode; latest?: ReactNode; pending?: ReactNode;
 }) {
   const c = useCountTo(Number(cash) || 0), s = useCountTo(Number(saved) || 0);
   const changed = c.changed || s.changed;
@@ -164,12 +164,6 @@ export function HeroCard({ label, cash, saved, foot, latest, pending, live = tru
       changed && 'ring-2 ring-pocket-cash/70')}>
       <div className="flex items-center gap-3">
         <p className="micro text-hero-muted min-w-0 flex-1">{label}</p>
-        {live && (
-          <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-hero-muted shrink-0" title="Updates by itself when anything is recorded">
-            <span className="relative flex size-2"><span className="absolute inset-0 rounded-full bg-[#4ADE80] motion-safe:animate-ping opacity-60" /><span className="relative size-2 rounded-full bg-[#4ADE80]" /></span>
-            Live
-          </span>
-        )}
       </div>
       <dl className="grid grid-cols-2 gap-4 mt-2" aria-live="polite">
         <div className="min-w-0 [container-type:inline-size]">

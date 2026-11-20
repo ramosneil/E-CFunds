@@ -184,3 +184,8 @@ prevents two approvals racing past a limit.
 - `notify_request` covers resolutions (filed / decided / liquidation sent / decided) with exact links.
 - Rehearsed (22 checks, rolled back): savings ₱560 → approve ₱100 → cash 100 / saved 460 → spent ₱70 → cash 0 /
   saved 490; over-savings, other org, student, anon refused.
+
+## SSG signers in report settings (migration 43 `ssg_signers_in_settings`, 2026-11-20)
+- `report_settings.ssg_governor_name`, `ssg_auditor_name` (≤ 80 chars), started from the SSG's saved signatories;
+  `save_report_settings` accepts both keys (SAS only). `get_financial_report` returns them in `settings`.
+- Rehearsed (rolled back): SAS saves + trims, report returns them, empty value clears only that key, treasurer refused.

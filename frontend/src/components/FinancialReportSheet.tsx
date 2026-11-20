@@ -146,7 +146,7 @@ export function FinancialReportSheet({ entityId, yearId, onClose }: { entityId: 
             <div>
               <p className="text-[14px] font-semibold mb-1">Signatories</p>
               <p className="text-[13px] text-muted mb-2">Saved for the whole school year. Prepared by: {r.treasurer_name ?? 'the treasurer'} (from the account).
-                {kind !== 'ssg' && ` SSG auditor and SSG governor come from the SSG treasurer's report settings${r.ssg_signatories?.head_name ? '' : ' (not set yet — blank lines)'}.`}</p>
+</p>
               <ol className="text-[13px] text-muted mb-3 list-decimal pl-5 space-y-0.5">
                 {(kind === 'club'
                   ? ['Club treasurer', 'Club auditor', 'SSG auditor', 'SSG governor', 'Club adviser', 'SAS coordinator']
@@ -155,11 +155,12 @@ export function FinancialReportSheet({ entityId, yearId, onClose }: { entityId: 
                     : ['SSG treasurer', 'SSG governor', 'SSG auditor', 'SSG adviser', 'SAS coordinator']).map((x) => <li key={x}>{x}</li>)}
               </ol>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {kind !== 'club' && <Field label={`${headTitle} (name)`}><Input value={sig.head_name} maxLength={80} onChange={(e) => { setSig({ ...sig, head_name: e.target.value }); setSigDirty(true); }} placeholder="e.g. Hannah C. Alfaro" /></Field>}
-                <Field label={`${kind === 'club' ? 'Club' : kind === 'ssg' ? 'SSG' : 'Org'} auditor (name)`}><Input value={sig.auditor_name} maxLength={80} onChange={(e) => { setSig({ ...sig, auditor_name: e.target.value }); setSigDirty(true); }} /></Field>
+                {kind === 'org' && <Field label={`${headTitle} (name)`}><Input value={sig.head_name} maxLength={80} onChange={(e) => { setSig({ ...sig, head_name: e.target.value }); setSigDirty(true); }} placeholder="e.g. Hannah C. Alfaro" /></Field>}
+                {kind !== 'ssg' && <Field label={`${kind === 'club' ? 'Club' : 'Org'} auditor (name)`}><Input value={sig.auditor_name} maxLength={80} onChange={(e) => { setSig({ ...sig, auditor_name: e.target.value }); setSigDirty(true); }} /></Field>}
                 <Field label={`${kind === 'club' ? 'Club' : kind === 'ssg' ? 'SSG' : 'Org'} adviser (name)`}><Input value={sig.adviser_name} maxLength={80} onChange={(e) => { setSig({ ...sig, adviser_name: e.target.value }); setSigDirty(true); }} /></Field>
               </div>
-              <p className="text-[13px] text-muted mt-2">Verified by: {r.settings.coordinator_name ?? '(SAS Coordinator — set by SAS)'}</p>
+              <p className="text-[13px] text-muted mt-2">Set by SAS (School year page): SSG governor {r.settings.ssg_governor_name ?? '— not set yet'} ·
+                SSG auditor {r.settings.ssg_auditor_name ?? '— not set yet'} · SAS Coordinator {r.settings.coordinator_name ?? '— not set yet'}.</p>
             </div>
           </>
         )}
@@ -194,7 +195,8 @@ export function ReportSettingsCard() {
   const [err, setErr] = useState('');
   useEffect(() => {
     if (st.data && !f) setF({ website: st.data.website ?? '', email: st.data.email ?? '', phone: st.data.phone ?? '',
-      coordinator_name: st.data.coordinator_name ?? '', coordinator_title: st.data.coordinator_title });
+      coordinator_name: st.data.coordinator_name ?? '', coordinator_title: st.data.coordinator_title,
+      ssg_governor_name: st.data.ssg_governor_name ?? '', ssg_auditor_name: st.data.ssg_auditor_name ?? '' });
   }, [st.data, f]);
   if (!f) return null;
   const set = (k: string) => (e: { target: { value: string } }) => setF({ ...f, [k]: e.target.value });
@@ -205,18 +207,22 @@ export function ReportSettingsCard() {
     setBusy(false);
     if (error) { setErr(errorText(error)); return; }
     void qc.invalidateQueries({ queryKey: ['report-settings'] });
-    toast({ title: 'Saved', body: 'Financial report header & SAS Coordinator', tone: 'ok', silent: true });
+    void qc.invalidateQueries({ queryKey: ['financial-report'] });
+    toast({ title: 'Saved', body: 'Financial report header & signers', tone: 'ok', silent: true });
   }
   return (
     <Card>
-      <h2 className="font-display text-[17px] font-bold">Financial report — header & SAS Coordinator</h2>
-      <p className="text-[14px] text-muted mt-1 mb-4">Printed on every org/club's Financial Report (the SAS form).</p>
+      <h2 className="font-display text-[17px] font-bold">Financial report — header & signers</h2>
+      <p className="text-[14px] text-muted mt-1 mb-4">Printed on every org/club's Financial Report (the SAS form). The SSG governor and SSG auditor sign every club, org and SSG report.</p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Field label="Website"><Input value={f.website} onChange={set('website')} /></Field>
         <Field label="Email address"><Input value={f.email} onChange={set('email')} /></Field>
         <Field label="Phone"><Input value={f.phone} onChange={set('phone')} /></Field>
         <Field label="SAS Coordinator (name)"><Input value={f.coordinator_name} onChange={set('coordinator_name')} placeholder="e.g. Cristina A. Caponpon, PhD" /></Field>
         <Field label="Title"><Input value={f.coordinator_title} onChange={set('coordinator_title')} /></Field>
+        <div className="hidden sm:block" />
+        <Field label="SSG governor (name)"><Input value={f.ssg_governor_name} maxLength={80} onChange={set('ssg_governor_name')} placeholder="e.g. Juan Dela Cruz" /></Field>
+        <Field label="SSG auditor (name)"><Input value={f.ssg_auditor_name} maxLength={80} onChange={set('ssg_auditor_name')} placeholder="e.g. Ana Reyes" /></Field>
       </div>
       {err && <div className="mt-3"><Alert>{err}</Alert></div>}
       <Button className="mt-4" busy={busy} onClick={save}>Save</Button>

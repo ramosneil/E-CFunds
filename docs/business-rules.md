@@ -321,3 +321,12 @@ None. Both §10 questions were answered in session 3 and moved to §8.
   opens that section's list. Searching shows the plain grouped list. **PDF (print-ready, A4)**: all members (Export
   menu), one year level (PDF on the year card) or one section (PDF in the pop-up): letterhead, one table per section
   (No., Student ID, Name, Course, Yr-Sec, Status, Receipt no.), totals, signature lines, page numbers.
+
+## Activity log, SSG signers, messages, fund card (Neil, 2026-11-20; migration 43)
+- **Activity log**: opening an entry shows "What changed" in plain words (e.g. Status: pending → approved · Reviewed
+  by: Neil Christian Ramos), not raw Before/After data. The full rows stay in the database (`audit_log`) for auditing.
+- **SSG governor + SSG auditor** are typed once by SAS (School year page → Financial report — header & signers) and
+  sign every club, org and SSG Financial Report. Clubs/orgs type only their own auditor, adviser (and Mayor for orgs);
+  the SSG sheet types only its adviser.
+- **Message notifications** open the conversation for treasurers too (`/messages/<org>`; the route was missing).
+- **Fund cards** no longer show the "Live" mark; the numbers still update by themselves.

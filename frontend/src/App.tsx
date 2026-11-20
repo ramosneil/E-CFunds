@@ -164,6 +164,7 @@ function Gate() {
           <Route path="reports" element={<Reports />} />
           <Route path="reports/:id" element={<ReportDetail />} />
           <Route path="messages" element={<Messages />} />
+          <Route path="messages/:key" element={<Messages />} />
         </>}
         {role === 'student' && <>
           <Route index element={<StudentHome />} />

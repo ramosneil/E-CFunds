@@ -124,18 +124,21 @@ export async function financialReportPdf(r: FinancialReport, cash: CashCount) {
   const isClub = r.entity.category === 'club';
   type Block = { label: string; name: string | null | undefined; role: string };
   const coordinator: Block = { label: 'Verified by:', name: s.coordinator_name, role: s.coordinator_title || 'SAS Coordinator' };
+  // SSG governor + SSG auditor: typed once by SAS (School year page, Neil 2026-11-20).
+  const ssgGovernor = s.ssg_governor_name ?? (r.entity.is_school_wide ? sig?.head_name : ssg?.head_name);
+  const ssgAuditor = s.ssg_auditor_name ?? (r.entity.is_school_wide ? sig?.auditor_name : ssg?.auditor_name);
   const blocks: Block[] = r.entity.is_school_wide ? [
     { label: 'Prepared by:', name: r.treasurer_name, role: `Treasurer, ${orgName}` },
-    { label: 'Noted by:', name: sig?.head_name, role: `Governor, ${orgName}` },
-    { label: 'Audited and Certified by:', name: sig?.auditor_name, role: `Auditor, ${orgName}` },
+    { label: 'Noted by:', name: ssgGovernor, role: `Governor, ${orgName}` },
+    { label: 'Audited and Certified by:', name: ssgAuditor, role: `Auditor, ${orgName}` },
     { label: '', name: sig?.adviser_name, role: `Adviser, ${orgName}` },
     coordinator,
   ] : [
     { label: 'Prepared by:', name: r.treasurer_name, role: `Treasurer, ${orgName}` },
     ...(isClub ? [] : [{ label: 'Noted by:', name: sig?.head_name, role: `Mayor, ${orgName}` }]),
     { label: 'Audited and Certified by:', name: sig?.auditor_name, role: `Auditor, ${orgName}` },
-    { label: 'Attested and Audited by:', name: ssg?.auditor_name, role: `Auditor, ${ssgName}` },
-    { label: 'Noted by:', name: ssg?.head_name, role: `Governor, ${ssgName}` },
+    { label: 'Attested and Audited by:', name: ssgAuditor, role: `Auditor, ${ssgName}` },
+    { label: 'Noted by:', name: ssgGovernor, role: `Governor, ${ssgName}` },
     { label: '', name: sig?.adviser_name, role: `Adviser, ${orgName}` },
     coordinator,
   ];

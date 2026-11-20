@@ -306,7 +306,8 @@ export type Signatories = {
 };
 export type ReportSettings = {
   id?: boolean; republic_line: string; school_name: string; campus_line: string; website: string | null; email: string | null;
-  phone: string | null; coordinator_name: string | null; coordinator_title: string; updated_by?: string | null; updated_at: string;
+  phone: string | null; coordinator_name: string | null; coordinator_title: string;
+  ssg_governor_name?: string | null; ssg_auditor_name?: string | null; updated_by?: string | null; updated_at: string;
 };
 export type ReportItem = { particular: string; unit: string; qty: number; unit_price: number; total: number; date: string };
 /** get_financial_report (migration 34): the SAS financial report form, computed from the ledger. */
