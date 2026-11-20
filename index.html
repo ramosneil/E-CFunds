@@ -18,6 +18,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet" />
     <script>
+      // GitHub Pages serves this unbuilt file (blank page) → send visitors to the real live site (Neil, 2026-11-20).
+      if (location.hostname.endsWith('github.io')) location.replace('https://e-cfunds.vercel.app/' + location.search + location.hash);
+    </script>
+    <script>
       try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
     </script>
   </head>
