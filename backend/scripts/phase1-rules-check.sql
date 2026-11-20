@@ -1,5 +1,5 @@
 -- Phase 1 self-check: prototype of the E-CFunds money model on SYNTHETIC data.
--- Run: psql -v ON_ERROR_STOP=1 -f scripts/phase1-rules-check.sql   (any throwaway Postgres 14+)
+-- Run: psql -v ON_ERROR_STOP=1 -f backend/scripts/phase1-rules-check.sql   (any throwaway Postgres 14+)
 -- Every check raises an exception on failure, so a clean run = all rules hold.
 drop schema if exists rules_check cascade;
 create schema rules_check;

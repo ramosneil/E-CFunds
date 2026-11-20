@@ -11,6 +11,7 @@ const lib = (pkgs: string) => new RegExp(`[\\\\/]node_modules[\\\\/](${pkgs})[\\
 const BUILD_ID = (process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA || 'dev').slice(0, 12);
 
 export default defineConfig({
+  envDir: '..',   // one .env at the project root, shared with the backend scripts (frontend/backend split, 2026-11-20)
   define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
   plugins: [
     react(),

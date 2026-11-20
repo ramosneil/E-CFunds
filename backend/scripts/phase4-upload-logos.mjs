@@ -11,7 +11,7 @@ import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const repo = join(dirname(fileURLToPath(import.meta.url)), '..');
+const repo = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const env = Object.fromEntries(
   readFileSync(join(repo, '.env'), 'utf8').split(/\r?\n/)
     .map((l) => l.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/)).filter(Boolean)

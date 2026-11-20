@@ -14,18 +14,18 @@ coverage/
 **/secrets.php
 
 # Supabase local
-supabase/.branches/
-supabase/.temp/
+backend/supabase/.branches/
+backend/supabase/.temp/
 
 # Capacitor / Android
-android/app/build/
-android/.gradle/
-android/local.properties
+frontend/android/app/build/
+frontend/android/.gradle/
+frontend/android/local.properties
 *.apk
 *.aab
 *.keystore
 *.jks
-android/app/google-services.json
+frontend/android/app/google-services.json
 
 # Data dumps (contain student personal data)
 *.sql.gz

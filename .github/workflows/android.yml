@@ -31,6 +31,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
       - uses: actions/setup-java@v5
         with:
@@ -40,6 +41,7 @@ jobs:
 
       - name: Version
         id: v
+        working-directory: frontend
         run: |
           base=$(node -p "require('./package.json').version")
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then name="${GITHUB_REF_NAME#v}"; else name="$base-build.$GITHUB_RUN_NUMBER"; fi
@@ -49,9 +51,11 @@ jobs:
           echo "Version $name (code $GITHUB_RUN_NUMBER)"
 
       - name: Install
+        working-directory: frontend
         run: npm ci
 
       - name: Build the web app
+        working-directory: frontend
         env:
           VITE_SUPABASE_URL: https://nvmlawpojydnouzqilaf.supabase.co
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
@@ -60,6 +64,7 @@ jobs:
           npm run build
 
       - name: Copy it into the Android project
+        working-directory: frontend
         run: npx cap sync android
 
       - name: Signing key
@@ -88,6 +93,7 @@ jobs:
           fi
 
       - name: Firebase config (push notifications)
+        working-directory: frontend
         env:
           GSJ: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
@@ -101,7 +107,7 @@ jobs:
           fi
 
       - name: Build the APK
-        working-directory: android
+        working-directory: frontend/android
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -125,7 +131,7 @@ jobs:
 
       - name: Remove the key file
         if: always()
-        run: rm -f "$RUNNER_TEMP/release.jks" android/app/google-services.json
+        run: rm -f "$RUNNER_TEMP/release.jks" frontend/android/app/google-services.json
 
       - uses: actions/upload-artifact@v6
         with:

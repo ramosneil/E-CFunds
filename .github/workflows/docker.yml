@@ -12,8 +12,8 @@ on:
     paths-ignore:
       - 'docs/**'
       - '**/*.md'
-      - 'android/**'
-      - 'supabase/**'
+      - 'frontend/android/**'
+      - 'backend/**'
       - '.github/workflows/android.yml'
       - '.github/workflows/keep-alive.yml'
   workflow_dispatch:
@@ -51,6 +51,7 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
+          file: deploy/Dockerfile
           push: true
           build-args: |
             VITE_SUPABASE_URL=https://nvmlawpojydnouzqilaf.supabase.co

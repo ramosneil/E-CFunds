@@ -8,16 +8,18 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Live site: **https://e-cfunds.vercel.app** (Vercel project `e-cfunds`, team ramosneil; production = `main`,
   previews behind Vercel login). Public pages: `/privacy`, `/terms`.
 - Repo: `ramosneil/E-CFunds` — **PUBLIC** (Neil's choice): everything committed is world-readable.
-  Local copy on Neil's PC: `C:\xampp\htdocs\E-CFunds`. Dev: `npm run dev` → http://localhost:3000.
+  Local copy on Neil's PC: `C:\xampp\htdocs\E-CFunds`. Dev: `cd frontend` → `npm run dev` → http://localhost:3000.
+- **Layout (2026-11-20):** `frontend/` = app (`src/`, `public/`, `android/`, scripts; `src/…` below = `frontend/src/…`) ·
+  `backend/` = `supabase/` (migrations, functions, tests) + scripts · `deploy/` = Dockerfile + nginx. One root `.env`.
 - Supabase: project `e-cfunds` (ref `nvmlawpojydnouzqilaf`, Singapore, Free plan). Edge Functions `chat`,
   `student-login`, `push`. Keep-alive: `.github/workflows/keep-alive.yml` every 3 days.
-- Android app: Capacitor 8 (`android/`, app id `ph.edu.omsc.ecfunds` — permanent). Built + signed on GitHub
+- Android app: Capacitor 8 (`frontend/android/`, app id `ph.edu.omsc.ecfunds` — permanent). Built + signed on GitHub
   (`.github/workflows/android.yml`); download `releases/latest/download/E-CFunds.apk`.
 - Firebase project `E-CFunds` (push notifications only).
 - Docs: `docs/plan.md` (phases) · `docs/business-rules.md` (rules) · `docs/database.md` (tables, functions,
   migrations, notification events) · `docs/design-system.md` · `docs/handoff.md` (things only Neil can do) ·
   `docs/sessions.md` (what each session did) · `docs/working-rules.md` (Neil's rules in full).
-- Docker: `Dockerfile` + `compose.yaml` (nginx) → Docker Hub `ramosneil/e-cfunds:latest` + `1.0.<run>` on every push
+- Docker: `deploy/Dockerfile` + `compose.yaml` → Docker Hub `ramosneil/e-cfunds:latest` + `1.0.<run>` on every push
   to main (`.github/workflows/docker.yml`, secret DOCKERHUB_TOKEN; `docs/docker.md`). Diagrams: `docs/diagrams/`.
 
 ## Status (updated 2026-11-20)
@@ -27,9 +29,8 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   2026-11-17: `docs/audit-2026-11-17.md` (all 7 lapses fixed; only SAS edits students; lists page past 1,000 rows).
 - **2026-11-19/20 batch live:** resolution requests + liquidation, notification delete + exact links, report signatories,
   member tiles + PDF. Checked with sample data + live SAS view; Neil's phone test of resolution → liquidation pending.
-- Android: latest APK **v1.1.1 = build 10**; `ota.json` minNativeBuild = 10.
+- Android: latest APK **v1.1.1 = build 10**; `frontend/ota.json` minNativeBuild = 10.
 - **Confirmed on Neil's phone:** push (app open / closed / signed out), self-update, Back, full screen, liquidation files.
-- Tools: UI Design Review, playwright, Mobile App Design plugins; Supabase + Figma connectors; GitHub PAT (exp. 2027-02-12).
 - **Notifications confirmed 2026-11-14:** Android phone (background AND swiped away) + Chrome on Neil's PC (site
   closed). iPhone Home Screen app not tested yet. When the push function says `sent: N` but nothing shows, it's the
   device: **Windows** → Settings → System → Notifications → Google Chrome (was off on Neil's PC); **Android** →
@@ -150,7 +151,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Pin package versions at least 2 weeks old. Free tiers only.
 
 ## How to change things
-- **Database:** new file in `supabase/migrations/` only; never edit an applied migration. Rehearse on live inside
+- **Database:** new file in `backend/supabase/migrations/` only; never edit an applied migration. Rehearse on live inside
   a transaction that always rolls back (test every case and role), then apply + record, then check RLS/grants.
   - Supabase connector (`execute_sql`, `apply_migration`, advisors) when it works.
   - **Connector down** (it was, 2026-11-13/14): direct DB — `SUPABASE_DB_URL` in `.env` + Supabase CA
@@ -159,21 +160,21 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
     `supabase_migrations.schema_migrations`).
 - **Edge Functions:** Supabase connector (`deploy_edge_function`; `verify_jwt: false` for `push` and
   `student-login`). Fallback if the connector is down: Neil makes a new scoped access token → `.env`
-  `SUPABASE_ACCESS_TOKEN`, then `npx supabase@2.122.0 functions deploy <name> --project-ref nvmlawpojydnouzqilaf
+  `SUPABASE_ACCESS_TOKEN`, then `npx supabase@2.122.0 functions deploy <name> --workdir backend --project-ref nvmlawpojydnouzqilaf
   --use-api` (+ `--no-verify-jwt` for those two); revoke the token afterwards. CORS allows exact origins only: localhost:3000,
   127.0.0.1:3000, `https://localhost` (Android), `https://e-cfunds.vercel.app`.
 - **Never use window.confirm/prompt/alert** (silently fail in the Android app) → `confirmAsk/promptAsk/alertAsk`
   from `src/lib/confirm.ts`.
 - **App self-update rules** (`src/lib/ota.ts`): a downloaded bundle is `pending` until first used, then `success` —
   accept both. If a bug ever breaks self-update on phones, they can't fix themselves: release a fixed APK first,
-  then raise `ota.json` minNativeBuild to its build number → old apps show "A new version of the app is ready".
+  then raise `frontend/ota.json` minNativeBuild to its build number → old apps show "A new version of the app is ready".
 - **Types:** `src/lib/database.types.ts` is hand-trimmed — add new tables/columns/RPCs there.
 - **Web deploy:** merge/push to `main` → Vercel builds production (and the OTA package) automatically.
 - **Android release:** push tag `vX.Y.Z` → signed APK + GitHub Release (tags with `-` = pre-release). Needs GitHub
   secrets: 4 × ANDROID_* (signing; key only in `Documents\E-CFunds-signing` on Neil's PC — lose it = no updates)
   and GOOGLE_SERVICES_JSON (Firebase; release builds fail without it). Push code requires build ≥ 9
   (`PUSH_MIN_BUILD` in `src/lib/push.ts`).
-- **Icons/splash:** `node scripts/make-app-assets.mjs` → `npx capacitor-assets generate --android`.
+- **Icons/splash:** in `frontend/`: `node scripts/make-app-assets.mjs` → `npx capacitor-assets generate --android`.
 - **API calls run with pg_safeupdate:** DELETE/UPDATE without WHERE fails live but not in the direct rehearsal.
   Direct `pg` hangs? Rehearse via the connector: `begin; … ; do $$ raise exception 'RESULTS…' $$` (all rolled back).
 - Testing two roles at once: localhost:3000 vs 127.0.0.1:3000. On e-cfunds.vercel.app the browser pane DOES run the

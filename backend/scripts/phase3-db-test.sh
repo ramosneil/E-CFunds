@@ -1,6 +1,6 @@
 #!/bin/bash
 # Phase 3 self-check: apply every migration to a throwaway local Postgres DB and run the
-# per-role RLS + money-workflow tests. Usage: bash scripts/phase3-db-test.sh
+# per-role RLS + money-workflow tests. Usage: bash backend/scripts/phase3-db-test.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
 DB=ecfunds_test

@@ -63,10 +63,11 @@ docker save e-cfunds:latest e-cfunds:1.0.0 | gzip > release/e-cfunds-docker-imag
 ```
 
 ## Files
-- `Dockerfile` — stage 1 `node:24-alpine` runs `npm ci` + `npm run build`; stage 2 `nginx-unprivileged` serves `dist/`.
-- `docker/nginx.conf` + `docker/security-headers.conf` — the same routing, headers and caching as `vercel.json`.
+- `deploy/Dockerfile` — stage 1 `node:24-alpine` builds `frontend/` (`npm ci` + `npm run build`); stage 2
+  `nginx-unprivileged` serves `dist/`. Build context = the project root (`compose.yaml` and the workflow pass it).
+- `deploy/docker/nginx.conf` + `deploy/docker/security-headers.conf` — the same routing, headers and caching as `vercel.json`.
 - `compose.yaml` — one service `web`, reads the two VITE_ values from `.env`.
-- `.dockerignore` — keeps `.env` (it has the Supabase SECRET key), `node_modules`, `android`, `docs`… out of the build.
+- `.dockerignore` — keeps `.env` (it has the Supabase SECRET key), `node_modules`, `frontend/android`, `backend`, `docs`… out of the build.
 
 ## Notes / limits
 - "Continue with Google" returns to the address set in Supabase (the Vercel site), not to localhost — use email +

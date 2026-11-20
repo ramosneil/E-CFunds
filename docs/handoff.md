@@ -149,3 +149,6 @@ Only you do steps 1–3 (they involve your Google password and a secret app pass
 3. Bell: delete one notification, then **Delete all**; tap a notification → it opens that exact request/receipt.
 4. Members → tap a section tile → its list pops up; PDF for all / one year / one section prints cleanly.
 5. Financial Report: club shows no Mayor line; org shows Mayor; fill in auditor/adviser names if blank.
+
+## Project folders changed (2026-11-20)
+- The app now lives in `frontend/`: run `npm run dev` inside `C:\xampp\htdocs\E-CFunds\frontend`. If you use Android Studio, open `frontend\android` (the old `android` folder is gone).
