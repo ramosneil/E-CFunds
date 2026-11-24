@@ -22,7 +22,7 @@
       if (location.hostname.endsWith('github.io')) location.replace('https://e-cfunds.vercel.app/' + location.search + location.hash);
     </script>
     <script>
-      try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+      try { document.documentElement.dataset.theme = localStorage.getItem('theme') || 'dark'; } catch (e) { document.documentElement.dataset.theme = 'dark'; }
     </script>
   </head>
   <body>

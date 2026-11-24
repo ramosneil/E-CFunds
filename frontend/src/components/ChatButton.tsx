@@ -29,7 +29,7 @@ export function ChatButton() {
     <>
       {!open && !loc.pathname.startsWith('/messages') && (
         <button onClick={() => setOpen(true)} aria-label="Ask E-CFunds assistant"
-          className="hidden lg:flex fixed z-40 right-8 bottom-8 h-14 pl-4 pr-5 rounded-full bg-primary text-on-primary shadow-xl items-center gap-2 font-semibold hover:brightness-110 cursor-pointer">
+          className="hidden lg:flex fixed z-40 right-8 bottom-8 h-14 pl-4 pr-5 rounded-full lux-primary lux-press shadow-xl items-center gap-2 font-semibold cursor-pointer">
           <Sparkles className="size-5" aria-hidden />Ask E-CFunds
         </button>
       )}

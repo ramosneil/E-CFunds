@@ -33,7 +33,7 @@ export function TreasurerHome() {
         {e && <EntityLogo path={e.logo_path} name={e.name} size={48} />}
         <div className="min-w-[160px] flex-1">
           <p className="micro text-muted">Treasurer</p>
-          <h1 className="font-display text-[24px] sm:text-[28px] font-extrabold leading-tight truncate">{e?.short_name ?? 'Your org'}</h1>
+          <h1 className="lux-title text-[28px] sm:text-[36px] truncate py-0.5">{e?.short_name ?? 'Your org'}</h1>
         </div>
         {e && year.data && <div className="flex gap-2 w-full sm:w-auto">
         <FinancialReportButton entityId={e.id} yearId={year.data.id} className="h-11 px-3 sm:px-4 flex-1 sm:flex-none" />

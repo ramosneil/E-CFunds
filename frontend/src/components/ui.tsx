@@ -271,10 +271,10 @@ export function Greeting({ name }: { name?: string | null }) {
 
 export function PageHeader({ title, sub, action, eyebrow }: { title: string; sub?: ReactNode; action?: ReactNode; eyebrow?: ReactNode }) {
   return (
-    <header className="flex items-end justify-between gap-4 mb-6">
+    <header className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3 mb-6">
       <div>
         {eyebrow && <p className="micro text-gold-text mb-1.5">{eyebrow}</p>}
-        <h1 className="font-display text-[27px] sm:text-[32px] font-extrabold leading-tight tracking-[-0.01em]">{title}</h1>
+        <h1 className="lux-title text-[30px] sm:text-[40px]">{title}</h1>
         {sub && <p className="text-muted mt-1.5">{sub}</p>}
       </div>
       {action}

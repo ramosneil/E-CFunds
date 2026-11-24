@@ -1,7 +1,8 @@
 export type ThemeChoice = 'light' | 'dark' | 'system';
 
+// Dark is the default (Neil, 2026-11-24: the app follows the dark welcome page); a saved light/dark choice wins.
 export function getTheme(): ThemeChoice {
-  try { return (localStorage.getItem('theme') as ThemeChoice) || 'system'; } catch { return 'system'; }
+  try { return (localStorage.getItem('theme') as ThemeChoice) || 'dark'; } catch { return 'dark'; }
 }
 
 export function setTheme(t: ThemeChoice) {

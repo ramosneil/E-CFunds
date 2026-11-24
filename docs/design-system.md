@@ -102,3 +102,13 @@ Default follows the phone/OS setting; a manual toggle (sun/moon) overrides and i
   list (`welcomeContent.ts`, 25 real features), a reading-progress line, closing call. No mascots, no purple/orange.
 - Buttons: gold `.lux-gold-btn`, royal `.lux-royal` (same in both themes). Android app: one-screen welcome on `.lux-night`.
 - Checked 320 / 390 / 412 / 768 / 1024 / 1440 (no sideways scroll), keyboard tabs (arrows), focus ring gold.
+
+## 12. The app in the welcome page's style (2026-11-24, Neil: dark by default, bold titles, calm content)
+- **Dark by default**: `index.html` sets `data-theme` to the saved choice or `dark`; `theme.ts` `getTheme()` → `dark`.
+  The sun/moon button still switches to light, and a saved light choice wins.
+- Dark tokens = the welcome page: bg `#060B1E`, surface `#0D1533`, surface2 `#152049`, border `#222E57`, text
+  `#EEF1FB`, muted `#A9B5DA` (contrast check `frontend/scripts/phase2-design-check.js`: all pass). Dark page background
+  carries the faint gold/blue specks; main buttons, tab pills, the bottom-menu pill and the Ask button are royal blue
+  with white text in dark; cards get the panels' soft top light.
+- **Bold titles**: `.lux-title` (uppercase Plus Jakarta 800) on `PageHeader` and the treasurer Home title; section
+  titles, tables, forms and lists keep normal case. `PageHeader` buttons wrap under the title on narrow phones.
