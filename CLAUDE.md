@@ -14,7 +14,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Supabase: project `e-cfunds` (ref `nvmlawpojydnouzqilaf`, Singapore, Free plan). Edge Functions `chat`,
   `student-login`, `push`. Keep-alive: `.github/workflows/keep-alive.yml` every 3 days.
 - Android app: Capacitor 8 (`frontend/android/`, app id `ph.edu.omsc.ecfunds` — permanent). Built + signed on GitHub
-  (`.github/workflows/android.yml`); download `releases/latest/download/E-CFunds.apk`.
+  (`.github/workflows/android.yml`); site serves it: `e-cfunds.vercel.app/E-CFunds.apk` (fetch-apk.mjs; GitHub ~20 KB/s in PH).
 - Firebase project `E-CFunds` (push notifications only).
 - Docs: `docs/plan.md` (phases) · `docs/business-rules.md` (rules) · `docs/database.md` (tables, functions,
   migrations, notification events) · `docs/design-system.md` · `docs/handoff.md` (things only Neil can do) ·

@@ -346,3 +346,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - **2026-11-24 seal**: Neil's new OMSU seal replaces the old OMSC seal in every PDF letterhead (one shared loader in pdf.ts, so all reports and every org/club follow); checked in generated letterhead and Financial Report PDFs. No org/club logo was the old seal.
 - 2026-11-24: Neil confirmed the new OMSU seal shows on a downloaded Financial Report.
 - 2026-11-24: old seal file logos/brand/omsc-seal-source.jpg deleted from Storage (Neil's OK); the 10 org/club logos untouched.
+- **2026-11-24 faster APK download** (Neil: app download slow): GitHub release download measured ~20 KB/s from PH (7 MB ≈ 6 min); Vercel ~1 MB/s+. Each Vercel build now copies the latest release to /E-CFunds.apk (fetch-apk.mjs, after the OTA zip; vercel.json falls back to GitHub); all download/Update links use it. Live: 7,168,168 B in 0.9 s. Release workflow pings VERCEL_DEPLOY_HOOK when set (Neil's handoff step).

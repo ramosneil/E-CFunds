@@ -177,3 +177,11 @@ Only you do steps 1–3 (they involve your Google password and a secret app pass
 2. **Email templates** — DONE 2026-11-24 (Claude, in Neil's Chrome): only the custom Reset password template had "OMSC"; its footer now says "OMSU Mamburao" (saved, re-checked). All other Supabase templates are the plain defaults with no school name.
 3. **OMSU seal** — DONE 2026-11-24: every PDF letterhead uses Neil's new seal. Some club badges (English Club, SamFilko, Sports Club) still say "State College"/"OMSC" — those are the clubs' own logos; SAS can change any of them with "Change logo" on the Orgs page when a club has a new one.
 4. If the website/email changed to omsu addresses, edit them on the School year page.
+
+## Faster app download (2026-11-24) — one setting for Neil
+The website now hands out the Android app itself (7 MB in about a second) instead of GitHub (about 6 minutes in PH).
+Each website deploy copies the newest release. So a new release also reaches the website right away, add this once:
+1. Vercel → project **e-cfunds** → Settings → Git → **Deploy Hooks** → name `apk-release`, branch `main` → Create Hook → copy the URL.
+2. GitHub → ramosneil/E-CFunds → Settings → Secrets and variables → Actions → New repository secret →
+   name `VERCEL_DEPLOY_HOOK`, value = that URL → Add secret. (Keep the URL private; anyone with it can redeploy the site.)
+Without it nothing breaks: after a release the website keeps the previous APK until the next push to main (Claude redeploys).
