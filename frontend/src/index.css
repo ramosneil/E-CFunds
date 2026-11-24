@@ -11,6 +11,8 @@
   --hero: #1F2A78; --hero-muted: #C9D4F7; --pocket-cash: #FDD20A; --pocket-saved: #8AA4FF;
   /* Charts (validated with the dataviz checks on #FFFFFF / #111934): blue = money in, orange = money out. */
   --chart-in: #2A78D6; --chart-out: #EB6834;
+  /* Insights (2026-11-25, validated): cash on hand / saved with SAS in charts (the brand pocket colours fail the band). */
+  --chart-cash: #B98000; --chart-saved: #4A68E0;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -21,18 +23,19 @@
     --gold: #FDD20A; --gold-text: #FDD20A; --gold-soft: #3A2F12;
     --ok: #4CD38A; --ok-soft: #0F3324; --warn: #F2B045; --warn-soft: #3A2A0C; --bad: #FF8A80; --bad-soft: #3E1614;
     --hero: #1F2A78; --hero-muted: #B9C6F5;
-    --chart-in: #3987E5; --chart-out: #D95926;
+    --chart-in: #3987E5; --chart-out: #D95926; --chart-cash: #B88A12; --chart-saved: #6680EA;
     color-scheme: dark;
   }
 }
-:root[data-theme="dark"] {
+/* .force-dark: Present mode slides are always dark, whatever the app theme. */
+:root[data-theme="dark"], .force-dark {
   --bg: #0E1640; --surface: #151F55; --surface2: #1C2864; --border: #2C3A78;
   --text: #EEF1FB; --muted: #A9B5DA;
   --primary: #8AA4FF; --primary-soft: #26347A; --on-primary: #0A1233;
   --gold: #FDD20A; --gold-text: #FDD20A; --gold-soft: #3A2F12;
   --ok: #4CD38A; --ok-soft: #0F3324; --warn: #F2B045; --warn-soft: #3A2A0C; --bad: #FF8A80; --bad-soft: #3E1614;
   --hero: #1F2A78; --hero-muted: #B9C6F5;
-  --chart-in: #3987E5; --chart-out: #D95926;
+  --chart-in: #3987E5; --chart-out: #D95926; --chart-cash: #B88A12; --chart-saved: #6680EA;
   color-scheme: dark;
 }
 
@@ -46,6 +49,7 @@
   --color-hero: var(--hero); --color-hero-muted: var(--hero-muted);
   --color-pocket-cash: var(--pocket-cash); --color-pocket-saved: var(--pocket-saved);
   --color-chart-in: var(--chart-in); --color-chart-out: var(--chart-out);
+  --color-chart-cash: var(--chart-cash); --color-chart-saved: var(--chart-saved);
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
 }
@@ -172,7 +176,7 @@ html, body { overscroll-behavior-y: contain; }
 /* Main buttons, tab pills and the bottom-menu pill: royal blue with white text, like the welcome page. */
 :root[data-theme="dark"] .lux-primary { background: linear-gradient(180deg, #3B4DB0, #283891); color: #fff; box-shadow: 0 10px 24px -14px rgb(40 56 145 / .9), inset 0 1px 0 rgb(255 255 255 / .18); }
 /* Cards: the welcome panels' soft top light and hairline. */
-:root[data-theme="dark"] .lux-card { background-image: linear-gradient(180deg, rgb(255 255 255 / .035), transparent 40%); box-shadow: inset 0 1px 0 rgb(255 255 255 / .05), var(--card-shadow); }
+:root[data-theme="dark"] .lux-card, .force-dark .lux-card { background-image: linear-gradient(180deg, rgb(255 255 255 / .035), transparent 40%); box-shadow: inset 0 1px 0 rgb(255 255 255 / .05), var(--card-shadow); }
 /* Bold page titles: uppercase display (calm content below). */
 .lux-title { font-family: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif; font-weight: 800; text-transform: uppercase; letter-spacing: -0.015em; line-height: 1; }
 

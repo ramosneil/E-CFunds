@@ -308,6 +308,13 @@ export type Finance = {
   monthly: { month: string; money_in: number; money_out: number }[];
   categories: { category: E['expense_category']; amount: number }[];
   expenses: { date: string; description: string; category: E['expense_category']; amount: number; receipt_checked?: boolean }[] | null;
+  /** Migration 47: one org/club's activities (approved resolutions + budgets) for Budget vs actual; null school-wide. */
+  activities?: FinanceActivity[] | null;
+};
+export type FinanceActivity = {
+  title: string; date: string | null; source: 'resolution' | 'budget';
+  approved: number; released: number; spent: number | null; returned: number | null;
+  state: 'liquidated' | 'liquidation_sent' | 'waiting_liquidation' | 'open' | 'overdue';
 };
 export type SchoolSummary = {
   cash_on_hand: number; clubs: number; expenses: number; organizations: number; pending_requests: number;

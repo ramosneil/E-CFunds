@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, type ComponentType, type ReactNode } from 'react';
-import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router';
+import { BrowserRouter, Navigate, Route, Routes, useNavigate, useParams } from 'react-router';
 import { hasSignedInBefore, useAuth } from './lib/auth';
 import { supabase } from './lib/supabase';
 import { Loading, Spinner } from './components/ui';
@@ -31,8 +31,8 @@ const TreasurerHome = page(() => import('./pages/treasurer/Home'), 'TreasurerHom
 const Members = page(() => import('./pages/treasurer/Members'), 'Members');
 const Requests = page(() => import('./pages/treasurer/Requests'), 'Requests');
 const StudentHome = page(() => import('./pages/student/Home'), 'StudentHome');
-const Reports = page(() => import('./pages/student/Reports'), 'Reports');
-const ReportDetail = page(() => import('./pages/student/ReportDetail'), 'ReportDetail');
+const Insights = page(() => import('./pages/Insights'), 'Insights');
+function ReportRedirect() { const { id } = useParams(); return <Navigate to={`/insights?org=${id}`} replace />; }
 const Account = page(() => import('./pages/Account'), 'Account');
 const Messages = page(() => import('./pages/Messages'), 'Messages');
 const Receipt = page(() => import('./pages/Receipt'), 'Receipt');
@@ -41,9 +41,9 @@ const Privacy = page(() => import('./pages/Privacy'), 'Privacy');
 const Terms = page(() => import('./pages/Terms'), 'Terms');
 
 const ROLE_PAGES = {
-  admin: [AdminDashboard, Approvals, Orgs, EntityDetail, Messages, Accredited, Calendar, ActivityLog, Students, Account],
-  treasurer: [TreasurerHome, Members, Requests, Messages, Reports, ReportDetail, Account],
-  student: [StudentHome, Reports, ReportDetail, Account],
+  admin: [AdminDashboard, Approvals, Orgs, EntityDetail, Messages, Insights, Accredited, Calendar, ActivityLog, Students, Account],
+  treasurer: [TreasurerHome, Members, Requests, Messages, Insights, Account],
+  student: [StudentHome, Insights, Account],
 } as const;
 
 /** After the first screen has painted, fetch the rest of this role's screens while the browser is idle. */
@@ -166,16 +166,16 @@ function Gate() {
           <Route index element={<TreasurerHome />} />
           <Route path="members" element={<Members />} />
           <Route path="requests" element={<Requests />} />
-          <Route path="reports" element={<Reports />} />
-          <Route path="reports/:id" element={<ReportDetail />} />
           <Route path="messages" element={<Messages />} />
           <Route path="messages/:key" element={<Messages />} />
         </>}
         {role === 'student' && <>
           <Route index element={<StudentHome />} />
-          <Route path="reports" element={<Reports />} />
-          <Route path="reports/:id" element={<ReportDetail />} />
         </>}
+        {/* Insights (2026-11-25) replaced Reports for everyone; old links land on the same org's dashboard. */}
+        <Route path="insights" element={<Insights />} />
+        <Route path="reports" element={<Navigate to="/insights" replace />} />
+        <Route path="reports/:id" element={<ReportRedirect />} />
         <Route path="receipt/:no" element={<Receipt />} />
         <Route path="receipt/m/:mid" element={<ReceiptOfMembership />} />
         <Route path="account" element={<Account />} />

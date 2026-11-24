@@ -192,3 +192,9 @@ Without it nothing breaks: after a release the website keeps the previous APK un
    it's still on the Requests page). **Clear all** → **Show cleared items** brings them back.
 3. Note: the Dashboard's **Full backup** is gone (your choice). There is no data download in the app now; on the free
    Supabase plan that may mean no backup copy at all. The weekly automatic backup is still on the improvements list.
+
+## Phone check — Insights (2026-11-25)
+1. As treasurer: menu → **Insights** opens Sports Club. Check the 4 numbers, the fund line, Budget vs actual.
+2. Switch the picker to **Whole school** → Compare orgs and clubs; tap one to open its dashboard.
+3. Tap **Present** → swipe through the 7 slides → × to close.
+4. As a student (if you have the account): Home shows the Insights card; Insights works the same (no receipt marks).

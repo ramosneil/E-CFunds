@@ -359,3 +359,13 @@ None. Both §10 questions were answered in session 3 and moved to §8.
 - **Clear (×) / Clear all** hides items from *that person's own* list only (`cleared_items`). Nothing is deleted or
   changed: Requests, the ledger, reports, the Financial Report and the audit log stay complete. "Clear all" covers
   everything up to that moment; newer items still appear. "Show cleared items" brings them back.
+
+## Insights — finance dashboards (Neil, 2026-11-25; migration 47)
+- One **Insights** page (`/insights`) for SAS, treasurers and students: "Whole school" plus any org/club (`?org=<id>`),
+  same layout. Treasurers open on their own org; SAS and students on the whole school. Old `/reports` links redirect.
+- Each dashboard: headline numbers (fund balance, collected, spent, dues collected %, each with this month vs last),
+  fund balance over time, money in vs out by month, where the money is (cash vs saved), what it was spent on.
+  Org/club: **Budget vs actual** (approved resolution requests + activity budgets: approved, spent, returned, state)
+  and approved expenses. Whole school: **Compare orgs and clubs** (fund, collected, spent, dues %).
+- **Present** shows it as full-screen slides (same numbers). Students see everything except receipts/receipt marks.
+- Home (treasurer, student) and the SAS Dashboard / org page show a short Insights card linking to the full page.

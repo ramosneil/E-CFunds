@@ -135,3 +135,14 @@ Default follows the phone/OS setting; a manual toggle (sun/moon) overrides and i
 - `ClearButton` (×, 44px, muted → red on hover) and `ClearAllButton` (text) — clearing only hides for that person.
 - Course cards with section boxes reuse the Members tile (surface2, 14px radius, bold 17px label, count, paid bar on
   Members); 2 columns on phones, 3 on tablets, 5 on desktop (one row = A–E).
+
+## 15. Insights charts and Present mode (2026-11-25)
+- `components/finance/`: `chartKit` (niceMax, barPath, useWidth, TableView, Key), `KpiTiles`, `BalanceTrend`,
+  `BudgetVsActual`, `CompareEntities` (+ `CashSaved`), `InsightsCard`, `Present`; `FinancePanel.tsx` keeps MoneyInOut,
+  SpendingByCategory, ExpenseList. Every chart: one axis, legend for 2+ series, hover/tap tooltip, table view,
+  one plain sentence under the title.
+- New chart tokens (validated with the dataviz script): `--chart-cash` #B98000 / dark #B88A12, `--chart-saved`
+  #4A68E0 / dark #6680EA (the brand pocket colours fail the lightness band). Balance line = `--primary`.
+  Status chips (Liquidated / Waiting / Overdue) always icon + words.
+- Present: `.force-dark` overlay (always dark), big titles, ← → / swipe / buttons, Esc closes, browser full screen
+  when allowed; tables hidden on slides.

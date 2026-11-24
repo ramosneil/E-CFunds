@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ChevronRight, Wallet } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { useCurrentYear, useSchoolFinance, useSchoolSummary, useSemesters } from '../../lib/data';
-import { FinancePanel } from '../../components/finance/FinancePanel';
+import { InsightsCard } from '../../components/finance/InsightsCard';
 import { supabase } from '../../lib/supabase';
 import { date, peso } from '../../lib/format';
 import { Card, Chip, Empty, EntityLogo, Greeting, HeroCard, PageHeader, SectionTitle, Spinner } from '../../components/ui';
@@ -99,14 +99,14 @@ export function StudentHome() {
         <div className="space-y-4">
           <HeroCard label="Student funds · school-wide" total={s?.total_fund ?? 0} cash={s?.cash_on_hand ?? 0} saved={s?.saved_with_sas ?? 0}
             foot={<>{s?.organizations ?? 0} organizations · {s?.clubs ?? 0} clubs</>} />
-          <Link to="/reports" className="flex items-center justify-between rounded-[20px] bg-surface border border-line p-5 font-semibold hover:bg-surface2">
+          <Link to="/insights" className="flex items-center justify-between rounded-[20px] bg-surface border border-line p-5 font-semibold hover:bg-surface2">
             Where each org & club's money went <ChevronRight className="size-5 text-muted" />
           </Link>
         </div>
       </div>
       <div className="mt-4">
-        <FinancePanel finance={school.data} loading={school.isLoading} title="Where all student funds went this year"
-          note="Every org and club together. Open Reports to see each one's approved expenses." />
+        <InsightsCard yearId={year.data?.id} finance={school.data} loading={school.isLoading} title="Where all student funds are"
+          note="Every org and club together. Open Insights to see each one's dashboard, activities and approved expenses." />
       </div>
     </>
   );

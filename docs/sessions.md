@@ -354,3 +354,8 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   nothing deleted; `cleared_items`, `audit_log_visible`); Dashboard Export = School summary PDF only (Full backup and
   CSV removed, backup.ts deleted). Checked in a preview harness at 412/1366, light/dark, no overflow.
 - 2026-11-25: Neil confirmed on his phone (treasurer): Members course/section boxes, Hide, clear one, Clear all and Show cleared all work.
+- **2026-11-25 Insights** (plan approved; research: nonprofit/board finance dashboards, student-government
+  transparency pages): one Insights page (whole school + every org/club), headline numbers with month change, fund
+  balance trend, budget vs actual (migration 47 activities), compare orgs, Present mode slides; compact cards on
+  Home/Dashboard; Reports pages removed (redirect). Checked in a preview harness (SAS/treasurer/student, 412/1366,
+  light/dark, all 7 slides).

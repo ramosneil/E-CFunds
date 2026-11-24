@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, CheckCircle2, HandCoins, Scale, XCircle } from 'lucide-react';
 import type { EntityReport } from '../../lib/database.types';
 import { useCurrentYear, useEntities, useEntityFinance, useEntityReport } from '../../lib/data';
-import { FinancePanel } from '../../components/finance/FinancePanel';
+import { InsightsCard } from '../../components/finance/InsightsCard';
 import { supabase, errorText } from '../../lib/supabase';
 import { date, kindLabel, peso } from '../../lib/format';
 import { Alert, Button, Card, ClearButton, DuesBar, EntityLogo, Field, HeroCard, Input, Select, Sheet, Spinner, Stat } from '../../components/ui';
@@ -153,8 +153,8 @@ export function EntityDetail() {
             </div>
           </div>
           <div className="mt-4">
-            <FinancePanel finance={finance.data} loading={finance.isLoading} title="Where the money goes — what students see"
-              note="Students see these charts and the approved expenses, but not receipts or the receipt mark." />
+            <InsightsCard yearId={year.data?.id} entityId={entityId} finance={finance.data} loading={finance.isLoading} title="Insights — what students see"
+              note="Students see these numbers, the charts and approved expenses, but not receipts or the receipt mark." />
           </div>
           {/* Phones: Dues + Release first, then the ledger. Computers: ledger left, the two cards right. */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr] mt-4 items-start">

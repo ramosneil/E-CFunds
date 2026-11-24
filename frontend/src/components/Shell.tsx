@@ -25,6 +25,7 @@ const NAV: Record<string, Item[]> = {
     { to: '/approvals', label: 'Approvals', icon: CheckCheck },
     { to: '/orgs', label: 'Orgs & clubs', icon: Building2 },
     { to: '/messages', label: 'Messages', icon: MessagesSquare, badge: 'messages' },
+    { to: '/insights', label: 'Insights', icon: BarChart3, phone: false },
     { to: '/students', label: 'Students', icon: GraduationCap, phone: false },
     { to: '/accredited', label: 'Accredited', icon: BadgeCheck, phone: false },
     { to: '/calendar', label: 'School year', icon: CalendarRange, phone: false },
@@ -35,11 +36,11 @@ const NAV: Record<string, Item[]> = {
     { to: '/members', label: 'Members', icon: Users },
     { to: '/requests', label: 'Requests', icon: Receipt },
     { to: '/messages', label: 'Messages', icon: MessagesSquare, badge: 'messages' },
-    { to: '/reports', label: 'Reports', icon: BarChart3 },
+    { to: '/insights', label: 'Insights', icon: BarChart3 },
   ],
   student: [
     { to: '/', label: 'Home', icon: Home },
-    { to: '/reports', label: 'Reports', icon: BarChart3 },
+    { to: '/insights', label: 'Insights', icon: BarChart3 },
   ],
 };
 

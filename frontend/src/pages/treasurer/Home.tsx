@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ChevronRight, Landmark, Receipt, Signature, Wallet } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { useCurrentYear, useEntities, useEntityFinance, useEntityReport, useRequests, useSemesters } from '../../lib/data';
-import { FinancePanel } from '../../components/finance/FinancePanel';
+import { InsightsCard } from '../../components/finance/InsightsCard';
 import { errorText, supabase } from '../../lib/supabase';
 import { kindLabel, peso } from '../../lib/format';
 import type { Row } from '../../lib/database.types';
@@ -88,8 +88,8 @@ export function TreasurerHome() {
             <HomeActivity entries={ledger.data ?? []} loading={ledger.isLoading} />
           </div>
           <div className="mt-4">
-            <FinancePanel finance={finance.data} loading={finance.isLoading} title="Your report — what students see"
-              note="Every signed-in student sees these charts and your approved expenses (purpose, category, amount). They don't see receipts or the receipt mark." />
+            <InsightsCard yearId={year.data.id} entityId={entityId} finance={finance.data} loading={finance.isLoading} title="Your Insights — what students see"
+              note="Students see your charts, activities and approved expenses (purpose, category, amount), but not receipts or the receipt mark." />
           </div>
         </>
       )}

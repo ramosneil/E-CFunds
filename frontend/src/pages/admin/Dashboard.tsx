@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronRight, UserCheck } from 'lucide-react';
 import { useCurrentYear, useEntities, useEntityReport, useRequests, useSchoolFinance, useSchoolSummary } from '../../lib/data';
-import { FinancePanel } from '../../components/finance/FinancePanel';
+import { InsightsCard } from '../../components/finance/InsightsCard';
 import { supabase } from '../../lib/supabase';
 import { peso } from '../../lib/format';
 import { Card, DuesBar, EntityLogo, Greeting, HeroCard, PageHeader, SectionTitle, Spinner, Stat, Chip } from '../../components/ui';
@@ -159,8 +159,8 @@ export function AdminDashboard() {
         </Card>
       </div>
       <div className="mt-4">
-        <FinancePanel finance={school.data} loading={school.isLoading} title="Where all student funds went this year"
-          note="Every org and club together — students see this on their Home page." />
+        <InsightsCard yearId={y} finance={school.data} loading={school.isLoading} title="Insights · all orgs and clubs"
+          note="Students see the same numbers. Open Insights for the charts, each org's dashboard and Present mode." />
       </div>
     </>
   );

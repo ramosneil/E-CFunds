@@ -1,53 +1,17 @@
-// "Where the money goes" — the same transparency view for students, treasurers and SAS (migration 27).
+// Money charts shared by Insights (migration 27; the old all-in-one FinancePanel became pages/Insights.tsx, 2026-11-25).
 // Charts follow the dataviz rules: one axis, thin bars with 4px rounded ends on a baseline, 2px gaps, a legend for the
 // 2-series chart, recessive grid, values in text colours, a hover/tap tooltip and a "Show as table" view.
 // Colours: --chart-in (blue) = money in, --chart-out (orange) = money out (validated light + dark).
-import { useEffect, useState } from 'react';
-import { CheckCircle2, ChevronDown, Receipt as ReceiptIcon } from 'lucide-react';
+import { useState } from 'react';
+import { CheckCircle2, Receipt as ReceiptIcon } from 'lucide-react';
+import { TableView, barPath, n, niceMax, useWidth } from './chartKit';
 import type { Finance } from '../../lib/database.types';
 import { categoryLabel, date, monthLabel, peso } from '../../lib/format';
-import { Card, SectionTitle, Spinner } from '../ui';
-
-const n = (v: unknown) => Number(v) || 0;
-
-/** Nice round top for the y-axis (₱0, ₱50, ₱100 … ). */
-function niceMax(v: number) {
-  if (v <= 0) return 100;
-  const p = 10 ** Math.floor(Math.log10(v));
-  const step = [1, 2, 2.5, 5, 10].map((m) => m * p).find((s) => v <= s * 4)!;
-  return step * 4;
-}
-
-/** A bar whose top corners are rounded (4px) and whose bottom sits flat on the baseline. */
-function barPath(x: number, y: number, w: number, h: number) {
-  if (h <= 0) return '';
-  const r = Math.min(4, w / 2, h);
-  return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
-}
-
-function TableView({ children }: { children: React.ReactNode }) {
-  return (
-    <details className="mt-3 group">
-      <summary className="list-none cursor-pointer text-[13px] font-semibold text-primary inline-flex items-center gap-1 h-11">
-        <ChevronDown className="size-4 transition group-open:rotate-180" aria-hidden />Show as table
-      </summary>
-      <div className="overflow-x-auto">{children}</div>
-    </details>
-  );
-}
 
 /** Money in vs money out, month by month (grouped bars). */
 export function MoneyInOut({ monthly }: { monthly: Finance['monthly'] }) {
   const [hover, setHover] = useState<number | null>(null);
-  // Draw at the real on-screen width (not a scaled-down picture), so 11 px labels stay 11 px on phones.
-  const [box, setBox] = useState<HTMLDivElement | null>(null);
-  const [width, setWidth] = useState(640);
-  useEffect(() => {
-    if (!box) return;
-    const ro = new ResizeObserver(([e]) => setWidth(Math.max(260, Math.round(e.contentRect.width))));
-    ro.observe(box);
-    return () => ro.disconnect();
-  }, [box]);
+  const [setBox, width] = useWidth();
   const rows = monthly.map((m) => ({ month: m.month, inn: n(m.money_in), out: n(m.money_out) }));
   const max = niceMax(Math.max(0, ...rows.map((r) => Math.max(r.inn, r.out))));
   const W = width, H = width < 480 ? 190 : 230, L = 52, R = 8, T = 10, B = 28;
@@ -168,56 +132,5 @@ export function ExpenseList({ expenses }: { expenses: NonNullable<Finance['expen
         </button>
       )}
     </>
-  );
-}
-
-/** The whole "where the money goes" view for one org/club — or the whole school (no expense list). */
-export function FinancePanel({ finance, loading, title = 'Where the money goes', note }: {
-  finance?: Finance | null; loading?: boolean; title?: string; note?: React.ReactNode;
-}) {
-  if (loading) return <Card><Spinner /></Card>;
-  if (!finance) return null;
-  const inn = n(finance.money_in), out = n(finance.money_out), left = inn - out;
-  const top = [...finance.categories].sort((a, b) => n(b.amount) - n(a.amount))[0];
-  const per100 = inn > 0 ? Math.round((out / inn) * 100) : 0;
-  return (
-    <section className="space-y-4" aria-label={title}>
-      <Card>
-        <SectionTitle>{title}</SectionTitle>
-        {note && <p className="text-[13px] text-muted -mt-2 mb-3">{note}</p>}
-        {/* Phones: three full-width rows (amounts never get cut off). Wider screens: three tiles. */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          {([['Collected', inn, 'bg-chart-in'], ['Spent', out, 'bg-chart-out'], ['Still in the fund', left, '']] as const).map(([k, v, dot]) => (
-            <div key={k} className="rounded-[14px] bg-surface2 px-3 py-2.5 sm:p-3 flex sm:block items-center justify-between gap-3 min-w-0">
-              <p className="text-[13px] sm:text-[12px] text-muted leading-tight flex items-center gap-1.5">{dot && <i className={`size-2 rounded-sm ${dot}`} aria-hidden />}{k}</p>
-              <p className="money font-display font-bold text-[18px] sm:text-[20px]">{peso(v)}</p>
-            </div>
-          ))}
-        </div>
-        <p className="text-[14px] mt-3">
-          {out <= 0
-            ? <>Nothing spent yet — all <b className="money">{peso(inn)}</b> is still in the fund.</>
-            : <>Of every <b>₱100</b> that came in, <b className="money">₱{per100}</b> was spent{top ? <> — most on <b>{categoryLabel[top.category]?.toLowerCase()}</b></> : null}.</>}
-        </p>
-      </Card>
-      <Card>
-        <SectionTitle>Money in and out by month</SectionTitle>
-        <MoneyInOut monthly={finance.monthly} />
-      </Card>
-      {finance.categories.length > 0 && (
-        <Card>
-          <SectionTitle>What it was spent on</SectionTitle>
-          <SpendingByCategory categories={finance.categories} />
-        </Card>
-      )}
-      {finance.expenses && (
-        <Card>
-          <SectionTitle>Approved expenses</SectionTitle>
-          {finance.expenses.length
-            ? <ExpenseList expenses={finance.expenses} />
-            : <p className="text-[14px] text-muted">No approved expenses yet this school year.</p>}
-        </Card>
-      )}
-    </section>
   );
 }

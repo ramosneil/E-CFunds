@@ -209,3 +209,11 @@ prevents two approvals racing past a limit.
   log reads it, so counts and paging stay right. audit_log itself is unchanged.
 - Rehearsed (rolled back) before applying: E accepted, F rejected, both functions patched, clear one/all/restore,
   other users can't see or forge someone's rows, bad list names refused. No new advisor warnings.
+
+## Activities in the finance report (migration 47 `finance_activities`, 2026-11-25)
+- `private.finance_json` recreated unchanged plus key `activities` (one org/club only; null school-wide): approved
+  resolution requests (approved = released amount; spent = liquidation_spent once liquidation approved; returned =
+  the rest; state liquidated / liquidation_sent / waiting_liquidation) and approved/liquidated budgets (released,
+  spent, returned via `budget_moved`; liquidated budgets count spent ≥ released − returned; state liquidated / open /
+  overdue). Only titles, dates and amounts — no files, names or remarks. Rehearsed: every other key identical for all
+  orgs and school-wide; a student can read it; no receipt marks for students.
