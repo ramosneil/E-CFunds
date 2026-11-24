@@ -27,7 +27,7 @@ export function Privacy() {
 
         <p className="mt-8 text-[16px] leading-relaxed">
           E-CFunds is the fund-monitoring app of the <b>Office of Student Affairs and Services (SAS), Occidental Mindoro State
-          College – Mamburao Campus</b>. It keeps the records of student organizations' and clubs' money: dues, remittances,
+          University – Mamburao Campus</b>. It keeps the records of student organizations' and clubs' money: dues, remittances,
           releases and expenses. This notice explains, in plain words, what we keep, why, and who can see it, following the
           Data Privacy Act of 2012 (Republic Act No. 10173).
         </p>
@@ -86,7 +86,7 @@ export function Privacy() {
 
         <Section title="Contact">
           <p>For any privacy question or request, contact the <b>Office of Student Affairs and Services</b>, Occidental Mindoro
-            State College – Mamburao Campus, in person or through your organization's treasurer.</p>
+            State University – Mamburao Campus, in person or through your organization's treasurer.</p>
         </Section>
       </main>
     </div>

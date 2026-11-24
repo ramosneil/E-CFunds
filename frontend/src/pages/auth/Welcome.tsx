@@ -39,7 +39,7 @@ function AppWelcome() {
     <div className="lux-night min-h-dvh flex flex-col px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]">
       <header className="lux-enter"><Brand light /></header>
       <main className="flex-1 flex flex-col justify-center py-6">
-        <p className="lux-enter text-[12.5px] font-semibold text-[#A9B5DA]" style={d(60)}>Fund monitoring · OMSC Mamburao</p>
+        <p className="lux-enter text-[12.5px] font-semibold text-[#A9B5DA]" style={d(60)}>Fund monitoring · OMSU Mamburao</p>
         <h1 className={`lux-enter ${display} text-[38px] mt-3`} style={d(120)}>Every peso of every club, <span className="lux-gold-text">out in the open.</span></h1>
         <div className="lux-enter mt-6 [@media(max-height:700px)]:hidden" style={d(220)}><SampleFundCard compact /></div>
       </main>
@@ -65,7 +65,7 @@ function Landing() {
   return (
     <div className="lux-night min-h-dvh">
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-[10px] focus:bg-white focus:text-[#0D1530] focus:px-4 focus:py-2 focus:font-semibold">Skip to content</a>
-      <header className="sticky top-0 z-40 bg-[#060B1E]/80 backdrop-blur-md border-b border-white/10">
+      <header className="sticky top-0 z-40 bg-[#0E1640]/80 backdrop-blur-md border-b border-white/10">
         <div className={`${wrap} h-[68px] flex items-center gap-3 whitespace-nowrap`}>
           <Link to="/welcome" aria-label="E-CFunds home" className="shrink-0 rounded-xl"><Brand light /></Link>
           <nav aria-label="On this page" className="hidden lg:flex mx-auto items-center gap-1 text-[14px] font-semibold text-[#C9D4F7]">
@@ -93,7 +93,7 @@ function Landing() {
       </main>
       <footer className="border-t border-white/10">
         <div className={`${wrap} py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[13.5px] text-[#A9B5DA]`}>
-          <span className="flex items-center gap-3"><Brand light /><span className="hidden md:inline border-l border-white/15 pl-3">Office of Student Affairs and Services · OMSC Mamburao</span></span>
+          <span className="flex items-center gap-3"><Brand light /><span className="hidden md:inline border-l border-white/15 pl-3">Office of Student Affairs and Services · OMSU Mamburao</span></span>
           <span className="flex gap-5"><Link to="/privacy" className="py-2 hover:text-white">Privacy</Link><Link to="/terms" className="py-2 hover:text-white">Terms</Link></span>
         </div>
       </footer>
@@ -107,7 +107,7 @@ function Hero() {
       <div className={`${wrap} min-h-[calc(100dvh-68px)] flex flex-col pt-10 lg:pt-14 pb-8`}>
         <div className="flex-1 grid grid-cols-[minmax(0,1fr)] lg:grid-cols-[1fr_1.15fr] gap-10 lg:gap-6 items-center">
           <div>
-            <p className="lux-enter text-[13px] font-semibold text-[#A9B5DA]">Fund monitoring for OMSC Mamburao student organizations</p>
+            <p className="lux-enter text-[13px] font-semibold text-[#A9B5DA]">Fund monitoring for OMSU Mamburao student organizations</p>
             <h1 id="hero-title" className={`lux-enter ${display} text-[clamp(40px,5.4vw,74px)] mt-4`} style={d(80)}>
               Every peso of every club, <span className="lux-gold-text">out in the open.</span>
             </h1>
@@ -120,7 +120,7 @@ function Hero() {
             </div>
           </div>
           <div className="lux-enter relative pb-10 lg:pb-0" style={d(200)}>
-            <div aria-hidden className="absolute -inset-10 bg-[radial-gradient(55%_55%_at_55%_45%,rgb(29_63_175/.55),transparent_70%)]" />
+            <div aria-hidden className="absolute -inset-10 bg-[radial-gradient(55%_55%_at_55%_45%,rgb(40_56_145/.55),transparent_70%)]" />
             <DeviceFrame className="relative"><AppWindow className="rounded-none border-0 shadow-none" /></DeviceFrame>
             <PhoneMini className="absolute -right-2 sm:right-2 -bottom-6 lg:-bottom-10 scale-[.62] sm:scale-[.75] origin-bottom-right" />
           </div>
@@ -252,7 +252,7 @@ function SemesterStage() {
           <div className="lux-inset relative min-h-[420px] lg:min-h-[540px] p-3 sm:p-10 pb-16 flex items-center justify-center">
             <div key={i} className="lux-swap w-full flex justify-center">{visual}</div>
             <button type="button" onClick={() => setPlaying((p) => !p)} aria-label={playing ? 'Pause the steps' : 'Play the steps'}
-              className="lux-press absolute bottom-4 right-4 h-11 px-4 rounded-[12px] border border-white/25 bg-[#060B1E]/60 text-[13px] font-semibold text-white flex items-center gap-1.5 cursor-pointer">
+              className="lux-press absolute bottom-4 right-4 h-11 px-4 rounded-[12px] border border-white/25 bg-[#0E1640]/60 text-[13px] font-semibold text-white flex items-center gap-1.5 cursor-pointer">
               {playing ? <><Pause className="size-4" aria-hidden />Pause</> : <><Play className="size-4" aria-hidden />Play</>}
             </button>
           </div>

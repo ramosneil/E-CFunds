@@ -107,8 +107,8 @@ async function context(db: SupabaseClient, role: string, entityId: number | null
 
 const HELP = `App help (where things are):
 - Everyone: "My account" (person icon / name card) sets or changes the password; students can then sign in with their Student ID.
-- Treasurer: Home shows the fund; Members → Record payment (club treasurers also Add member; organizations get members automatically from each student's course when a club adds them); Requests → New → Remit, Release or Expense (expense needs a receipt photo); Messages talks to SAS; Export menu on Home gives the PDF report and CSVs.
-- Admin: Approvals approves money requests and accounts; Orgs & clubs edits dues and logos; an org's page has its ledger and "Release"; School year (in "More" on phones) opens or edits the year; Dashboard → Export for the school summary.
+- Treasurer: Home shows the fund; Members → Record payment (club treasurers also Add member; organizations get members automatically from each student's course when a club adds them); Requests → Remit to SAS, or Resolution request (attach the signed resolution; SAS types the amount); an approved resolution gets Liquidate (activity name, receipt items, files); Messages talks to SAS; Home has Financial report and the Export menu.
+- Admin: Approvals approves remittances, resolution requests, liquidations and accounts; Orgs & clubs edits dues and logos; an org's page has its ledger; School year (in "More" on phones) opens or edits the year and the report signers; Dashboard → Export for the school summary.
 - Students: Home shows your dues; Reports shows every org's totals (no names).`;
 
 /** Decides the reply language from the latest question only (the model alone drifts with the conversation). */
@@ -121,7 +121,7 @@ function replyLanguage(q: string): string {
 }
 
 function systemPrompt(role: string, ctx: unknown, lang: string) {
-  return `You are the E-CFunds assistant for the Office of Student Affairs and Services of Occidental Mindoro State College (Mamburao Campus). You help with student organization and club funds.
+  return `You are the E-CFunds assistant for the Office of Student Affairs and Services of Occidental Mindoro State University (Mamburao Campus). You help with student organization and club funds.
 The person asking is a ${role === 'admin' ? 'SAS admin' : role}.
 Rules:
 1. Answer ONLY from the DATA below and the app help. If the answer is not in the data, say you don't have that information. Never guess numbers.

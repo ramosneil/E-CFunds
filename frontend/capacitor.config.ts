@@ -8,7 +8,7 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   android: {
     allowMixedContent: false,
-    backgroundColor: '#13297A',
+    backgroundColor: '#1F2A78',
   },
   server: { androidScheme: 'https' },
   plugins: {
@@ -18,7 +18,7 @@ const config: CapacitorConfig = {
     // Full screen: the status bar is hidden at start (src/lib/phone.ts); insets reach CSS as env(safe-area-inset-*).
     SystemBars: { insetsHandling: 'css', initialViewportFitValueHint: 'cover' },
     // Phone notifications: white ₱ (res/drawable/ic_stat_notify.xml) tinted royal blue.
-    LocalNotifications: { smallIcon: 'ic_stat_notify', iconColor: '#2447C4' },
+    LocalNotifications: { smallIcon: 'ic_stat_notify', iconColor: '#283891' },
   },
 };
 

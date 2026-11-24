@@ -1,6 +1,6 @@
 # CLAUDE.md — E-CFunds
 
-Fund monitoring app for the OMSC Mamburao Office of Student Affairs and Services (SAS): student organizations'
+Fund monitoring app for the OMSU (Occidental Mindoro State University, formerly OMSC) Mamburao Office of Student Affairs and Services (SAS): student organizations'
 and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL/XAMPP system
 (`C:\xampp\htdocs\mini system`, a plain folder — never commit anything from it) as a web app + Android app.
 
@@ -25,7 +25,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 ## Status (updated 2026-11-20)
 - **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
   student on the roster. Test data was wiped before launch.
-- Database: **44 migrations** live (last `20261120140000_liquidation_items`). pg_cron on (2 jobs). Full system check
+- Database: **45 migrations** live (last `20261124090000_school_name_omsu`). pg_cron on (2 jobs). Full system check
   2026-11-17: `docs/audit-2026-11-17.md` (all 7 lapses fixed; only SAS edits students; lists page past 1,000 rows).
 - **2026-11-19/20 batch live:** resolution requests + liquidation, notification delete + exact links, report signatories,
   member tiles + PDF. Checked with sample data + live SAS view; Neil's phone test of resolution → liquidation pending.
@@ -92,7 +92,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   `get_entity_finance` / `get_school_finance` (`useEntityFinance` / `useSchoolFinance`). Shown on `/reports/:id`
   (students + treasurers), student Home + SAS Dashboard (school-wide), treasurer Home, SAS org detail, PDF report.
   Expenses need a category (form + Approvals, SAS may change it).
-- Exports: org report PDF (charts, OMSC letterhead, Inter font for ₱) + CSVs, school summary, members, accredited;
+- Exports: org report PDF (charts, OMSU letterhead, Inter font for ₱) + CSVs, school summary, members, accredited;
   SAS **Full backup** (Dashboard → Export → .xlsx, a sheet per table; `src/lib/export/backup.ts`).
 - **Session 7 features** (rules: `docs/business-rules.md` "Functionality batch"; DB: `docs/database.md` 28–33):
   - SAS: Approvals → Accounts disable/enable · org page Corrections (Correct… = `reverse_entry`, adjustment) + Close

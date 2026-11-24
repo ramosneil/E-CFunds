@@ -26,14 +26,14 @@ export function Terms() {
         </div>
 
         <p className="mt-8 text-[16px] leading-relaxed">
-          E-CFunds is run by the <b>Office of Student Affairs and Services (SAS), Occidental Mindoro State College –
+          E-CFunds is run by the <b>Office of Student Affairs and Services (SAS), Occidental Mindoro State University –
           Mamburao Campus</b> to keep the funds of student organizations and clubs honest and open. By creating an account
           or signing in, you agree to these terms.
         </p>
 
         <Section title="Who can use E-CFunds">
           <List items={[
-            'Students, officers and SAS staff of OMSC Mamburao Campus.',
+            'Students, officers and SAS staff of OMSU Mamburao Campus.',
             'Every account is checked and approved by SAS before it can see any money records. SAS may refuse, limit or close an account.',
           ]} />
         </Section>

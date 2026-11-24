@@ -15,7 +15,7 @@ await sharp({ create: { width: 1024, height: 1024, channels: 4, background: { r:
 // Splash: brand blue with the icon in the middle (light and dark use the same brand colours).
 const mark = await sharp(Buffer.from(fgOnly), { density: 600 }).resize(640, 640).png().toBuffer();   // glyph only, no tile edge
 for (const name of ['splash.png', 'splash-dark.png']) {
-  await sharp({ create: { width: 2732, height: 2732, channels: 4, background: '#13297A' } })
+  await sharp({ create: { width: 2732, height: 2732, channels: 4, background: '#1F2A78' } })
     .composite([{ input: mark, gravity: 'center' }]).png().toFile(`assets/${name}`);
 }
 console.log('assets/ written');

@@ -160,7 +160,7 @@ export function HeroCard({ label, cash, saved, foot, latest, pending }: {
   const big = 'money font-display font-extrabold leading-tight whitespace-nowrap block';
   const size = { fontSize: `clamp(16px, calc(100cqw / ${(chars * 0.64).toFixed(2)}), 34px)` };
   return (
-    <section className={cx('rounded-[24px] p-5 sm:p-6 text-white lux-ground relative overflow-hidden transition-shadow duration-700 shadow-[0_24px_48px_-28px_rgb(10_23_71/.8)]',
+    <section className={cx('rounded-[24px] p-5 sm:p-6 text-white lux-ground relative overflow-hidden transition-shadow duration-700 shadow-[0_24px_48px_-28px_rgb(14_22_64/.8)]',
       changed && 'ring-2 ring-pocket-cash/70')}>
       <div aria-hidden className="absolute inset-0 lux-grid pointer-events-none" />
       <div className="relative flex items-center gap-3">

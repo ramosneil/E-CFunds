@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { Lock, ReceiptText, UserCheck } from 'lucide-react';
 import { PocketBar, ThemeToggle } from '../../components/ui';
 import { ReceiptChip } from './landing';
+import { BrandMark } from '../../components/BrandMark';
 
 /** Sign-in / sign-up / reset screens (v2 2026-11-24, navy and gold). `tab` shows the one-tap Sign in ⇄ Create
  *  account switch. Computers: a gradient panel on the left. Phones and the app: a gradient band with the title on top,
@@ -16,7 +17,7 @@ export function AuthLayout({ title, sub, children, tab }: { title: string; sub?:
           <Link to="/welcome" aria-label="E-CFunds — about this system" className="self-start rounded-xl focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-4"><Brand light /></Link>
           <div className="max-w-[500px]">
             <p className="font-display font-extrabold text-[40px] leading-[1.08]">Every peso of every club, <span className="lux-gold-text">out in the open.</span></p>
-            <p className="text-hero-muted mt-4 text-[16px] leading-relaxed">Dues, remittances and resolution requests for OMSC student organizations and clubs.</p>
+            <p className="text-hero-muted mt-4 text-[16px] leading-relaxed">Dues, remittances and resolution requests for OMSU student organizations and clubs.</p>
             <div className="relative mt-9">
               <SampleFundCard />
               <ReceiptChip className="absolute -right-6 -bottom-16" />
@@ -27,7 +28,7 @@ export function AuthLayout({ title, sub, children, tab }: { title: string; sub?:
               <li className="flex items-center gap-2.5"><UserCheck className="size-4 text-pocket-cash" aria-hidden />Every account approved by SAS</li>
             </ul>
           </div>
-          <p className="text-hero-muted text-[13px]">Office of Student Affairs and Services · OMSC Mamburao</p>
+          <p className="text-hero-muted text-[13px]">Office of Student Affairs and Services · OMSU Mamburao</p>
         </div>
       </aside>
       <div className="flex flex-col min-w-0">
@@ -77,7 +78,7 @@ export function LegalFooter() {
     <p className="text-center text-[12.5px] text-muted">
       <Link to="/privacy" className="inline-block py-2 hover:text-ink underline-offset-2 hover:underline">Privacy</Link><span aria-hidden> · </span>
       <Link to="/terms" className="inline-block py-2 hover:text-ink underline-offset-2 hover:underline">Terms</Link><span aria-hidden> · </span>
-      <span>Office of Student Affairs and Services · OMSC Mamburao</span>
+      <span>Office of Student Affairs and Services · OMSU Mamburao</span>
     </p>
   );
 }
@@ -116,12 +117,21 @@ export function SampleFundCard({ className = '', compact = false }: { className?
   );
 }
 
+/** The E-CFunds logo (Neil's logo sheet, 2026-11-24): coin tile + wordmark "E-CFunds" with a gold dash.
+ *  `light` = on a dark/navy background: "E-C" white, "Funds" gold. Otherwise the theme decides (navy on light,
+ *  white + gold on dark) through --brand-ink / --brand-funds. */
 export function Brand({ light, compact }: { light?: boolean; compact?: boolean }) {
+  const ink = light ? 'text-white' : 'text-[var(--brand-ink)]';
+  const funds = light ? 'text-[#FDD20A]' : 'text-[var(--brand-funds)]';
   return (
-    <span className="flex items-center gap-2.5 relative" aria-label="E-CFunds">
-      <span className={`size-9 rounded-xl grid place-items-center font-display font-extrabold ${light ? 'bg-white text-hero' : 'bg-primary text-on-primary'}`}>₱</span>
+    <span className="flex items-center gap-2.5 relative" aria-label="E-CFunds" role="img">
+      <BrandMark size={36} className={light ? 'ring-1 ring-white/15 rounded-[10px]' : ''} />
       {/* compact: the phone top bar hides the word on very small screens (under 360 px) to fit its 4 buttons */}
-      <span className={`font-display font-extrabold text-[18px] tracking-tight ${compact ? 'max-[359px]:hidden' : ''}`}>E-CFunds</span>
+      <span aria-hidden className={`flex items-center font-display font-extrabold text-[19px] tracking-[-0.02em] leading-none ${compact ? 'max-[359px]:hidden' : ''}`}>
+        <span className={ink}>E</span>
+        <span className="mx-[2.5px] inline-block w-[9px] h-[5px] rounded-full bg-[#FDD20A]" />
+        <span className={ink}>C</span><span className={funds}>Funds</span>
+      </span>
     </span>
   );
 }

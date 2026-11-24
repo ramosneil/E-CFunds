@@ -1,5 +1,6 @@
 // Product visuals for the welcome and sign-in screens (Neil, 2026-11-24). They are E-CFunds' own screens drawn in
 // HTML with example numbers (marked "Example"), not pictures: they stay sharp, follow the theme and never go stale.
+import { BrandMark } from '../../components/BrandMark';
 import { BadgeCheck, Bell, Check, FileText, Home, LayoutDashboard, Landmark, ListChecks, Receipt, Send, Users, Wallet } from 'lucide-react';
 
 const Pocket = ({ cash, saved, h = 'h-2' }: { cash: number; saved: number; h?: string }) => (
@@ -13,7 +14,7 @@ const Pocket = ({ cash, saved, h = 'h-2' }: { cash: number; saved: number; h?: s
 export function AppWindow({ className = '' }: { className?: string }) {
   const orgs: [string, string, number][] = [['Sports Club', '₱8,470.00', 93], ['LSC', '₱320.00', 97], ['JOES', '₱40.00', 100]];
   return (
-    <div className={`rounded-[18px] bg-[#0C1A4D] border border-white/15 shadow-[0_40px_80px_-30px_rgb(5_10_40/.8)] overflow-hidden text-white ${className}`} role="img"
+    <div className={`rounded-[18px] bg-[#131D52] border border-white/15 shadow-[0_40px_80px_-30px_rgb(5_10_40/.8)] overflow-hidden text-white ${className}`} role="img"
       aria-label="E-CFunds SAS dashboard with example numbers: cash on hand, saved with SAS, a resolution request waiting, and each organization's funds">
       <div className="flex items-center gap-2 px-4 h-9 border-b border-white/10 bg-white/[0.04]">
         <span className="size-2.5 rounded-full bg-white/25" /><span className="size-2.5 rounded-full bg-white/25" /><span className="size-2.5 rounded-full bg-white/25" />
@@ -32,7 +33,7 @@ export function AppWindow({ className = '' }: { className?: string }) {
           })}
         </nav>
         <div className="p-4 space-y-3">
-          <div className="rounded-[14px] p-3.5 bg-gradient-to-br from-[#1D3FAF] to-[#13297A] border border-white/10">
+          <div className="rounded-[14px] p-3.5 bg-gradient-to-br from-[#283891] to-[#1F2A78] border border-white/10">
             <p className="text-[10px] tracking-[0.08em] uppercase font-semibold text-hero-muted">Funds · all orgs and clubs</p>
             <div className="grid grid-cols-2 gap-3 mt-1.5">
               <div><p className="text-[10.5px] text-hero-muted flex items-center gap-1"><i className="size-1.5 rounded-full bg-pocket-cash" />Cash on hand</p><p className="money font-display font-extrabold text-[15px] min-[400px]:text-[19px]">₱1,250.00</p></div>
@@ -112,7 +113,7 @@ export function PhoneMini({ className = '' }: { className?: string }) {
       aria-label="E-CFunds Android app: a treasurer's home screen with example numbers">
       <div className="rounded-[30px] bg-[#F4F6FB] overflow-hidden h-[470px] text-[#0D1530]">
         <div className="flex items-center justify-between px-4 pt-3 pb-2">
-          <span className="flex items-center gap-1.5"><span className="size-6 rounded-[7px] bg-[#1D3FAF] text-white grid place-items-center font-display font-extrabold text-[11px]">₱</span><span className="font-display font-extrabold text-[12.5px]">E-CFunds</span></span>
+          <span className="flex items-center gap-1.5"><BrandMark size={24} /><span className="font-display font-extrabold text-[12.5px]">E-CFunds</span></span>
           <Bell className="size-4 text-[#566080]" aria-hidden />
         </div>
         <div className="px-3">
@@ -129,14 +130,14 @@ export function PhoneMini({ className = '' }: { className?: string }) {
             {[[Wallet, 'Record payment', true], [Landmark, 'Remit to SAS', false], [Send, 'Resolution request', false], [BadgeCheck, 'Liquidate', false]].map(([I, t, gold]) => {
               const Icon = I as typeof Home;
               return (
-                <span key={t as string} className={`rounded-[14px] p-2.5 flex flex-col gap-1.5 ${gold ? 'bg-[#F0C14B] text-[#1A1300]' : 'bg-white border border-[#DDE2EE]'}`}>
+                <span key={t as string} className={`rounded-[14px] p-2.5 flex flex-col gap-1.5 ${gold ? 'bg-[#FDD20A] text-[#1A1300]' : 'bg-white border border-[#DDE2EE]'}`}>
                   <Icon className="size-4" />{t as string}
                 </span>
               );
             })}
           </div>
           <div className="mt-3 rounded-[14px] bg-white border border-[#DDE2EE] p-2.5">
-            <p className="text-[10.5px] font-semibold flex items-center gap-1.5"><Users className="size-3.5 text-[#1D3FAF]" />Dues this semester</p>
+            <p className="text-[10.5px] font-semibold flex items-center gap-1.5"><Users className="size-3.5 text-[#283891]" />Dues this semester</p>
             <div className="mt-1.5 h-1.5 rounded-full bg-[#E6EAF3] overflow-hidden"><span className="block h-full w-[93%] bg-[#13774A]" /></div>
             <p className="mt-1 text-[9.5px] text-[#566080] flex items-center gap-1"><Check className="size-3" />28 of 30 paid</p>
           </div>
@@ -151,8 +152,8 @@ export function PhoneMini({ className = '' }: { className?: string }) {
 /** A royal-blue tablet frame around a screen (the hero's SAS dashboard). */
 export function DeviceFrame({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`rounded-[30px] p-3 bg-gradient-to-b from-[#3358DE] to-[#1D3FAF] shadow-[0_50px_100px_-40px_rgb(29_63_175/.9),inset_0_1px_0_rgb(255_255_255/.3)] ${className}`}>
-      <div className="rounded-[20px] overflow-hidden bg-[#0C1A4D]">{children}</div>
+    <div className={`rounded-[30px] p-3 bg-gradient-to-b from-[#3B4DB0] to-[#283891] shadow-[0_50px_100px_-40px_rgb(40_56_145/.9),inset_0_1px_0_rgb(255_255_255/.3)] ${className}`}>
+      <div className="rounded-[20px] overflow-hidden bg-[#131D52]">{children}</div>
       <p className="text-center text-[9.5px] tracking-[0.25em] font-bold text-white/55 mt-2 mb-0.5">E-CFUNDS</p>
     </div>
   );
@@ -161,7 +162,7 @@ export function DeviceFrame({ children, className = '' }: { children: React.Reac
 /** A frosted stat card that sits over a demo (roles stage). */
 export function GlassStat({ title, rows, className = '' }: { title: string; rows: [string, string, string?][]; className?: string }) {
   return (
-    <div className={`rounded-[20px] bg-[#0B1336]/75 backdrop-blur-md border border-white/15 shadow-[0_30px_60px_-24px_rgb(0_0_0/.8)] p-5 text-white ${className}`} aria-hidden>
+    <div className={`rounded-[20px] bg-[#0E1640]/75 backdrop-blur-md border border-white/15 shadow-[0_30px_60px_-24px_rgb(0_0_0/.8)] p-5 text-white ${className}`} aria-hidden>
       <p className="font-display font-extrabold text-[17px]">{title}</p>
       <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-3">
         {rows.map(([label, value, tone]) => (
@@ -187,7 +188,7 @@ export function StudentDues({ className = '' }: { className?: string }) {
       <ul className="mt-3 space-y-2" aria-hidden>
         {rows.map(([org, sub, paid]) => (
           <li key={org} className="rounded-[14px] bg-white border border-[#DDE2EE] px-3 py-2.5 flex items-center gap-3">
-            <span className="size-9 rounded-full bg-[#E6ECFB] text-[#1D3FAF] grid place-items-center text-[11px] font-bold shrink-0">{org.slice(0, 2).toUpperCase()}</span>
+            <span className="size-9 rounded-full bg-[#E6ECFB] text-[#283891] grid place-items-center text-[11px] font-bold shrink-0">{org.slice(0, 2).toUpperCase()}</span>
             <span className="min-w-0 flex-1"><b className="block text-[13px]">{org}</b><span className="block text-[11.5px] text-[#566080] truncate">{sub}</span></span>
             <span className="text-right"><b className="block money text-[13px]">₱20.00</b>
               <span className={`text-[11px] font-semibold ${paid ? 'text-[#13774A]' : 'text-[#9A5B00]'}`}>{paid ? 'Paid' : 'To collect'}</span></span>
@@ -211,7 +212,7 @@ export function StepPay() {
           <div key={n} className="rounded-[14px] bg-white border border-[#DDE2EE] px-3 py-2.5 flex items-center justify-between">
             <span className="text-[13px] font-semibold">{n}</span>
             {done ? <span className="text-[12px] font-semibold text-[#13774A] flex items-center gap-1"><Check className="size-3.5" />Paid</span>
-              : <span className="rounded-[10px] bg-[#F0C14B] text-[#1A1300] text-[12px] font-bold px-3 py-1">Record ₱20</span>}
+              : <span className="rounded-[10px] bg-[#FDD20A] text-[#1A1300] text-[12px] font-bold px-3 py-1">Record ₱20</span>}
           </div>
         ))}
       </div>
@@ -232,7 +233,7 @@ export function StepRemit() {
       </div>
       <div className="mt-3 flex items-center justify-between" aria-hidden>
         <span className="text-[12px] text-[#566080]">Waiting for SAS</span>
-        <span className="rounded-[10px] bg-[#1D3FAF] text-white text-[12px] font-bold px-3 py-1.5">Approve</span>
+        <span className="rounded-[10px] bg-[#283891] text-white text-[12px] font-bold px-3 py-1.5">Approve</span>
       </div>
     </div>
   );
@@ -243,13 +244,13 @@ export function StepResolution() {
     <div className={lightCard} role="img" aria-label="A resolution request: SAS opens the file and types the amount written in it">
       <p className="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#566080]">Resolution request · Sports Club</p>
       <div className="mt-3 rounded-[14px] bg-white border border-[#DDE2EE] px-3 py-2.5 flex items-center gap-2.5" aria-hidden>
-        <FileText className="size-5 text-[#1D3FAF]" /><span className="text-[13px] font-semibold flex-1 truncate">Resolution No. 7 - Intramurals.pdf</span>
+        <FileText className="size-5 text-[#283891]" /><span className="text-[13px] font-semibold flex-1 truncate">Resolution No. 7 - Intramurals.pdf</span>
       </div>
       <p className="text-[12px] text-[#566080] mt-3">Amount in the resolution</p>
-      <p className="money font-display font-extrabold text-[30px] rounded-[14px] bg-white border-2 border-[#1D3FAF] px-3 py-1.5 mt-1">₱1,500.00</p>
+      <p className="money font-display font-extrabold text-[30px] rounded-[14px] bg-white border-2 border-[#283891] px-3 py-1.5 mt-1">₱1,500.00</p>
       <div className="mt-3 grid grid-cols-2 gap-2 text-[12.5px] font-bold" aria-hidden>
         <span className="rounded-[12px] bg-[#FDE8E6] text-[#B42318] text-center py-2">Reject</span>
-        <span className="rounded-[12px] bg-[#1D3FAF] text-white text-center py-2">Approve</span>
+        <span className="rounded-[12px] bg-[#283891] text-white text-center py-2">Approve</span>
       </div>
     </div>
   );

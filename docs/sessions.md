@@ -339,3 +339,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - **2026-11-24 dark app** (plan approved): signed-in pages and sign-in start dark (light optional), welcome-page palette and specks, royal buttons, uppercase page titles; contrast re-checked (all pass).
 - Neil confirmed on his phone 2026-11-24: app updated itself, opens dark, pages work.
 - 2026-11-24: Neil confirmed on his phone the Financial Report PDF shows the liquidated activity (hhshdggd) with its receipt item in the SAS-form layout.
+- **2026-11-24 brand**: new logo (gold ₱ coin, Neil's sheet), sheet colours (#283891 / #FDD20A / #0E1640 / #FBFAF6), OMSC→OMSU and State College→State University everywhere visible (migration 45 school name; chat assistant redeployed with the new name and current help). App id kept. Android icon needs a new APK.

@@ -112,3 +112,17 @@ Default follows the phone/OS setting; a manual toggle (sun/moon) overrides and i
   with white text in dark; cards get the panels' soft top light.
 - **Bold titles**: `.lux-title` (uppercase Plus Jakarta 800) on `PageHeader` and the treasurer Home title; section
   titles, tables, forms and lists keep normal case. `PageHeader` buttons wrap under the title on narrow phones.
+
+## 13. New logo and brand colours (2026-11-24, Neil's logo sheet "E-CFunds Logo.pdf"); OMSC is now OMSU
+- **Logo**: the gold ₱ coin on an OMSU-navy rounded tile (`src/components/BrandMark.tsx`, same drawing as
+  `public/icon.svg`) + the wordmark "E-CFunds" with a gold dash (`Brand` in `AuthLayout.tsx`): navy on light; "E-C"
+  white and "Funds" gold on dark/navy (`--brand-ink`, `--brand-funds`). Web icons regenerated (`npx pwa-assets-generator`);
+  Android icon + splash regenerated (`node scripts/make-app-assets.mjs` → `npx capacitor-assets generate --android`) —
+  they reach phones only with the next APK.
+- **Colours** from the sheet: OMSU Navy `#283891` (primary, tiles), Coin Gold `#FDD20A` (gold, cash pocket, gold
+  buttons), Night `#0E1640` (dark page, welcome ground, theme colour), Paper `#FBFAF6` (light page). Dark surfaces sit
+  lighter than Night: surface `#151F55`, surface2 `#1C2864`, border `#2C3A78`. Contrast check passes.
+- **Names**: every visible "OMSC" → "OMSU" and "Occidental Mindoro State College" → "…State University" (app, PDFs,
+  Privacy/Terms, assistant, email templates in docs/). Not changed on purpose: the Android app id and sign-in link
+  `ph.edu.omsc.ecfunds` (changing them breaks installed apps and Google sign-in), the seal file path, and the school
+  website/email addresses (SAS edits those on the School year page).

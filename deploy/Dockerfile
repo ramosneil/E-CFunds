@@ -30,7 +30,7 @@ RUN npm run build
 # ---- 2. Serve it (small, runs as a non-root user) ------------------------------------------------------------------
 FROM nginxinc/nginx-unprivileged:1.28-alpine AS runtime
 LABEL org.opencontainers.image.title="E-CFunds" \
-      org.opencontainers.image.description="Student organization fund monitoring — OMSC Mamburao (web app)"
+      org.opencontainers.image.description="Student organization fund monitoring — OMSU Mamburao (web app)"
 COPY deploy/docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY deploy/docker/security-headers.conf /etc/nginx/snippets/security-headers.conf
 COPY --from=build /app/dist /usr/share/nginx/html

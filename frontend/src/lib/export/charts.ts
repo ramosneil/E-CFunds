@@ -1,10 +1,10 @@
 // Vector charts drawn straight into the PDF (no chart library). Colours were run through the dataviz validator on
-// a white page: cash/saved = #E0A82E / #3355CC (all checks pass; gold < 3:1 → every gold mark carries a printed label),
+// a white page: cash/saved = #FDD20A / #3355CC (all checks pass; gold < 3:1 → every gold mark carries a printed label),
 // money in/out = #0E8A7A / #D9480F (CVD ΔE 13.5, all pass). Marks: thin bars, rounded ends, 2 px gaps, values printed.
 import { peso } from '../format';
 import { INK, LINE, MUTED, PAGE, text, type Doc } from './pdf';
 
-export const C = { cash: '#E0A82E', saved: '#3355CC', in: '#0E8A7A', out: '#D9480F', track: '#EEF1F7' };
+export const C = { cash: '#FDD20A', saved: '#3355CC', in: '#0E8A7A', out: '#D9480F', track: '#EEF1F7' };
 const GAP = 0.6; // ≈2 px surface gap between adjacent fills
 
 function bar(doc: Doc, x: number, y: number, w: number, h: number, color: string, round = 1) {

@@ -79,7 +79,7 @@ export function Shell() {
       <aside className="hidden lg:flex flex-col sticky top-0 h-dvh lux-side text-white px-4 py-5 relative overflow-hidden">
         <div aria-hidden className="absolute inset-0 lux-grid pointer-events-none opacity-60" />
         <div className="relative px-2"><Brand light /></div>
-        <p className="relative px-2 mt-2 text-[11.5px] text-hero-muted">OMSC Mamburao · SAS</p>
+        <p className="relative px-2 mt-2 text-[11.5px] text-hero-muted">OMSU Mamburao · SAS</p>
         <nav className="relative mt-7 space-y-1" aria-label="Main">
           {items.map((it) => (
             <NavLink key={it.to} to={it.to} end={it.to === '/'}
@@ -108,7 +108,7 @@ export function Shell() {
       </aside>
 
       <div className="min-w-0 flex flex-col">
-        <header className="lg:hidden sticky top-0 z-30 lux-side text-white shadow-[0_8px_24px_-16px_rgb(10_23_71/.8)] px-5 pt-[env(safe-area-inset-top)] h-[calc(4rem+env(safe-area-inset-top))] flex items-center justify-between lux-topbar">
+        <header className="lg:hidden sticky top-0 z-30 lux-side text-white shadow-[0_8px_24px_-16px_rgb(14_22_64/.8)] px-5 pt-[env(safe-area-inset-top)] h-[calc(4rem+env(safe-area-inset-top))] flex items-center justify-between lux-topbar">
           <Brand compact light />
           <div className="flex items-center">
             <AskTopButton />
@@ -132,7 +132,7 @@ export function Shell() {
         </main>
       </div>
 
-      <nav aria-label="Main" className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-surface/95 backdrop-blur border-t border-line shadow-[0_-10px_30px_-20px_rgb(10_23_71/.35)] h-[calc(76px+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)] flex justify-around items-center px-2">
+      <nav aria-label="Main" className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-surface/95 backdrop-blur border-t border-line shadow-[0_-10px_30px_-20px_rgb(14_22_64/.35)] h-[calc(76px+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)] flex justify-around items-center px-2">
         {phoneItems.map((it) => (
           <NavLink key={it.to} to={it.to} end={it.to === '/'} className="flex-1 flex flex-col items-center gap-1 text-[11px] font-semibold">
             {({ isActive }) => (<>

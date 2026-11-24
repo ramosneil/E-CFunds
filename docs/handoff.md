@@ -171,3 +171,9 @@ Only you do steps 1–3 (they involve your Google password and a secret app pass
 ## Phone check — dark app (2026-11-24) — DONE: Neil confirmed on his phone (updated, dark, everything works)
 1. After the app updates, it opens dark. The sun button in the top bar switches to light (and stays light).
 2. Page titles are big and uppercase (DASHBOARD, MEMBERS…); everything else works as before.
+
+## After the OMSU / new logo change (2026-11-24)
+1. **Android app icon**: the new coin icon reaches phones only with a new APK (version tag v1.1.2 → GitHub builds and publishes it). Say the word and Claude starts it.
+2. **Email templates** in Supabase (Authentication → Email Templates) still say "OMSC Mamburao" at the bottom. The fixed copies are in docs/email-templates/; paste them in (or let Claude do it in your Chrome).
+3. If the school has a new **OMSU seal**, send the image: the PDF letterhead still uses the old seal picture.
+4. If the website/email changed to omsu addresses, edit them on the School year page.

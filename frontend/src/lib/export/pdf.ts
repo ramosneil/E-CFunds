@@ -1,12 +1,12 @@
 // PDF engine for exports. jsPDF is loaded only when someone exports (separate chunk), with the Inter font embedded
-// so "₱" and "−" render (standard PDF fonts have neither). Letterhead: OMSC seal + school + office + report title.
+// so "₱" and "−" render (standard PDF fonts have neither). Letterhead: OMSU seal + school + office + report title.
 import type { jsPDF as JsPDF } from 'jspdf';
 import { supabase, logoUrl } from '../supabase';
 import { saveFile } from './save';
 
 export type Doc = JsPDF;
 export const PAGE = { w: 210, h: 297, m: 16 } as const;               // A4 portrait, millimetres
-export const INK = '#0D1530', MUTED = '#566080', LINE = '#DDE2EE', SOFT = '#F4F6FB', HERO = '#13297A';
+export const INK = '#0D1530', MUTED = '#566080', LINE = '#DDE2EE', SOFT = '#F4F6FB', HERO = '#1F2A78';
 
 let libs: Promise<{ jsPDF: typeof JsPDF; autoTable: typeof import('jspdf-autotable').default }> | null = null;
 function loadLibs() {
@@ -58,7 +58,7 @@ async function circleImage(src: string, crop?: { cx: number; cy: number; r: numb
   } catch { return null; }
 }
 
-// The OMSC seal sits in the top part of the 1000×1000 source poster (logos/brand/omsc-seal-source.jpg).
+// The OMSU seal sits in the top part of the 1000×1000 source poster (logos/brand/omsc-seal-source.jpg).
 const SEAL = { path: 'brand/omsc-seal-source.jpg', crop: { cx: 506, cy: 237, r: 206 } };
 let sealCache: Promise<string | null> | null = null;
 
@@ -71,7 +71,7 @@ export async function createDoc(format: [number, number]) {
   doc.setFont('Inter', 'normal');
   return { doc, autoTable };
 }
-/** OMSC seal and an org/club logo as round PNG data URLs (null if they can't load). */
+/** OMSU seal and an org/club logo as round PNG data URLs (null if they can't load). */
 export function sealImage() { sealCache ??= circleImage(logoUrl(SEAL.path)!, SEAL.crop); return sealCache; }
 export function logoImage(path: string | null | undefined) { return path ? circleImage(logoUrl(path)!) : Promise.resolve(null); }
 
@@ -90,7 +90,7 @@ export async function newDoc(opts: { title: string; subtitle?: string; orgLogoPa
   // Letterhead
   if (seal) doc.addImage(seal, 'PNG', m, 12, 18, 18);
   const tx = seal ? m + 22 : m;
-  text(doc, 'OCCIDENTAL MINDORO STATE COLLEGE', tx, 18, { size: 11, bold: true, color: HERO });
+  text(doc, 'OCCIDENTAL MINDORO STATE UNIVERSITY', tx, 18, { size: 11, bold: true, color: HERO });
   text(doc, 'Mamburao Campus · Office of Student Affairs and Services', tx, 23.5, { size: 8.5, color: MUTED });
   text(doc, 'E-CFunds — Student Organization Fund Monitoring', tx, 28, { size: 8.5, color: MUTED });
   if (org) doc.addImage(org, 'PNG', W - m - 18, 12, 18, 18);
@@ -137,7 +137,7 @@ export function finish(doc: Doc, filename: string) {
   for (let i = 1; i <= n; i++) {
     doc.setPage(i);
     doc.setDrawColor(LINE); doc.setLineWidth(0.2); doc.line(PAGE.m, H - 12, W - PAGE.m, H - 12);
-    text(doc, 'E-CFunds · Office of Student Affairs and Services · Occidental Mindoro State College', PAGE.m, H - 7.5, { size: 7, color: MUTED });
+    text(doc, 'E-CFunds · Office of Student Affairs and Services · Occidental Mindoro State University', PAGE.m, H - 7.5, { size: 7, color: MUTED });
     text(doc, `Page ${i} of ${n}`, W - PAGE.m, H - 7.5, { size: 7, color: MUTED, align: 'right' });
   }
   return saveFile(filename, doc.output('blob'));

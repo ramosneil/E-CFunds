@@ -21,7 +21,7 @@ function plugin() {
     try {
       await LocalNotifications.createChannel({
         id: CHANNEL, name: 'E-CFunds', description: 'Payments, requests, messages and announcements',
-        importance: 4, visibility: 1, vibration: true, lights: true, lightColor: '#2447C4',
+        importance: 4, visibility: 1, vibration: true, lights: true, lightColor: '#283891',
       });
     } catch { /* channel exists */ }
     await LocalNotifications.addListener('localNotificationActionPerformed', (a) => {
@@ -89,7 +89,7 @@ export async function shadeNotify(n: { id: number; title: string; body?: string 
     if ((await p.checkPermissions()).display !== 'granted') return false;
     await p.schedule({ notifications: [{
       id: n.id % 2_000_000_000, title: n.title, body: n.body ?? '', channelId: CHANNEL,
-      smallIcon: 'ic_stat_notify', iconColor: '#2447C4', extra: { link: n.link ?? '/' }, autoCancel: true,
+      smallIcon: 'ic_stat_notify', iconColor: '#283891', extra: { link: n.link ?? '/' }, autoCancel: true,
     }] });
     return true;
   } catch (e) { console.warn('[phone] notify', e); return false; }

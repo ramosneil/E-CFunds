@@ -1,6 +1,6 @@
 # E-CFunds
 
-Fund monitoring system for the OMSC Mamburao Office of Student Affairs and Services (SAS): student organizations'
+Fund monitoring system for the OMSU Mamburao Office of Student Affairs and Services (SAS): student organizations'
 and clubs' dues, remittances, resolution requests, liquidations and transparent financial reports.
 
 - **Live site:** https://e-cfunds.vercel.app
