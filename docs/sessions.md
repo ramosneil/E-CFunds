@@ -342,3 +342,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - **2026-11-24 brand**: new logo (gold ₱ coin, Neil's sheet), sheet colours (#283891 / #FDD20A / #0E1640 / #FBFAF6), OMSC→OMSU and State College→State University everywhere visible (migration 45 school name; chat assistant redeployed with the new name and current help). App id kept. Android icon needs a new APK.
 - 2026-11-24: Android release v1.1.2 (build 12, signed) published by tag; new coin launcher icon and splash. minNativeBuild unchanged (10): old apps keep working and self-updating.
 - 2026-11-24: Neil installed v1.1.2 on his phone over the old app — new gold coin icon shows, account kept.
+- 2026-11-24: Supabase email templates checked (all 14); only Reset password had OMSC → footer changed to OMSU and saved in Neil's Chrome.
