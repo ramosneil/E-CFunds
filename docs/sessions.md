@@ -345,3 +345,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - 2026-11-24: Supabase email templates checked (all 14); only Reset password had OMSC → footer changed to OMSU and saved in Neil's Chrome.
 - **2026-11-24 seal**: Neil's new OMSU seal replaces the old OMSC seal in every PDF letterhead (one shared loader in pdf.ts, so all reports and every org/club follow); checked in generated letterhead and Financial Report PDFs. No org/club logo was the old seal.
 - 2026-11-24: Neil confirmed the new OMSU seal shows on a downloaded Financial Report.
+- 2026-11-24: old seal file logos/brand/omsc-seal-source.jpg deleted from Storage (Neil's OK); the 10 org/club logos untouched.
