@@ -337,3 +337,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - **2026-11-24 inner pages** (plan approved): navy-and-gold carried into every signed-in page via Shell/ui/common (sidebar, phone top bar, bottom menu, buttons, cards, fund card, tabs, sheets, page titles) + greeting and tiles on the 3 home screens. Logic unchanged.
 - **2026-11-24 welcome v3** (Neil's reference site): dark, bold landing with device hero, role tabs, scroll-lit statement, semester timeline, searchable list of 25 real features, phone section; Android app keeps a short dark welcome.
 - **2026-11-24 dark app** (plan approved): signed-in pages and sign-in start dark (light optional), welcome-page palette and specks, royal buttons, uppercase page titles; contrast re-checked (all pass).
+- Neil confirmed on his phone 2026-11-24: app updated itself, opens dark, pages work.

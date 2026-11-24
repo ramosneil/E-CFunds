@@ -168,6 +168,6 @@ Only you do steps 1–3 (they involve your Google password and a secret app pass
 1. Open the app (it updates itself), sign in: navy top bar, greeting, gradient fund card, blue pill on the active bottom-menu item.
 2. Open Members, Requests, Messages, Reports and a pop-up (e.g. Record payment): everything works as before, only the look changed.
 
-## Phone check — dark app (2026-11-24)
+## Phone check — dark app (2026-11-24) — DONE: Neil confirmed on his phone (updated, dark, everything works)
 1. After the app updates, it opens dark. The sun button in the top bar switches to light (and stays light).
 2. Page titles are big and uppercase (DASHBOARD, MEMBERS…); everything else works as before.
