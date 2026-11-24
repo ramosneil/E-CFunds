@@ -6,6 +6,10 @@
   "outputDirectory": "frontend/dist",
   "rewrites": [
     {
+      "source": "/E-CFunds.apk",
+      "destination": "https://github.com/ramosneil/E-CFunds/releases/latest/download/E-CFunds.apk"
+    },
+    {
       "source": "/((?!assets/|fonts/|.*\\.[a-z0-9]+$).*)",
       "destination": "/index.html"
     }
@@ -48,6 +52,23 @@
     {
       "source": "/(sw.js|index.html|manifest.webmanifest)",
       "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/E-CFunds.apk",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/vnd.android.package-archive"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "attachment; filename=E-CFunds.apk"
+        },
         {
           "key": "Cache-Control",
           "value": "public, max-age=0, must-revalidate"

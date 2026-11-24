@@ -155,3 +155,14 @@ jobs:
             --title "E-CFunds $NAME" $pre \
             --notes "Android app for E-CFunds. On your phone: download **E-CFunds.apk**, open it, and allow installing from your browser if asked. Installs over the previous version."
           echo "::notice title=Release published::https://github.com/$GITHUB_REPOSITORY/releases/tag/$GITHUB_REF_NAME"
+
+      # The website serves the APK itself (fast in PH; frontend/scripts/fetch-apk.mjs copies the latest release on each
+      # Vercel build), so a new release asks Vercel to rebuild. Needs the GitHub secret VERCEL_DEPLOY_HOOK (a Vercel
+      # Deploy Hook URL for main); without it, the next push to main picks the new APK up.
+      - name: Refresh the website's APK
+        if: startsWith(github.ref, 'refs/tags/v') && steps.key.outputs.kind == 'signed' && !contains(steps.v.outputs.name, '-')
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "::warning::VERCEL_DEPLOY_HOOK not set — the website keeps the previous APK until the next deploy of main"; exit 0; fi
+          curl -fsS -X POST "$HOOK" > /dev/null && echo "::notice::Website rebuild requested (new APK on the site in ~2 minutes)"

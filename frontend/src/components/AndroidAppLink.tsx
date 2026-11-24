@@ -1,8 +1,10 @@
 import { Download } from 'lucide-react';
 import { isNative } from '../lib/native';
 
-/** Always the newest signed APK: every version tag publishes a GitHub Release with this fixed-name file. */
-export const APK_URL = 'https://github.com/ramosneil/E-CFunds/releases/latest/download/E-CFunds.apk';
+/** Always the newest signed APK: every version tag publishes a GitHub Release (E-CFunds.apk). */
+// Served by our own website (fast in PH), not GitHub (~20 KB/s): scripts/fetch-apk.mjs copies the latest release
+// into the site on each Vercel deploy. Absolute so the Android app's Update button works too.
+export const APK_URL = 'https://e-cfunds.vercel.app/E-CFunds.apk';
 
 const onAndroidBrowser = () => !isNative && /Android/i.test(navigator.userAgent);
 
