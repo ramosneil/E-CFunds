@@ -369,3 +369,9 @@ None. Both §10 questions were answered in session 3 and moved to §8.
   and approved expenses. Whole school: **Compare orgs and clubs** (fund, collected, spent, dues %).
 - **Present** shows it as full-screen slides (same numbers). Students see everything except receipts/receipt marks.
 - Home (treasurer, student) and the SAS Dashboard / org page show a short Insights card linking to the full page.
+
+## Landing page first (Neil, 2026-11-25)
+- Signed out → the landing page (`/`) on every device, website and Android app (before: only devices that had never
+  signed in; returning devices opened Sign in). Signed-in users still open their Home. A link that needs sign-in
+  (e.g. a tapped notification) still goes to Sign in on a known device and lands there after signing in.
+- The app shows the full landing page too, without the "Get the Android app" section.

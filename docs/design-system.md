@@ -100,7 +100,7 @@ Default follows the phone/OS setting; a manual toggle (sun/moon) overrides and i
   Student), a statement that lights up word by word on scroll (`.lux-word`, all lit under reduced motion), "One semester
   at a club" timeline (5 steps, plays itself with Pause, stops off-screen and under reduced motion), a searchable feature
   list (`welcomeContent.ts`, 25 real features), a reading-progress line, closing call. No mascots, no purple/orange.
-- Buttons: gold `.lux-gold-btn`, royal `.lux-royal` (same in both themes). Android app: one-screen welcome on `.lux-night`.
+- Buttons: gold `.lux-gold-btn`, royal `.lux-royal` (same in both themes). Android app: the same landing page since 2026-11-25 (no "get the app" section, status-bar padding).
 - Checked 320 / 390 / 412 / 768 / 1024 / 1440 (no sideways scroll), keyboard tabs (arrows), focus ring gold.
 
 ## 12. The app in the welcome page's style (2026-11-24, Neil: dark by default, bold titles, calm content)

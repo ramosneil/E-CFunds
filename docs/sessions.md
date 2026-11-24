@@ -360,3 +360,6 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   Home/Dashboard; Reports pages removed (redirect). Checked in a preview harness (SAS/treasurer/student, 412/1366,
   light/dark, all 7 slides).
 - 2026-11-25: Neil confirmed Insights on his phone (treasurer): own dashboard, whole school + compare, Present slides, Home card.
+- **2026-11-25 landing first** (Neil): signed-out users always see the landing page first (web + app); the app's short
+  one-screen welcome was replaced by the full landing page (minus the app-download section). Checked: a device marked
+  "signed in before" now opens the landing page.

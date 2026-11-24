@@ -2,14 +2,15 @@
 // (corefitness-site.vercel.app) but with E-CFunds' own navy and gold, own words and own screens. Patterns borrowed:
 // device hero, big rounded stages with role tabs, a statement that lights up on scroll, a timeline with Pause, a
 // searchable feature list, a reading-progress line. Nothing here signs anyone in: Sign in (/login) and Create account
-// (/register) are the existing screens. The Android app keeps a short one-screen welcome.
+// (/register) are the existing screens. The Android app shows the same page (Neil, 2026-11-25), minus the
+// "get the app" section, with room for the phone's status bar.
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { ArrowDown, ArrowRight, Check, ChevronDown, Download, Pause, Play, Search } from 'lucide-react';
 import { APK_URL } from '../../components/AndroidAppLink';
 import { IphoneSteps } from '../../components/IphoneInstall';
 import { isNative } from '../../lib/native';
-import { Brand, SampleFundCard } from './AuthLayout';
+import { Brand } from './AuthLayout';
 import { AppWindow, DeviceFrame, GlassStat, PhoneMini, ReportPreview, StepLiquidate, StepPay, StepRemit, StepResolution, StudentDues } from './landing';
 import { FEATURE_GROUPS, ROLES, STEPS, type RoleKey } from './welcomeContent';
 
@@ -30,29 +31,7 @@ export function useEntered() {
 
 export function Welcome() {
   const entered = useEntered();
-  return <div className={entered}>{isNative ? <AppWelcome /> : <Landing />}</div>;
-}
-
-/** Android app: one screen, sign in fast. */
-function AppWelcome() {
-  return (
-    <div className="lux-night min-h-dvh flex flex-col px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]">
-      <header className="lux-enter"><Brand light /></header>
-      <main className="flex-1 flex flex-col justify-center py-6">
-        <p className="lux-enter text-[12.5px] font-semibold text-[#A9B5DA]" style={d(60)}>Fund monitoring · OMSU Mamburao</p>
-        <h1 className={`lux-enter ${display} text-[38px] mt-3`} style={d(120)}>Every peso of every club, <span className="lux-gold-text">out in the open.</span></h1>
-        <div className="lux-enter mt-6 [@media(max-height:700px)]:hidden" style={d(220)}><SampleFundCard compact /></div>
-      </main>
-      <div className="space-y-3 lux-enter" style={d(300)}>
-        <Link to="/login" className={`${goldBtn} w-full h-[56px] text-[16px]`}>Sign in</Link>
-        <Link to="/register" className={`${blueBtn} w-full h-[56px] text-[16px]`}>Create an account</Link>
-        <p className="text-center text-[12.5px] text-[#A9B5DA]">
-          <Link to="/privacy" className="inline-block py-2 hover:text-white">Privacy</Link><span aria-hidden> · </span>
-          <Link to="/terms" className="inline-block py-2 hover:text-white">Terms</Link>
-        </p>
-      </div>
-    </div>
-  );
+  return <div className={entered}><Landing /></div>;
 }
 
 function Landing() {
@@ -65,11 +44,11 @@ function Landing() {
   return (
     <div className="lux-night min-h-dvh">
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-[10px] focus:bg-white focus:text-[#0D1530] focus:px-4 focus:py-2 focus:font-semibold">Skip to content</a>
-      <header className="sticky top-0 z-40 bg-[#0E1640]/80 backdrop-blur-md border-b border-white/10">
+      <header className="sticky top-0 z-40 bg-[#0E1640]/80 backdrop-blur-md border-b border-white/10" style={isNative ? { paddingTop: 'env(safe-area-inset-top)' } : undefined}>
         <div className={`${wrap} h-[68px] flex items-center gap-3 whitespace-nowrap`}>
           <Link to="/welcome" aria-label="E-CFunds home" className="shrink-0 rounded-xl"><Brand light /></Link>
           <nav aria-label="On this page" className="hidden lg:flex mx-auto items-center gap-1 text-[14px] font-semibold text-[#C9D4F7]">
-            {[['#roles', 'Roles'], ['#semester', 'A semester'], ['#features', 'Features'], ['#app', 'Mobile app']].map(([h, t]) => (
+            {[['#roles', 'Roles'], ['#semester', 'A semester'], ['#features', 'Features'], ...(isNative ? [] : [['#app', 'Mobile app']])].map(([h, t]) => (
               <a key={h} href={h} className="px-3 py-2 rounded-[10px] hover:text-white hover:bg-white/10">{t}</a>
             ))}
           </nav>
@@ -88,11 +67,11 @@ function Landing() {
         <Statement />
         <SemesterStage />
         <Features />
-        <AppStage />
+        {!isNative && <AppStage />}
         <Closing />
       </main>
       <footer className="border-t border-white/10">
-        <div className={`${wrap} py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[13.5px] text-[#A9B5DA]`}>
+        <div className={`${wrap} py-8 pb-[max(2rem,env(safe-area-inset-bottom))] flex flex-col sm:flex-row items-center justify-between gap-4 text-[13.5px] text-[#A9B5DA]`}>
           <span className="flex items-center gap-3"><Brand light /><span className="hidden md:inline border-l border-white/15 pl-3">Office of Student Affairs and Services · OMSU Mamburao</span></span>
           <span className="flex gap-5"><Link to="/privacy" className="py-2 hover:text-white">Privacy</Link><Link to="/terms" className="py-2 hover:text-white">Terms</Link></span>
         </div>

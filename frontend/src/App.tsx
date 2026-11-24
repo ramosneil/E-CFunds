@@ -124,10 +124,10 @@ function Gate() {
           <Route path="/forgot" element={<Forgot />} />
           <Route path="/reset" element={<ResetPassword />} />
           <Route path="/welcome" element={<Welcome />} />
-          {/* New device → the welcome page (Neil, 2026-11-24); a device that has signed in before → Sign in.
-              Any other address (e.g. a notification tapped while signed out) keeps its path on a known device, so
-              signing in lands on it; on a new device it goes to the welcome page. */}
-          <Route path="/" element={hasSignedInBefore() ? <SignIn /> : <Welcome />} />
+          {/* Signed out → the landing page first, on every device, web and app (Neil, 2026-11-25; before: only new
+              devices). Any other address (e.g. a notification tapped while signed out) keeps its path on a known
+              device, so signing in lands on it; on a new device it goes to the landing page. */}
+          <Route path="/" element={<Welcome />} />
           <Route path="*" element={hasSignedInBefore() ? <SignIn /> : <Navigate to="/" replace />} />
         </Routes>
       </Lazy>
