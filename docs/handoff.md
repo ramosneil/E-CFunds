@@ -178,7 +178,7 @@ Only you do steps 1–3 (they involve your Google password and a secret app pass
 3. **OMSU seal** — DONE 2026-11-24: every PDF letterhead uses Neil's new seal. Some club badges (English Club, SamFilko, Sports Club) still say "State College"/"OMSC" — those are the clubs' own logos; SAS can change any of them with "Change logo" on the Orgs page when a club has a new one.
 4. If the website/email changed to omsu addresses, edit them on the School year page.
 
-## Faster app download (2026-11-24) — one setting for Neil
+## Faster app download (2026-11-24) — DONE 2026-11-25: Neil added the VERCEL_DEPLOY_HOOK secret (name checked in GitHub)
 The website now hands out the Android app itself (7 MB in about a second) instead of GitHub (about 6 minutes in PH).
 Each website deploy copies the newest release. So a new release also reaches the website right away, add this once:
 1. Vercel → project **e-cfunds** → Settings → Git → **Deploy Hooks** → name `apk-release`, branch `main` → Create Hook → copy the URL.
