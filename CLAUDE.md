@@ -74,7 +74,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - **Student**: own dues + every org's totals + "where the money goes" (charts + SAS-approved expenses: date,
   purpose, category, amount). Never: other students' names, receipts, the "receipt checked by SAS" mark (staff only),
   remit/release lines, the ledger. Rule + categories: `docs/business-rules.md` "Transparency".
-- Signed out: new device → Create account (`/register`), signed in here before → Sign in (`/login`). Self-register → SAS approves (students must match a roster Student ID). Email/password, Google (web + app), or
+- Signed out: new device → Welcome page (`/`, `pages/auth/Welcome.tsx`; also `/welcome`), signed in here before → Sign in. Sign in ⇄ Create account toggle. Self-register → SAS approves (students must match a roster Student ID). Email/password, Google (web + app), or
   Student ID + password (`student-login`, lockout 5 tries / 15 min). First admin via `private.bootstrap_admins`.
 - Passwords: 8+ chars with upper, lower, number, symbol (meter + checklist, eye icon) — also set in Supabase Auth.
   Terms: checkbox on sign-up / Google's first screen → `profiles.terms_accepted_at`.

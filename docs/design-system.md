@@ -61,3 +61,9 @@ and no transaction-level ledger (business-rules §3, §8).
 
 ## 7. Theme behavior
 Default follows the phone/OS setting; a manual toggle (sun/moon) overrides and is remembered per device.
+
+## 8. Welcome page (2026-11-24, approved by Neil)
+- `src/pages/auth/Welcome.tsx`: desktop landing (lg+) and a one-screen phone welcome (hero blue, gold Sign in, outline
+  Create account, buttons at the bottom). `SampleFundCard` and `LegalFooter` live in `AuthLayout.tsx`.
+- Example numbers are always labelled "Example". Sign in ⇄ Create account switch = blue pill like `Segmented`.
+- Checked: phone 375, tablet 768, desktop 1440, light + dark, keyboard focus ring on every link.

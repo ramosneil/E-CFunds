@@ -158,3 +158,8 @@ Only you do steps 1–3 (they involve your Google password and a secret app pass
 2. SAS → Approvals: the liquidation card shows the activity name and the items → Approve (or Return).
 3. Financial report → Download PDF: the activity appears as a salmon heading with its items and Sub Total, like the SAS spreadsheet.
 4. School year page: type the real **SSG governor** and **SSG auditor** names → Save (they print on every report).
+
+## Phone check — welcome page (2026-11-24)
+1. On a phone that never used E-CFunds (or after clearing the browser's site data): the blue welcome screen shows, with Sign in and Create an account at the bottom.
+2. Tap Sign in → the Sign in ⇄ Create account switch is at the top; switching works.
+3. In the Android app after it updates: sign out → you land on Sign in (this phone has signed in before), and the logo opens the welcome screen.

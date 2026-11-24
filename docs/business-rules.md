@@ -340,3 +340,12 @@ None. Both §10 questions were answered in session 3 and moved to §8.
   per activity with its numbered items and a Sub Total — the same rows and colours as the SAS spreadsheet form (blue
   Previous Fund / Total Collection / Sub Total bars, salmon Grand Total, grey Total Remain Fund, orange Cash Breakdown).
   Empty filler rows of the paper form are left out. Receipt files stay in the system (not printed in the PDF).
+
+## Welcome page and sign-in screens (Neil, 2026-11-24; design only, no rule changes)
+- A **new device** opens the **welcome page** (`/`): on computers a landing page (hero with Sign in / Create an
+  account, an example fund card clearly marked "Example", How it works in 3 steps, what Students / Treasurers / SAS
+  get, the Android app and iPhone Home Screen steps, footer); on phones and in the Android app one screen with two big
+  buttons at the bottom. A device that has **signed in before** still opens straight to Sign in. `/welcome` always
+  shows the welcome page (the E-CFunds logo on the sign-in screens links there).
+- Sign in and Create account have a one-tap switch at the top. Sign-in, Google, Student ID, reset and approval work
+  exactly as before. Footer on every signed-out screen: Privacy · Terms · Office of Student Affairs and Services.

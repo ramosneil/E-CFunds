@@ -18,6 +18,7 @@ function page<K extends string>(load: () => Promise<Record<K, ComponentType>>, n
 const auth = () => import('./pages/auth/SignIn');
 const SignIn = page(auth, 'SignIn'), Register = page(auth, 'Register'), Forgot = page(auth, 'Forgot'), ResetPassword = page(auth, 'ResetPassword');
 const Pending = page(() => import('./pages/auth/Pending'), 'Pending');
+const Welcome = page(() => import('./pages/auth/Welcome'), 'Welcome');
 const AdminDashboard = page(() => import('./pages/admin/Dashboard'), 'AdminDashboard');
 const Approvals = page(() => import('./pages/admin/Approvals'), 'Approvals');
 const Orgs = page(() => import('./pages/admin/Orgs'), 'Orgs');
@@ -95,7 +96,7 @@ function RecoveryRedirect() {
       // Signing in on a deep link (a notification tapped while signed out, e.g. /requests) stays there; signing in
       // from Home or a sign-in page goes to the Dashboard; signing out always goes to the start.
       const path = window.location.pathname;
-      const deep = now && !['/', '/login', '/register', '/forgot'].includes(path);
+      const deep = now && !['/', '/welcome', '/login', '/register', '/forgot'].includes(path);
       if (had !== null && now !== had && path !== '/reset' && !(deep && !recovering)) {
         nav(recovering ? '/reset' : '/', { replace: true });
         window.scrollTo(0, 0);
@@ -122,8 +123,12 @@ function Gate() {
           <Route path="/login" element={<SignIn />} />
           <Route path="/forgot" element={<Forgot />} />
           <Route path="/reset" element={<ResetPassword />} />
-          {/* New device → Create account first; a device that has signed in before → Sign in. */}
-          <Route path="*" element={hasSignedInBefore() ? <SignIn /> : <Navigate to="/register" replace />} />
+          <Route path="/welcome" element={<Welcome />} />
+          {/* New device → the welcome page (Neil, 2026-11-24); a device that has signed in before → Sign in.
+              Any other address (e.g. a notification tapped while signed out) keeps its path on a known device, so
+              signing in lands on it; on a new device it goes to the welcome page. */}
+          <Route path="/" element={hasSignedInBefore() ? <SignIn /> : <Welcome />} />
+          <Route path="*" element={hasSignedInBefore() ? <SignIn /> : <Navigate to="/" replace />} />
         </Routes>
       </Lazy>
     );

@@ -72,11 +72,11 @@ export function SignIn() {
   }
 
   return (
-    <AuthLayout title="Welcome back" sub="Sign in to see your club funds.">
+    <AuthLayout tab="login" title="Welcome back" sub="Use your email, or your Student ID once SAS has approved you.">
       <GoogleButton onClick={() => googleSignIn(setErr)} />
       <Divider label="or with email or Student ID" />
       <form onSubmit={submit} className="space-y-4">
-        <Field label="Email or Student ID" hint="Students: your Student ID works once SAS has approved your account.">
+        <Field label="Email or Student ID">
           <Input autoComplete="username" autoCapitalize="none" spellCheck={false} required value={email} onChange={(e) => setEmail(e.target.value)} />
         </Field>
         <Field label="Password"><PasswordInput autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
@@ -129,7 +129,7 @@ export function Register() {
   );
 
   return (
-    <AuthLayout title="Create your account" sub="Students and treasurers sign up here. SAS approves every account.">
+    <AuthLayout tab="register" title="Create your account" sub="For students and treasurers. SAS approves every account.">
       <GoogleButton onClick={() => googleSignIn(setErr)} />
       <p className="text-[12.5px] text-muted text-center mt-2">With Google you'll agree to the Terms on the next screen.</p>
       <Divider label="or with email" />
