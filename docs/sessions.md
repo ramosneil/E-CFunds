@@ -353,3 +353,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   migration 46); Hide + clear one/all on treasurer Home (Requests, Recent activity) and the Activity log (per person,
   nothing deleted; `cleared_items`, `audit_log_visible`); Dashboard Export = School summary PDF only (Full backup and
   CSV removed, backup.ts deleted). Checked in a preview harness at 412/1366, light/dark, no overflow.
+- 2026-11-25: Neil confirmed on his phone (treasurer): Members course/section boxes, Hide, clear one, Clear all and Show cleared all work.
