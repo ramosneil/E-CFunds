@@ -359,3 +359,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   balance trend, budget vs actual (migration 47 activities), compare orgs, Present mode slides; compact cards on
   Home/Dashboard; Reports pages removed (redirect). Checked in a preview harness (SAS/treasurer/student, 412/1366,
   light/dark, all 7 slides).
+- 2026-11-25: Neil confirmed Insights on his phone (treasurer): own dashboard, whole school + compare, Present slides, Home card.
