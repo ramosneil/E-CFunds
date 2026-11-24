@@ -173,7 +173,7 @@ Only you do steps 1–3 (they involve your Google password and a secret app pass
 2. Page titles are big and uppercase (DASHBOARD, MEMBERS…); everything else works as before.
 
 ## After the OMSU / new logo change (2026-11-24)
-1. **Android app icon**: the new coin icon reaches phones only with a new APK (version tag v1.1.2 → GitHub builds and publishes it). Say the word and Claude starts it.
+1. **Android app icon** — DONE 2026-11-24: release v1.1.2 (build 12) published with the new coin icon and splash. On each phone: download E-CFunds.apk from the website (Get the Android app) and install it over the old app; accounts and data stay.
 2. **Email templates** in Supabase (Authentication → Email Templates) still say "OMSC Mamburao" at the bottom. The fixed copies are in docs/email-templates/; paste them in (or let Claude do it in your Chrome).
 3. If the school has a new **OMSU seal**, send the image: the PDF letterhead still uses the old seal picture.
 4. If the website/email changed to omsu addresses, edit them on the School year page.
