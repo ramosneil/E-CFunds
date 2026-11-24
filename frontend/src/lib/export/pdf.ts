@@ -58,8 +58,9 @@ async function circleImage(src: string, crop?: { cx: number; cy: number; r: numb
   } catch { return null; }
 }
 
-// The OMSU seal sits in the top part of the 1000×1000 source poster (logos/brand/omsc-seal-source.jpg).
-const SEAL = { path: 'brand/omsc-seal-source.jpg', crop: { cx: 506, cy: 237, r: 206 } };
+// The OMSU seal (Neil's file, 2026-11-24): round, transparent corners, shipped with the app (public/brand/omsu-seal.png)
+// so every letterhead (Financial Report and all other PDFs, every org and club) uses the same official seal.
+const SEAL_URL = '/brand/omsu-seal.png';
 let sealCache: Promise<string | null> | null = null;
 
 /** A blank document of any size (mm) with Inter loaded — for forms with their own layout (Financial Report, Folio). */
@@ -72,7 +73,7 @@ export async function createDoc(format: [number, number]) {
   return { doc, autoTable };
 }
 /** OMSU seal and an org/club logo as round PNG data URLs (null if they can't load). */
-export function sealImage() { sealCache ??= circleImage(logoUrl(SEAL.path)!, SEAL.crop); return sealCache; }
+export function sealImage() { sealCache ??= circleImage(SEAL_URL); return sealCache; }
 export function logoImage(path: string | null | undefined) { return path ? circleImage(logoUrl(path)!) : Promise.resolve(null); }
 
 export async function newDoc(opts: { title: string; subtitle?: string; orgLogoPath?: string | null; generatedBy?: string | null; landscape?: boolean }) {
@@ -83,7 +84,7 @@ export async function newDoc(opts: { title: string; subtitle?: string; orgLogoPa
   doc.setFont('Inter', 'normal');
   doc.setProperties({ title: `E-CFunds — ${opts.title}`, creator: 'E-CFunds', subject: opts.subtitle ?? '' });
 
-  sealCache ??= circleImage(logoUrl(SEAL.path)!, SEAL.crop);
+  sealCache ??= circleImage(SEAL_URL);
   const [seal, org] = await Promise.all([sealCache, opts.orgLogoPath ? circleImage(logoUrl(opts.orgLogoPath)!) : Promise.resolve(null)]);
 
   const W = doc.internal.pageSize.getWidth(), m = PAGE.m;

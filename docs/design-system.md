@@ -124,5 +124,7 @@ Default follows the phone/OS setting; a manual toggle (sun/moon) overrides and i
   lighter than Night: surface `#151F55`, surface2 `#1C2864`, border `#2C3A78`. Contrast check passes.
 - **Names**: every visible "OMSC" → "OMSU" and "Occidental Mindoro State College" → "…State University" (app, PDFs,
   Privacy/Terms, assistant, email templates in docs/). Not changed on purpose: the Android app id and sign-in link
-  `ph.edu.omsc.ecfunds` (changing them breaks installed apps and Google sign-in), the seal file path, and the school
+  `ph.edu.omsc.ecfunds` (changing them breaks installed apps and Google sign-in) and the school
   website/email addresses (SAS edits those on the School year page).
+- **Seal** (2026-11-24, Neil's file): every PDF letterhead (Financial Report and all other exports, every org/club)
+  uses the OMSU seal `frontend/public/brand/omsu-seal.png` (600 px, round, transparent). Org/club logos are their own.

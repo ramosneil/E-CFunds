@@ -175,5 +175,5 @@ Only you do steps 1–3 (they involve your Google password and a secret app pass
 ## After the OMSU / new logo change (2026-11-24)
 1. **Android app icon** — DONE 2026-11-24: release v1.1.2 (build 12) published with the new coin icon and splash; installed on Neil's phone (icon changed, account kept). On each phone: download E-CFunds.apk from the website (Get the Android app) and install it over the old app; accounts and data stay.
 2. **Email templates** — DONE 2026-11-24 (Claude, in Neil's Chrome): only the custom Reset password template had "OMSC"; its footer now says "OMSU Mamburao" (saved, re-checked). All other Supabase templates are the plain defaults with no school name.
-3. If the school has a new **OMSU seal**, send the image: the PDF letterhead still uses the old seal picture.
+3. **OMSU seal** — DONE 2026-11-24: every PDF letterhead uses Neil's new seal. Some club badges (English Club, SamFilko, Sports Club) still say "State College"/"OMSC" — those are the clubs' own logos; SAS can change any of them with "Change logo" on the Orgs page when a club has a new one.
 4. If the website/email changed to omsu addresses, edit them on the School year page.

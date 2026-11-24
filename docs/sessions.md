@@ -88,8 +88,8 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   treasurer can delete only own messages, admin deletes conversation/broadcast; student has no Messages and is
   redirected. All TEST messages deleted (0 messages, 0 reads; audit log keeps the history).
 - Exports (plan mode; Neil: all 4, real PDF files, OMSC letterhead, graphs). jsPDF 4.2.1 + autotable 5.0.9 lazy
-  chunk (main bundle +1.8 KB). Inter 4.1 TTF in public/fonts (OFL; verified ₱/− glyphs). Seal source uploaded to
-  Storage by scripts/upload-brand-logo.mjs (not committed). Charts drawn as vectors; palettes validated: cash/saved
+  chunk (main bundle +1.8 KB). Inter 4.1 TTF in public/fonts (OFL; verified ₱/− glyphs). Seal: since 2026-11-24 the
+  OMSU seal file in frontend/public/brand (the old Storage poster + upload script retired). Charts drawn as vectors; palettes validated: cash/saved
   #E0A82E/#3355CC, in/out #0E8A7A/#D9480F (CVD ΔE 13.5). Every export generated via the real buttons and inspected:
   numbers match the DB; fixed header overlap, CSV negative numbers, UTC "today" → Manila date.
 - Found: database timezone is UTC, so ledger `occurred_on` (default current_date) is the previous day between
@@ -343,3 +343,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - 2026-11-24: Android release v1.1.2 (build 12, signed) published by tag; new coin launcher icon and splash. minNativeBuild unchanged (10): old apps keep working and self-updating.
 - 2026-11-24: Neil installed v1.1.2 on his phone over the old app — new gold coin icon shows, account kept.
 - 2026-11-24: Supabase email templates checked (all 14); only Reset password had OMSC → footer changed to OMSU and saved in Neil's Chrome.
+- **2026-11-24 seal**: Neil's new OMSU seal replaces the old OMSC seal in every PDF letterhead (one shared loader in pdf.ts, so all reports and every org/club follow); checked in generated letterhead and Financial Report PDFs. No org/club logo was the old seal.

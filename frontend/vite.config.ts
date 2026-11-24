@@ -43,7 +43,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
         // The PDF tools and report fonts are only needed for exports, which need a connection anyway.
-        globIgnores: ['**/jspdf*', '**/html2canvas*', '**/purify*', '**/index.es-*', '**/fonts/**'],
+        globIgnores: ['**/jspdf*', '**/html2canvas*', '**/purify*', '**/index.es-*', '**/fonts/**', '**/brand/**'],
         navigateFallback: '/index.html',
         cleanupOutdatedCaches: true,
         importScripts: ['push-sw.js'],   // Web Push: show notifications + open the right page on tap (public/push-sw.js)
