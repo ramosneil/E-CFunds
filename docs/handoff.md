@@ -163,3 +163,7 @@ Only you do steps 1–3 (they involve your Google password and a secret app pass
 1. On a phone that never used E-CFunds (or after clearing the browser's site data): the blue welcome screen shows, with Sign in and Create an account at the bottom.
 2. Tap Sign in → the Sign in ⇄ Create account switch is at the top; switching works.
 3. In the Android app after it updates: sign out → you land on Sign in (this phone has signed in before), and the logo opens the welcome screen.
+
+## Phone check — new look inside the app (2026-11-24)
+1. Open the app (it updates itself), sign in: navy top bar, greeting, gradient fund card, blue pill on the active bottom-menu item.
+2. Open Members, Requests, Messages, Reports and a pop-up (e.g. Record payment): everything works as before, only the look changed.

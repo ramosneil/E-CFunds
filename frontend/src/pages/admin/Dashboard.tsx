@@ -5,7 +5,8 @@ import { useCurrentYear, useEntities, useEntityReport, useRequests, useSchoolFin
 import { FinancePanel } from '../../components/finance/FinancePanel';
 import { supabase } from '../../lib/supabase';
 import { peso } from '../../lib/format';
-import { Card, DuesBar, EntityLogo, HeroCard, PageHeader, SectionTitle, Spinner, Stat, Chip } from '../../components/ui';
+import { Card, DuesBar, EntityLogo, Greeting, HeroCard, PageHeader, SectionTitle, Spinner, Stat, Chip } from '../../components/ui';
+import { useAuth } from '../../lib/auth';
 import { NoYear, RequestRow } from '../../components/common';
 import { ExportMenu, exportsLib } from '../../components/ExportMenu';
 import { LatestLine } from './EntityDetail';
@@ -38,6 +39,7 @@ function useLatestEntry(yearId: number | undefined) {
 }
 
 export function AdminDashboard() {
+  const { profile } = useAuth();
   const year = useCurrentYear();
   const y = year.data?.id;
   const summary = useSchoolSummary(y);
@@ -62,6 +64,7 @@ export function AdminDashboard() {
 
   return (
     <>
+      <Greeting name={profile?.full_name} />
       <PageHeader title="Dashboard" sub={`All organizations and clubs · ${year.data.label}`}
         action={<ExportMenu options={[
           { label: 'School summary', kind: 'pdf', run: async () => (await exportsLib()).schoolSummary('pdf', year.data!) },
@@ -128,7 +131,7 @@ export function AdminDashboard() {
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-[14px]">
                 <thead>
-                  <tr className="text-left text-muted border-b border-line">
+                  <tr className="text-left text-muted border-b border-line bg-surface2/70">
                     <th className="micro px-5 py-2 font-semibold">Org / club</th>
                     <th className="micro px-3 py-2 font-semibold text-right">Cash</th>
                     <th className="micro px-3 py-2 font-semibold text-right">Saved</th>
@@ -137,7 +140,7 @@ export function AdminDashboard() {
                 </thead>
                 <tbody>
                   {orgs.map((r) => (
-                    <tr key={r.entity_id} className="border-b border-line last:border-0 hover:bg-surface2/60">
+                    <tr key={r.entity_id} className="border-b border-line last:border-0 hover:bg-primary-soft/50 transition-colors">
                       <td className="px-5 py-3">
                         <Link to={`/orgs/${r.entity_id}`} className="flex items-center gap-3 font-semibold">
                           <EntityLogo path={byId.get(r.entity_id)?.logo_path ?? null} name={r.name} size={32} />

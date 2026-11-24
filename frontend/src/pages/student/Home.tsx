@@ -6,7 +6,7 @@ import { useCurrentYear, useSchoolFinance, useSchoolSummary, useSemesters } from
 import { FinancePanel } from '../../components/finance/FinancePanel';
 import { supabase } from '../../lib/supabase';
 import { date, peso } from '../../lib/format';
-import { Card, Chip, Empty, EntityLogo, HeroCard, PageHeader, SectionTitle, Spinner } from '../../components/ui';
+import { Card, Chip, Empty, EntityLogo, Greeting, HeroCard, PageHeader, SectionTitle, Spinner } from '../../components/ui';
 import { NoYear } from '../../components/common';
 
 export function StudentHome() {
@@ -41,7 +41,8 @@ export function StudentHome() {
   });
 
   if (year.isLoading) return <Spinner />;
-  const first = profile?.full_name?.split(' ')[0];
+  const raw = profile?.full_name?.trim().split(/\s+/)[0];
+  const first = raw ? raw[0].toUpperCase() + raw.slice(1).toLowerCase() : undefined;   // NEIL → Neil
   if (!year.data) return <><PageHeader title={`Hi${first ? `, ${first}` : ''}`} /><NoYear /></>;
   const owed = (dues.data ?? []).filter((d) => !d.is_paid).reduce((s, d) => s + Number(d.amount_due), 0);
   const s = summary.data;
@@ -58,6 +59,7 @@ export function StudentHome() {
 
   return (
     <>
+      <Greeting />
       <PageHeader title={`Hi${first ? `, ${first}` : ''}`} sub={`School year ${year.data.label}`} />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 items-start">
         <Card>

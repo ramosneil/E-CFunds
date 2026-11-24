@@ -80,3 +80,15 @@ Default follows the phone/OS setting; a manual toggle (sun/moon) overrides and i
   (a UI row per role) → Reports (dark band + report) → Mobile app (phone) → closing call + footer.
 - Phone / app: gradient welcome with the example fund card (hidden under 700 px tall); sign-in screens get a gradient
   band with the title and the form on a sheet. Checked 375 / 768 / 1024 / 1440, light and dark, keyboard.
+
+## 10. Signed-in pages — navy and gold (2026-11-24, plan approved by Neil)
+- Done through the shared parts, so every page follows: `Shell.tsx` (navy gradient sidebar `.lux-side` with a gold
+  bar on the active item; school-year chip on computers; navy phone top bar `.lux-topbar` with light icons; bottom
+  menu active pill = blue gradient), `ui.tsx` (`Button` primary = `.lux-primary` gradient, gold = `.lux-gold-btn`,
+  every button `.lux-press`; `Card`/`Stat` soft shadow `.lux-card`, `Stat` tone dot; `HeroCard` = `.lux-ground` +
+  grid; `Sheet` grab handle + shadow; `PageHeader` larger + optional `eyebrow`; `Greeting`), `Segmented` active =
+  `.lux-primary`.
+- Home screens: greeting line (Manila time); treasurer quick actions as tiles (Record payment gold); SAS funds table
+  tinted header + row hover; student "Hi, Neil" in normal case.
+- Focus ring on navy areas is gold. Checked: SAS, treasurer, student home + Approvals + Requests at 412 / 1366, light
+  and dark; keyboard Tab through the sidebar.

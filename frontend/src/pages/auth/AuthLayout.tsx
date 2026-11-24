@@ -51,7 +51,7 @@ export function AuthLayout({ title, sub, children, tab }: { title: string; sub?:
                 <nav aria-label="Sign in or create an account" className="grid grid-cols-2 bg-surface2 rounded-[14px] p-1 mb-7">
                   {([['login', 'Sign in'], ['register', 'Create account']] as const).map(([k, label]) => (
                     <Link key={k} to={`/${k}`} replace aria-current={tab === k ? 'page' : undefined}
-                      className={`h-11 rounded-[11px] grid place-items-center font-semibold text-[14.5px] transition ${tab === k ? 'bg-primary text-on-primary shadow-sm' : 'text-muted hover:text-ink'}`}>
+                      className={`h-11 rounded-[11px] grid place-items-center font-semibold text-[14.5px] transition ${tab === k ? 'lux-primary' : 'text-muted hover:text-ink'}`}>
                       {label}
                     </Link>
                   ))}

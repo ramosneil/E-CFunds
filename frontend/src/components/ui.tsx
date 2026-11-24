@@ -10,22 +10,22 @@ type BtnVariant = 'primary' | 'gold' | 'ghost' | 'danger' | 'soft';
 export function Button({ variant = 'primary', busy, className, children, ...p }:
   ButtonHTMLAttributes<HTMLButtonElement> & { variant?: BtnVariant; busy?: boolean }) {
   const v = {
-    primary: 'bg-primary text-on-primary hover:brightness-110',
-    gold: 'bg-gold text-on-gold hover:brightness-105',
+    primary: 'lux-primary',
+    gold: 'lux-gold-btn',
     ghost: 'bg-transparent text-ink border border-line hover:bg-surface2',
     soft: 'bg-primary-soft text-primary hover:brightness-95',
     danger: 'bg-bad-soft text-bad hover:brightness-95',
   }[variant];
   return (
     <button {...p} disabled={p.disabled || busy}
-      className={cx('inline-flex items-center justify-center gap-2 h-12 px-5 whitespace-nowrap rounded-[14px] font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer', v, className)}>
+      className={cx('lux-press inline-flex items-center justify-center gap-2 h-12 px-5 whitespace-nowrap rounded-[14px] font-semibold disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer', v, className)}>
       {busy && <Loader2 className="size-4 animate-spin" aria-hidden />}{children}
     </button>
   );
 }
 
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
-  return <section className={cx('bg-surface border border-line rounded-[20px] p-5', className)}>{children}</section>;
+  return <section className={cx('lux-card bg-surface border border-line rounded-[20px] p-5', className)}>{children}</section>;
 }
 
 export function SectionTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
@@ -160,12 +160,13 @@ export function HeroCard({ label, cash, saved, foot, latest, pending }: {
   const big = 'money font-display font-extrabold leading-tight whitespace-nowrap block';
   const size = { fontSize: `clamp(16px, calc(100cqw / ${(chars * 0.64).toFixed(2)}), 34px)` };
   return (
-    <section className={cx('rounded-[24px] p-5 sm:p-6 text-white bg-hero relative overflow-hidden transition-shadow duration-700',
+    <section className={cx('rounded-[24px] p-5 sm:p-6 text-white lux-ground relative overflow-hidden transition-shadow duration-700 shadow-[0_24px_48px_-28px_rgb(10_23_71/.8)]',
       changed && 'ring-2 ring-pocket-cash/70')}>
-      <div className="flex items-center gap-3">
+      <div aria-hidden className="absolute inset-0 lux-grid pointer-events-none" />
+      <div className="relative flex items-center gap-3">
         <p className="micro text-hero-muted min-w-0 flex-1">{label}</p>
       </div>
-      <dl className="grid grid-cols-2 gap-4 mt-2" aria-live="polite">
+      <dl className="relative grid grid-cols-2 gap-4 mt-2" aria-live="polite">
         <div className="min-w-0 [container-type:inline-size]">
           <dt className="flex items-center gap-1.5 text-[13px] text-hero-muted"><i className="size-2 rounded-full bg-pocket-cash" aria-hidden />Cash on hand</dt>
           <dd className={big} style={size}>{peso(c.shown)}</dd>
@@ -175,19 +176,20 @@ export function HeroCard({ label, cash, saved, foot, latest, pending }: {
           <dd className={big} style={size}>{peso(s.shown)}</dd>
         </div>
       </dl>
-      <div className="mt-3"><PocketBar cash={c.shown} saved={s.shown} onHero bare /></div>
-      {latest && <div className="text-[13px] text-hero-muted mt-3">{latest}</div>}
-      {pending && <div className="mt-3 rounded-[14px] bg-white/10 px-3 py-2 text-[13px] text-white">{pending}</div>}
-      {foot && <div className="mt-3 text-[13px] text-hero-muted">{foot}</div>}
+      <div className="relative mt-3"><PocketBar cash={c.shown} saved={s.shown} onHero bare /></div>
+      {latest && <div className="relative text-[13px] text-hero-muted mt-3">{latest}</div>}
+      {pending && <div className="relative mt-3 rounded-[14px] bg-white/10 border border-white/10 px-3 py-2 text-[13px] text-white">{pending}</div>}
+      {foot && <div className="relative mt-3 text-[13px] text-hero-muted">{foot}</div>}
     </section>
   );
 }
 
 export function Stat({ label, value, tone }: { label: string; value: ReactNode; tone?: 'ok' | 'bad' | 'warn' }) {
   const t = tone ? { ok: 'text-ok', bad: 'text-bad', warn: 'text-warn' }[tone] : 'text-ink';
+  const dot = tone ? { ok: 'bg-ok', bad: 'bg-bad', warn: 'bg-warn' }[tone] : 'bg-line';
   return (
-    <div className="bg-surface border border-line rounded-[18px] p-4">
-      <p className="micro text-muted">{label}</p>
+    <div className="lux-card bg-surface border border-line rounded-[18px] p-4">
+      <p className="micro text-muted flex items-center gap-1.5"><i className={cx('size-1.5 rounded-full shrink-0', dot)} aria-hidden />{label}</p>
       <p className={cx('money font-display font-bold text-[20px] mt-1', t)}>{value}</p>
     </div>
   );
@@ -240,7 +242,8 @@ export function Sheet({ open, onClose, title, children, top }: { open: boolean; 
   return (
     <div className={`fixed inset-0 ${top ? 'z-[75]' : 'z-50'} flex items-end sm:items-center justify-center`} role="dialog" aria-modal="true" aria-label={title}>
       <button aria-label="Close" className="absolute inset-0 bg-black/45 cursor-default" onClick={onClose} />
-      <div className="relative w-full sm:max-w-lg max-h-[92dvh] overflow-y-auto bg-surface rounded-t-[24px] sm:rounded-[24px] p-5 pb-[max(20px,env(safe-area-inset-bottom))]">
+      <div className="relative w-full sm:max-w-lg max-h-[92dvh] overflow-y-auto bg-surface rounded-t-[26px] sm:rounded-[24px] p-5 pt-3 sm:pt-5 pb-[max(20px,env(safe-area-inset-bottom))] shadow-[0_-12px_40px_-12px_rgb(5_10_40/.35)] sm:shadow-[0_30px_80px_-30px_rgb(5_10_40/.6)]">
+        <div aria-hidden className="sm:hidden mx-auto mb-3 h-1.5 w-10 rounded-full bg-line" />
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-[20px] font-bold">{title}</h2>
           <button onClick={onClose} aria-label="Close" className="size-10 grid place-items-center rounded-full hover:bg-surface2 cursor-pointer"><X className="size-5" /></button>
@@ -251,12 +254,28 @@ export function Sheet({ open, onClose, title, children, top }: { open: boolean; 
   );
 }
 
-export function PageHeader({ title, sub, action }: { title: string; sub?: ReactNode; action?: ReactNode }) {
+/** "Good morning, Neil · Tuesday, 24 November" (Manila time) — above the title on the home screens. */
+export function Greeting({ name }: { name?: string | null }) {
+  const now = new Date();
+  const h = Number(new Intl.DateTimeFormat('en-PH', { hour: 'numeric', hourCycle: 'h23', timeZone: 'Asia/Manila' }).format(now));
+  const part = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+  const first = (name ?? '').trim().split(/\s+/)[0] ?? '';
+  const nice = first ? first[0].toUpperCase() + first.slice(1).toLowerCase() : '';
+  const day = new Intl.DateTimeFormat('en-PH', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Asia/Manila' }).format(now);
   return (
-    <header className="flex items-end justify-between gap-4 mb-5">
+    <p className="text-[14px] font-semibold text-muted mb-1 flex items-center gap-2">
+      <i className="size-1.5 rounded-full bg-pocket-cash" aria-hidden />{part}{nice ? `, ${nice}` : ''}<span aria-hidden>·</span><span className="font-normal">{day}</span>
+    </p>
+  );
+}
+
+export function PageHeader({ title, sub, action, eyebrow }: { title: string; sub?: ReactNode; action?: ReactNode; eyebrow?: ReactNode }) {
+  return (
+    <header className="flex items-end justify-between gap-4 mb-6">
       <div>
-        <h1 className="font-display text-[26px] sm:text-[30px] font-extrabold leading-tight">{title}</h1>
-        {sub && <p className="text-muted mt-1">{sub}</p>}
+        {eyebrow && <p className="micro text-gold-text mb-1.5">{eyebrow}</p>}
+        <h1 className="font-display text-[27px] sm:text-[32px] font-extrabold leading-tight tracking-[-0.01em]">{title}</h1>
+        {sub && <p className="text-muted mt-1.5">{sub}</p>}
       </div>
       {action}
     </header>

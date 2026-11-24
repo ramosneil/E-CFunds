@@ -75,44 +75,53 @@ export function Shell() {
 
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[248px_1fr]">
-      <aside className="hidden lg:flex flex-col sticky top-0 h-dvh border-r border-line bg-surface px-4 py-5">
-        <div className="px-2"><Brand /></div>
-        <nav className="mt-8 space-y-1" aria-label="Main">
+      {/* Desktop sidebar: navy gradient (navy-and-gold look, 2026-11-24). */}
+      <aside className="hidden lg:flex flex-col sticky top-0 h-dvh lux-side text-white px-4 py-5 relative overflow-hidden">
+        <div aria-hidden className="absolute inset-0 lux-grid pointer-events-none opacity-60" />
+        <div className="relative px-2"><Brand light /></div>
+        <p className="relative px-2 mt-2 text-[11.5px] text-hero-muted">OMSC Mamburao · SAS</p>
+        <nav className="relative mt-7 space-y-1" aria-label="Main">
           {items.map((it) => (
             <NavLink key={it.to} to={it.to} end={it.to === '/'}
-              className={({ isActive }) => `flex items-center gap-3 h-11 px-3 rounded-[14px] font-semibold transition ${isActive ? 'bg-primary-soft text-primary' : 'text-muted hover:bg-surface2 hover:text-ink'}`}>
-              <it.icon className="size-5" /><span className="flex-1">{it.label}</span><Badge n={count(it)} />
+              className={({ isActive }) => `relative flex items-center gap-3 h-11 px-3 rounded-[14px] font-semibold transition ${isActive ? 'bg-white/12 text-white shadow-[inset_0_0_0_1px_rgb(255_255_255/.08)]' : 'text-hero-muted hover:bg-white/[0.07] hover:text-white'}`}>
+              {({ isActive }) => (<>
+                {isActive && <span aria-hidden className="absolute left-0 top-2.5 bottom-2.5 w-1 rounded-full bg-pocket-cash" />}
+                <it.icon className={`size-5 ${isActive ? 'text-pocket-cash' : ''}`} /><span className="flex-1">{it.label}</span><Badge n={count(it)} />
+              </>)}
             </NavLink>
           ))}
         </nav>
-        <div className="mt-auto">
+        <div className="relative mt-auto">
           <NavLink to="/account" title="My account"
-            className={({ isActive }) => `rounded-[16px] p-3 flex items-center gap-3 transition ${isActive ? 'bg-primary-soft' : 'bg-surface2 hover:brightness-95'}`}>
-            {org ? <EntityLogo path={org.logo_path} name={org.name} size={36} /> : <span className="size-9 rounded-full bg-primary text-on-primary grid place-items-center font-bold">{(profile?.full_name || session?.user.email || '?')[0].toUpperCase()}</span>}
+            className={({ isActive }) => `rounded-[16px] p-3 flex items-center gap-3 transition border ${isActive ? 'bg-white/14 border-white/20' : 'bg-white/[0.07] border-white/10 hover:bg-white/12'}`}>
+            {org ? <EntityLogo path={org.logo_path} name={org.name} size={36} /> : <span className="size-9 rounded-full lux-gold-btn grid place-items-center font-bold">{(profile?.full_name || session?.user.email || '?')[0].toUpperCase()}</span>}
             <div className="min-w-0">
               <p className="font-semibold text-[14px] truncate">{profile?.full_name || session?.user.email}</p>
-              <p className="text-[12px] text-muted truncate">{roleLabel} · My account</p>
+              <p className="text-[12px] text-hero-muted truncate">{roleLabel} · My account</p>
             </div>
           </NavLink>
           <div className="flex items-center justify-between mt-2">
-            <button onClick={() => void askSignOut(signOut)} className="flex items-center gap-2 h-11 px-3 rounded-[14px] text-muted hover:text-ink hover:bg-surface2 font-semibold cursor-pointer"><LogOut className="size-5" />Sign out</button>
-            <ThemeToggle />
+            <button onClick={() => void askSignOut(signOut)} className="flex items-center gap-2 h-11 px-3 rounded-[14px] text-hero-muted hover:text-white hover:bg-white/10 font-semibold cursor-pointer"><LogOut className="size-5" />Sign out</button>
+            <ThemeToggle className="text-hero-muted! hover:bg-white/10!" />
           </div>
         </div>
       </aside>
 
       <div className="min-w-0 flex flex-col">
-        <header className="lg:hidden sticky top-0 z-30 bg-bg/90 backdrop-blur border-b border-line px-5 pt-[env(safe-area-inset-top)] h-[calc(4rem+env(safe-area-inset-top))] flex items-center justify-between">
-          <Brand compact />
+        <header className="lg:hidden sticky top-0 z-30 lux-side text-white shadow-[0_8px_24px_-16px_rgb(10_23_71/.8)] px-5 pt-[env(safe-area-inset-top)] h-[calc(4rem+env(safe-area-inset-top))] flex items-center justify-between lux-topbar">
+          <Brand compact light />
           <div className="flex items-center">
             <AskTopButton />
             {uid && <NotificationBell uid={uid} />}
-            <ThemeToggle />
-            <NavLink to="/account" aria-label="My account and sign out" className="size-11 grid place-items-center rounded-full text-muted hover:bg-surface2"><UserRound className="size-5" /></NavLink>
+            <ThemeToggle className="text-hero-muted! hover:bg-white/10!" />
+            <NavLink to="/account" aria-label="My account and sign out" className="size-11 grid place-items-center rounded-full text-hero-muted hover:bg-white/10"><UserRound className="size-5" /></NavLink>
           </div>
         </header>
-        <div className="hidden lg:flex items-center justify-end gap-3 h-14 px-8 text-[13px] text-muted">
-          <span>{year.data ? <>School year <b className="text-ink ml-1">{year.data.label}</b></> : 'No school year open'}</span>
+        <div className="hidden lg:flex items-center justify-end gap-3 h-16 px-8 text-[13px] text-muted">
+          <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3.5 py-1.5 lux-card">
+            <i className="size-1.5 rounded-full bg-pocket-cash" aria-hidden />
+            {year.data ? <>School year <b className="text-ink">{year.data.label}</b></> : 'No school year open'}
+          </span>
           {uid && <NotificationBell uid={uid} />}
         </div>
         {/* Bottom padding = bottom menu (76 px + the iPhone home-bar area) + breathing room. */}
@@ -123,11 +132,11 @@ export function Shell() {
         </main>
       </div>
 
-      <nav aria-label="Main" className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-surface border-t border-line h-[calc(76px+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)] flex justify-around items-center px-2">
+      <nav aria-label="Main" className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-surface/95 backdrop-blur border-t border-line shadow-[0_-10px_30px_-20px_rgb(10_23_71/.35)] h-[calc(76px+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)] flex justify-around items-center px-2">
         {phoneItems.map((it) => (
           <NavLink key={it.to} to={it.to} end={it.to === '/'} className="flex-1 flex flex-col items-center gap-1 text-[11px] font-semibold">
             {({ isActive }) => (<>
-              <span className={`relative h-8 w-14 rounded-full grid place-items-center transition ${isActive ? 'bg-primary-soft text-primary' : 'text-muted'}`}>
+              <span className={`relative h-8 w-14 rounded-full grid place-items-center transition ${isActive ? 'lux-primary' : 'text-muted'}`}>
                 <it.icon className="size-5" /><Badge n={count(it)} className="absolute -top-1 right-1" />
               </span>
               <span className={isActive ? 'text-primary' : 'text-muted'}>{it.label}</span>
@@ -136,7 +145,7 @@ export function Shell() {
         ))}
         {moreItems.length > 0 && (
           <button onClick={() => setMore(true)} className="flex-1 flex flex-col items-center gap-1 text-[11px] font-semibold cursor-pointer" aria-haspopup="dialog">
-            <span className={`h-8 w-14 rounded-full grid place-items-center transition ${moreActive ? 'bg-primary-soft text-primary' : 'text-muted'}`}><Ellipsis className="size-5" /></span>
+            <span className={`h-8 w-14 rounded-full grid place-items-center transition ${moreActive ? 'lux-primary' : 'text-muted'}`}><Ellipsis className="size-5" /></span>
             <span className={moreActive ? 'text-primary' : 'text-muted'}>More</span>
           </button>
         )}

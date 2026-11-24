@@ -97,3 +97,23 @@ html, body { overscroll-behavior-y: contain; }
 @media (prefers-reduced-motion: reduce) { .lux-enter { animation: none; } .lux-press, .lux-press:hover, .lux-press:active { transform: none; } }
 /* Safety net: whatever happens to the animation (hidden tab, paused webview), content shows after the entrance window. */
 .lux-entered .lux-enter { animation: none; }
+
+/* ── Signed-in pages, navy and gold (2026-11-24, Neil) ───────────────────────────────────────────────────────────── */
+:root { --primary-hi: #2E54D6; --card-shadow: 0 1px 2px rgb(13 21 48 / .05), 0 14px 32px -22px rgb(13 21 48 / .28); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --primary-hi: #A8BBFF; --card-shadow: 0 18px 40px -26px rgb(0 0 0 / .7); } }
+:root[data-theme="dark"] { --primary-hi: #A8BBFF; --card-shadow: 0 18px 40px -26px rgb(0 0 0 / .7); }
+.lux-primary { background: linear-gradient(180deg, var(--primary-hi), var(--primary)); color: var(--on-primary); box-shadow: 0 10px 22px -14px rgb(29 63 175 / .75), inset 0 1px 0 rgb(255 255 255 / .18); }
+.lux-card { box-shadow: var(--card-shadow); }
+.lux-press:disabled, .lux-press:disabled:hover { transform: none; filter: none; }
+.lux-side {
+  background:
+    radial-gradient(90% 40% at 0% 0%, rgb(240 193 75 / .16), transparent 60%),
+    radial-gradient(80% 50% at 100% 100%, rgb(138 164 255 / .18), transparent 65%),
+    linear-gradient(180deg, #0A1747 0%, #102265 55%, #13297A 100%);
+}
+/* Phone top bar is navy: its own icon buttons turn light (not the buttons inside the notification panel). */
+.lux-topbar > div > button, .lux-topbar > div > a, .lux-topbar > div > .relative > button { color: var(--hero-muted); }
+.lux-topbar > div > button:hover, .lux-topbar > div > a:hover, .lux-topbar > div > .relative > button:hover { color: #fff; background: rgb(255 255 255 / .1); }
+.lux-topbar > div > button[aria-label^="Ask"] { color: #F0C14B; }
+/* Keyboard focus on navy areas: gold ring (blue would vanish on navy). */
+.lux-side :focus-visible, .lux-ground :focus-visible { outline-color: #F0C14B; }

@@ -6,7 +6,7 @@ import { useCurrentYear, useEntities, useEntityFinance, useEntityReport, useRequ
 import { FinancePanel } from '../../components/finance/FinancePanel';
 import { supabase } from '../../lib/supabase';
 import { peso } from '../../lib/format';
-import { Card, DuesBar, EntityLogo, HeroCard, SectionTitle, Spinner, Stat } from '../../components/ui';
+import { Card, DuesBar, EntityLogo, Greeting, HeroCard, SectionTitle, Spinner, Stat } from '../../components/ui';
 import { NoYear, RequestRow } from '../../components/common';
 import { LatestLine, LedgerList, useLedger } from '../admin/EntityDetail';
 import { ExportMenu, exportsLib } from '../../components/ExportMenu';
@@ -28,6 +28,7 @@ export function TreasurerHome() {
   if (year.isLoading || entities.isLoading) return <Spinner />;
   return (
     <>
+      <Greeting name={profile?.full_name} />
       <div className="flex flex-wrap items-center gap-3 mb-5">
         {e && <EntityLogo path={e.logo_path} name={e.name} size={48} />}
         <div className="min-w-[160px] flex-1">
@@ -123,7 +124,7 @@ function useDues(entityId: number | undefined, yearId: number | undefined, perSe
 
 function Action({ to, icon, label, gold }: { to: string; icon: React.ReactNode; label: string; gold?: boolean }) {
   return (
-    <Link to={to} className={`rounded-[16px] px-3 h-16 flex items-center gap-3 font-semibold transition hover:brightness-105 ${gold ? 'bg-gold text-on-gold' : 'bg-surface border border-line hover:bg-surface2'}`}>
+    <Link to={to} className={`lux-press rounded-[16px] px-3 h-16 flex items-center gap-3 font-semibold ${gold ? 'lux-gold-btn' : 'lux-card bg-surface border border-line hover:border-primary/40'}`}>
       <span className={`size-10 shrink-0 rounded-[12px] grid place-items-center ${gold ? 'bg-black/10' : 'bg-primary-soft text-primary'}`}>{icon}</span>
       <span className="text-[14px] leading-tight">{label}</span>
     </Link>
