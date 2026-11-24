@@ -87,9 +87,9 @@ function DesktopWelcome() {
   return (
     <div className="hidden lg:block min-h-dvh bg-bg">
       <header className="sticky top-0 z-20 bg-surface/95 backdrop-blur border-b border-line">
-        <div className="max-w-6xl mx-auto px-8 h-16 flex items-center gap-4">
-          <Link to="/welcome" aria-label="E-CFunds home"><Brand /></Link>
-          <span className="text-[13px] text-muted border-l border-line pl-4">OMSC Mamburao · SAS</span>
+        <div className="max-w-6xl mx-auto px-8 h-16 flex items-center gap-3 whitespace-nowrap">
+          <Link to="/welcome" aria-label="E-CFunds home" className="shrink-0"><Brand /></Link>
+          <span className="hidden xl:inline text-[13px] text-muted border-l border-line pl-4">OMSC Mamburao · SAS</span>
           <nav aria-label="On this page" className="ml-auto flex items-center gap-1 text-[14px] font-semibold text-muted">
             <a href="#how" className="px-3 py-2 rounded-[10px] hover:text-ink hover:bg-surface2">How it works</a>
             <a href="#roles" className="px-3 py-2 rounded-[10px] hover:text-ink hover:bg-surface2">Who it’s for</a>
