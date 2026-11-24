@@ -92,3 +92,13 @@ Default follows the phone/OS setting; a manual toggle (sun/moon) overrides and i
   tinted header + row hover; student "Hi, Neil" in normal case.
 - Focus ring on navy areas is gold. Checked: SAS, treasurer, student home + Approvals + Requests at 412 / 1366, light
   and dark; keyboard Tab through the sidebar.
+
+## 11. Welcome page v3 — dark and bold (2026-11-24, after Neil's reference corefitness-site.vercel.app)
+- Welcome page only (sign-in and signed-in pages unchanged), dark all the way: `.lux-night` (near-black navy + faint
+  gold/blue specks). Patterns borrowed, not assets: heavy uppercase headlines, the product in a royal-blue tablet frame
+  (`DeviceFrame`) with the phone, big rounded stages (`.lux-stage` / `.lux-inset`) — role tabs (SAS / Treasurer /
+  Student), a statement that lights up word by word on scroll (`.lux-word`, all lit under reduced motion), "One semester
+  at a club" timeline (5 steps, plays itself with Pause, stops off-screen and under reduced motion), a searchable feature
+  list (`welcomeContent.ts`, 25 real features), a reading-progress line, closing call. No mascots, no purple/orange.
+- Buttons: gold `.lux-gold-btn`, royal `.lux-royal` (same in both themes). Android app: one-screen welcome on `.lux-night`.
+- Checked 320 / 390 / 412 / 768 / 1024 / 1440 (no sideways scroll), keyboard tabs (arrows), focus ring gold.
