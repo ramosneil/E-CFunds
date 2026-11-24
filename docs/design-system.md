@@ -67,3 +67,16 @@ Default follows the phone/OS setting; a manual toggle (sun/moon) overrides and i
   Create account, buttons at the bottom). `SampleFundCard` and `LegalFooter` live in `AuthLayout.tsx`.
 - Example numbers are always labelled "Example". Sign in ⇄ Create account switch = blue pill like `Segmented`.
 - Checked: phone 375, tablet 768, desktop 1440, light + dark, keyboard focus ring on every link.
+
+## 9. Welcome v2 — navy and gold (2026-11-24, Neil: "business-like, at its best for deployment")
+- Signed-out screens only (inner pages next round). Ground `.lux-ground` (navy #0A1747 → #13297A → #1D3FAF with a
+  gold light top right and a blue light bottom left) + `.lux-grid` (faint ledger grid); gold gradient text and buttons
+  (`.lux-gold-text`, `.lux-gold-btn`); buttons step on hover and press on click (`.lux-press`); the hero enters once
+  (`.lux-enter`, rests under reduced motion; `.lux-entered` shows everything after 1.2 s whatever happens).
+- Product visuals in `src/pages/auth/landing.tsx`: the SAS dashboard in an app window, a receipt chip, the Financial
+  Report form, the treasurer's Home in a phone. Example numbers only, each marked "Example". No photographs (campus
+  photos only from SAS / the school, with permission).
+- Desktop landing: hero (app window + receipt) with 4 trust points → How it works (gold numbered steps) → Who it's for
+  (a UI row per role) → Reports (dark band + report) → Mobile app (phone) → closing call + footer.
+- Phone / app: gradient welcome with the example fund card (hidden under 700 px tall); sign-in screens get a gradient
+  band with the title and the form on a sheet. Checked 375 / 768 / 1024 / 1440, light and dark, keyboard.

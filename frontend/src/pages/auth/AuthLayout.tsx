@@ -2,49 +2,71 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 import { Lock, ReceiptText, UserCheck } from 'lucide-react';
 import { PocketBar, ThemeToggle } from '../../components/ui';
+import { ReceiptChip } from './landing';
 
-/** Sign-in / sign-up / reset screens. `tab` shows the one-tap Sign in ⇄ Create account switch (Neil, 2026-11-24). */
+/** Sign-in / sign-up / reset screens (v2 2026-11-24, navy and gold). `tab` shows the one-tap Sign in ⇄ Create
+ *  account switch. Computers: a gradient panel on the left. Phones and the app: a gradient band with the title on top,
+ *  the form on a sheet below it. */
 export function AuthLayout({ title, sub, children, tab }: { title: string; sub?: ReactNode; children: ReactNode; tab?: 'login' | 'register' }) {
   return (
     <div className="min-h-dvh grid lg:grid-cols-[1.1fr_1fr]">
-      <aside className="hidden lg:flex flex-col justify-between gap-10 bg-hero text-white p-12">
-        <Link to="/welcome" aria-label="E-CFunds — about this system" className="self-start rounded-xl focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-4"><Brand light /></Link>
-        <div className="max-w-[480px]">
-          <p className="font-display font-extrabold text-[38px] leading-[1.1]">Every peso of every club, out in the open.</p>
-          <p className="text-hero-muted mt-4 text-[16px] leading-relaxed">Dues, remittances and resolution requests for OMSC student organizations and clubs.</p>
-          <SampleFundCard className="mt-8" />
-          <ul className="mt-6 space-y-2 text-[14px] text-hero-muted">
-            <li className="flex items-center gap-2"><Lock className="size-4" aria-hidden />One ledger nobody can quietly edit</li>
-            <li className="flex items-center gap-2"><ReceiptText className="size-4" aria-hidden />Numbered receipt for every payment</li>
-            <li className="flex items-center gap-2"><UserCheck className="size-4" aria-hidden />SAS approves every account</li>
-          </ul>
-        </div>
-        <p className="text-hero-muted text-[13px]">Office of Student Affairs and Services · OMSC Mamburao</p>
-      </aside>
-      <main className="flex flex-col px-5 py-6 pt-[max(1.5rem,env(safe-area-inset-top))] sm:px-10">
-        <div className="flex items-center justify-between lg:justify-end">
-          <Link to="/welcome" aria-label="E-CFunds — about this system" className="lg:hidden rounded-xl"><Brand /></Link>
-          <ThemeToggle />
-        </div>
-        <div className="flex-1 flex items-center justify-center py-8">
-          <div className="w-full max-w-[400px]">
-            {tab && (
-              <nav aria-label="Sign in or create an account" className="grid grid-cols-2 bg-surface2 rounded-[14px] p-1 mb-7">
-                {([['login', 'Sign in'], ['register', 'Create account']] as const).map(([k, label]) => (
-                  <Link key={k} to={`/${k}`} replace aria-current={tab === k ? 'page' : undefined}
-                    className={`h-11 rounded-[11px] grid place-items-center font-semibold text-[14.5px] transition ${tab === k ? 'bg-primary text-on-primary shadow-sm' : 'text-muted hover:text-ink'}`}>
-                    {label}
-                  </Link>
-                ))}
-              </nav>
-            )}
-            <h1 className="font-display text-[28px] font-extrabold leading-tight">{title}</h1>
-            {sub && <p className="text-muted mt-1.5">{sub}</p>}
-            <div className="mt-7">{children}</div>
+      <aside className="hidden lg:block relative lux-ground text-white overflow-hidden">
+        <div aria-hidden className="absolute inset-0 lux-grid" />
+        <div className="relative h-full flex flex-col justify-between gap-10 p-12">
+          <Link to="/welcome" aria-label="E-CFunds — about this system" className="self-start rounded-xl focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-4"><Brand light /></Link>
+          <div className="max-w-[500px]">
+            <p className="font-display font-extrabold text-[40px] leading-[1.08]">Every peso of every club, <span className="lux-gold-text">out in the open.</span></p>
+            <p className="text-hero-muted mt-4 text-[16px] leading-relaxed">Dues, remittances and resolution requests for OMSC student organizations and clubs.</p>
+            <div className="relative mt-9">
+              <SampleFundCard />
+              <ReceiptChip className="absolute -right-6 -bottom-16" />
+            </div>
+            <ul className="mt-24 space-y-2.5 text-[14px] text-hero-muted">
+              <li className="flex items-center gap-2.5"><Lock className="size-4 text-pocket-cash" aria-hidden />A ledger nobody can quietly edit</li>
+              <li className="flex items-center gap-2.5"><ReceiptText className="size-4 text-pocket-cash" aria-hidden />A numbered receipt for every payment</li>
+              <li className="flex items-center gap-2.5"><UserCheck className="size-4 text-pocket-cash" aria-hidden />Every account approved by SAS</li>
+            </ul>
           </div>
+          <p className="text-hero-muted text-[13px]">Office of Student Affairs and Services · OMSC Mamburao</p>
         </div>
-        <LegalFooter />
-      </main>
+      </aside>
+      <div className="flex flex-col min-w-0">
+        {/* Phones and the app: gradient band with the brand and the title. */}
+        <header className="lg:hidden relative lux-ground text-white overflow-hidden px-5 pt-[max(1rem,env(safe-area-inset-top))] pb-12">
+          <div aria-hidden className="absolute inset-0 lux-grid" />
+          <div className="relative flex items-center justify-between">
+            <Link to="/welcome" aria-label="E-CFunds — about this system" className="rounded-xl"><Brand light /></Link>
+            <ThemeToggle className="text-hero-muted! hover:bg-white/10!" />
+          </div>
+          <div className="relative mt-7 max-w-[400px] sm:mx-auto">
+            <h1 className="font-display text-[28px] font-extrabold leading-tight">{title}</h1>
+            {sub && <p className="text-hero-muted mt-1.5">{sub}</p>}
+          </div>
+        </header>
+        <main className="relative flex-1 flex flex-col bg-bg px-5 pb-6 sm:px-10 -mt-6 lg:mt-0 rounded-t-[28px] lg:rounded-none pt-6">
+          <div className="hidden lg:flex justify-end"><ThemeToggle /></div>
+          <div className="flex-1 flex lg:items-center justify-center lg:py-8">
+            <div className="w-full max-w-[400px]">
+              {tab && (
+                <nav aria-label="Sign in or create an account" className="grid grid-cols-2 bg-surface2 rounded-[14px] p-1 mb-7">
+                  {([['login', 'Sign in'], ['register', 'Create account']] as const).map(([k, label]) => (
+                    <Link key={k} to={`/${k}`} replace aria-current={tab === k ? 'page' : undefined}
+                      className={`h-11 rounded-[11px] grid place-items-center font-semibold text-[14.5px] transition ${tab === k ? 'bg-primary text-on-primary shadow-sm' : 'text-muted hover:text-ink'}`}>
+                      {label}
+                    </Link>
+                  ))}
+                </nav>
+              )}
+              <div className="hidden lg:block mb-7">
+                <h1 className="font-display text-[30px] font-extrabold leading-tight">{title}</h1>
+                {sub && <p className="text-muted mt-1.5">{sub}</p>}
+              </div>
+              {children}
+            </div>
+          </div>
+          <div className="mt-8"><LegalFooter /></div>
+        </main>
+      </div>
     </div>
   );
 }
@@ -60,33 +82,36 @@ export function LegalFooter() {
   );
 }
 
-/** A fund card with example numbers (clearly labelled), so visitors see what E-CFunds shows before signing in. */
-export function SampleFundCard({ className = '' }: { className?: string }) {
+/** A fund card with example numbers (clearly labelled), so visitors see what E-CFunds shows before signing in.
+ *  `compact`: the two numbers and the pocket bar only (phone welcome). */
+export function SampleFundCard({ className = '', compact = false }: { className?: string; compact?: boolean }) {
   return (
-    <figure className={`rounded-[22px] bg-white/[0.07] border border-white/15 p-5 text-white ${className}`}>
+    <figure className={`rounded-[22px] bg-gradient-to-br from-white/[0.12] to-white/[0.04] border border-white/15 backdrop-blur-sm ${compact ? 'p-4' : 'p-5'} text-white shadow-[0_30px_60px_-30px_rgb(5_10_40/.7)] ${className}`}>
       <figcaption className="flex items-center justify-between gap-3">
         <span className="micro text-hero-muted">Funds · Sports Club</span>
-        <span className="rounded-full bg-white/12 px-2.5 py-0.5 text-[11.5px] font-semibold text-hero-muted">Example</span>
+        <span className="rounded-full bg-pocket-cash/20 px-2.5 py-0.5 text-[11.5px] font-semibold text-pocket-cash">Example</span>
       </figcaption>
       <dl className="grid grid-cols-2 gap-4 mt-3">
         <div>
           <dt className="flex items-center gap-1.5 text-[13px] text-hero-muted"><i className="size-2 rounded-full bg-pocket-cash" aria-hidden />Cash on hand</dt>
-          <dd className="money font-display font-extrabold text-[26px] leading-tight">₱1,250.00</dd>
+          <dd className={`money font-display font-extrabold leading-tight ${compact ? 'text-[22px]' : 'text-[26px]'}`}>₱1,250.00</dd>
         </div>
         <div>
           <dt className="flex items-center gap-1.5 text-[13px] text-hero-muted"><i className="size-2 rounded-full bg-pocket-saved" aria-hidden />Saved with SAS</dt>
-          <dd className="money font-display font-extrabold text-[26px] leading-tight">₱8,470.00</dd>
+          <dd className={`money font-display font-extrabold leading-tight ${compact ? 'text-[22px]' : 'text-[26px]'}`}>₱8,470.00</dd>
         </div>
       </dl>
       <div className="mt-3"><PocketBar cash={1250} saved={8470} onHero bare /></div>
-      <ul className="mt-4 space-y-2 text-[13.5px]">
-        <li className="flex items-center justify-between gap-3 rounded-[12px] bg-white/[0.08] px-3 py-2.5">
-          <span>Resolution request · Intramurals</span><span className="text-[12px] font-semibold text-[#86EFAC]">Approved</span>
-        </li>
-        <li className="flex items-center justify-between gap-3 rounded-[12px] bg-white/[0.08] px-3 py-2.5">
-          <span>Dues · 28 of 30 paid</span><span className="money font-semibold">₱560.00</span>
-        </li>
-      </ul>
+      {!compact && (
+        <ul className="mt-4 space-y-2 text-[13.5px]">
+          <li className="flex items-center justify-between gap-3 rounded-[12px] bg-white/[0.08] px-3 py-2.5">
+            <span>Resolution request · Intramurals</span><span className="text-[12px] font-semibold text-[#86EFAC]">Approved</span>
+          </li>
+          <li className="flex items-center justify-between gap-3 rounded-[12px] bg-white/[0.08] px-3 py-2.5">
+            <span>Dues · 28 of 30 paid</span><span className="money font-semibold">₱560.00</span>
+          </li>
+        </ul>
+      )}
     </figure>
   );
 }
