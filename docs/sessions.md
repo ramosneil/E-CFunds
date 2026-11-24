@@ -349,3 +349,7 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - **2026-11-24 faster APK download** (Neil: app download slow): GitHub release download measured ~20 KB/s from PH (7 MB ≈ 6 min); Vercel ~1 MB/s+. Each Vercel build now copies the latest release to /E-CFunds.apk (fetch-apk.mjs, after the OTA zip; vercel.json falls back to GitHub); all download/Update links use it. Live: 7,168,168 B in 0.9 s. Release workflow pings VERCEL_DEPLOY_HOOK when set (Neil's handoff step).
 - **2026-11-25 APK link fix** (Neil: could not download): on phones/PCs that had opened the site, the PWA service worker answered the same-origin /E-CFunds.apk link with the app page. Fix: download-only address e-cfunds-app.vercel.app added to the Vercel project (only /E-CFunds.apk; every other path redirects to e-cfunds.vercel.app), links point there; the service worker no longer catches .apk or /ota/ navigations.
 - 2026-11-25: Neil confirmed on his phone the app downloads again (download-only address).
+- **2026-11-25 sections + clear + export** (plan approved): Students and Members in course → section boxes (A–E,
+  migration 46); Hide + clear one/all on treasurer Home (Requests, Recent activity) and the Activity log (per person,
+  nothing deleted; `cleared_items`, `audit_log_visible`); Dashboard Export = School summary PDF only (Full backup and
+  CSV removed, backup.ts deleted). Checked in a preview harness at 412/1366, light/dark, no overflow.

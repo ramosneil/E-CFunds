@@ -249,7 +249,7 @@ None. Both §10 questions were answered in session 3 and moved to §8.
   in cash on hand. Budgets can't be edited — cancel (if no money moved) and file again.
 - **Unpaid-dues reminders:** treasurer (own org) or SAS presses "Remind unpaid" — max once per Manila day per org;
   plus an automatic one every **Monday 8:00 AM** (pg_cron). Only students with an account get it (their own amount).
-- **Backup:** SAS Dashboard → Export → Full backup: one Excel workbook, a sheet per table (not the activity log).
+- **Backup:** the Dashboard's Full backup (and the school-summary CSV) were removed (Neil, 2026-11-25); the Export menu keeps the School summary PDF. There is no in-app data download now; whatever backups the Supabase plan includes are the only copy (see handoff).
 
 ## Financial Report — the SAS form, automated (Neil, 2026-11-15; migrations 34–36)
 - Every org/club's **Financial Report** (Neil's sample `FR as of 9.15.25.xlsx`) is generated from what was recorded:
@@ -349,3 +349,13 @@ None. Both §10 questions were answered in session 3 and moved to §8.
   shows the welcome page (the E-CFunds logo on the sign-in screens links there).
 - Sign in and Create account have a one-tap switch at the top. Sign-in, Google, Student ID, reset and approval work
   exactly as before. Footer on every signed-out screen: Privacy · Terms · Office of Student Affairs and Services.
+
+## Sections by course + clearing lists (Neil, 2026-11-25; migration 46)
+- **Sections A–E** (was A–D): imports, Add student, Edit and the database accept 1A … 4E.
+- **Students (SAS) and Members (treasurer)** show one card per course (courses-table order: BSIT, BEED, BSBA OM,
+  BSBA FM; then "No course"), with a box per section that has students (1A … 4E, then "3 · no section", "No year").
+  Tapping a box opens its list. Typing a search shows the plain list. Members keeps the PDF per course and per box.
+- **Hide** on treasurer Home (Requests, Recent activity) and the SAS Activity log folds the box; remembered per device.
+- **Clear (×) / Clear all** hides items from *that person's own* list only (`cleared_items`). Nothing is deleted or
+  changed: Requests, the ledger, reports, the Financial Report and the audit log stay complete. "Clear all" covers
+  everything up to that moment; newer items still appear. "Show cleared items" brings them back.

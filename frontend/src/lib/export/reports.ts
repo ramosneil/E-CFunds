@@ -153,20 +153,11 @@ export async function orgReport(format: 'pdf' | 'csv', entity: Entity, year: Yea
 }
 
 // ---------------------------------------------------------------- 2. School-wide summary (admin)
-export async function schoolSummary(format: 'pdf' | 'csv', year: Year) {
+// PDF only (Neil, 2026-11-25: the CSV version and the full backup left the Dashboard's Export menu).
+export async function schoolSummary(year: Year) {
   const rows = await reportRow(year.id);
   const sum = (k: keyof EntityReport) => rows.reduce((a, r) => a + Number(r[k] ?? 0), 0);
   const base = `E-CFunds_school-summary_${year.label}`;
-  const header = ['Org / club', 'Type', 'Previous funds', 'Collected', 'Spent', 'Cash on hand', 'Saved with SAS', 'Members', 'Paid'];
-  const line = (r: EntityReport) => [r.name, r.category, r.previous_funds, r.collections, r.expenses, r.cash_on_hand, r.saved_with_sas, r.members, r.paid_members];
-
-  if (format === 'csv') {
-    await downloadCsv(`${base}.csv`, header, [
-      ...rows.map((r) => line(r).map((v) => (typeof v === 'number' && !Number.isInteger(v) ? v.toFixed(2) : v))),
-      ['ALL ORGS & CLUBS', '', sum('previous_funds').toFixed(2), sum('collections').toFixed(2), sum('expenses').toFixed(2), sum('cash_on_hand').toFixed(2), sum('saved_with_sas').toFixed(2), sum('members'), sum('paid_members')],
-    ]);
-    return;
-  }
 
   const { doc, autoTable, top } = await newDoc({ title: 'School-wide fund summary', subtitle: `All organizations and clubs · School year ${year.label}`, generatedBy: await myName() });
   let y = tiles(doc, top, [

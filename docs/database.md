@@ -199,3 +199,13 @@ prevents two approvals racing past a limit.
   `get_financial_report` groups the items under it (no report function change).
 - Rehearsed (8 checks, rolled back): over released / no title / qty 0 refused; old-style call ok; ₱28 from 2 items;
   approve → expense "SimuLIT" ₱28 + ₱2 back to savings; report group SimuLIT, 2 items, subtotal ₱28; anon can't run it.
+
+## Sections A–E + cleared items (migration 46 `sections_e_and_cleared_items`, 2026-11-25)
+- `students.section` check is now `^[A-E]$`; `private.add_member` and `private.roster_row_errors` patched in place
+  (only the A–D test and its message).
+- `public.cleared_items (user_id, list, item_id, cleared_at)` — list in `home_requests | home_activity | activity_log`;
+  `item_id '*'` = cleared everything up to `cleared_at`. RLS: each user sees/changes only their own rows.
+- `public.audit_log_visible` (security_invoker view): audit_log minus what the signed-in person cleared. The Activity
+  log reads it, so counts and paging stay right. audit_log itself is unchanged.
+- Rehearsed (rolled back) before applying: E accepted, F rejected, both functions patched, clear one/all/restore,
+  other users can't see or forge someone's rows, bad list names refused. No new advisor warnings.

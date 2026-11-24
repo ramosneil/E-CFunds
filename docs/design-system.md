@@ -128,3 +128,10 @@ Default follows the phone/OS setting; a manual toggle (sun/moon) overrides and i
   website/email addresses (SAS edits those on the School year page).
 - **Seal** (2026-11-24, Neil's file): every PDF letterhead (Financial Report and all other exports, every org/club)
   uses the OMSU seal `frontend/public/brand/omsu-seal.png` (600 px, round, transparent). Org/club logos are their own.
+
+## 14. Fold boxes, clear buttons, course/section boxes (2026-11-25)
+- `FoldCard` (ui.tsx): title + "Hide/Show" (chevron, aria-expanded, 44px) on the first line; actions (Clear all, All ›)
+  beside it on desktop, on their own line on phones; `flush` for full-width lists. Fold state in localStorage.
+- `ClearButton` (×, 44px, muted → red on hover) and `ClearAllButton` (text) — clearing only hides for that person.
+- Course cards with section boxes reuse the Members tile (surface2, 14px radius, bold 17px label, count, paid bar on
+  Members); 2 columns on phones, 3 on tablets, 5 on desktop (one row = A–E).

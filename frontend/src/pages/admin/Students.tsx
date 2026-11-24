@@ -3,7 +3,8 @@ import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-quer
 import { AlertTriangle, ChevronLeft, ChevronRight, FileSpreadsheet, GraduationCap, Pencil, Search, Upload, UserPlus } from 'lucide-react';
 import { supabase, errorText } from '../../lib/supabase';
 import { normStudentNo } from '../../lib/format';
-import { SECTIONS, YEARS, downloadTemplate, parseRoster, yearSection, type Parsed } from '../../lib/roster';
+import { NO_COURSE, SECTIONS, YEARS, boxLabel, boxTitle, byCourseBox, courseLabel, downloadTemplate, parseRoster, yearSection, type Parsed } from '../../lib/roster';
+import { fetchAll } from '../../lib/fetchAll';
 import type { Row } from '../../lib/database.types';
 import { Alert, Button, Card, Chip, Empty, Field, Input, PageHeader, Select, Sheet, Spinner } from '../../components/ui';
 import { Segmented } from '../../components/common';
@@ -43,6 +44,7 @@ export function Students() {
 
   const list = useQuery({
     queryKey: ['students', term, course, year, status, page],
+    enabled: !!term,   // the plain list is only for searching; otherwise the page shows course + section boxes
     placeholderData: keepPreviousData,
     queryFn: async () => {
       let qy = supabase.from('students').select('*', { count: 'exact' });
@@ -60,6 +62,23 @@ export function Students() {
   });
   const total = list.data?.count ?? 0;
   const pages = Math.max(1, Math.ceil(total / PER_PAGE));
+
+  // No search typed: one box per course + section (Neil, 2026-11-25). Only the fields needed to count them.
+  const boxed = !term;
+  const roster = useQuery({
+    queryKey: ['students', 'boxes', course, year, status],
+    enabled: boxed,
+    queryFn: () => fetchAll((from, to) => {
+      let qy = supabase.from('students').select('id, course, year_level, section');
+      if (course === '-') qy = qy.is('course', null); else if (course) qy = qy.eq('course', course);
+      if (year) qy = qy.eq('year_level', Number(year));
+      if (status !== 'all') qy = qy.eq('is_active', status === 'active');
+      return qy.order('id').range(from, to);
+    }),
+  });
+  const groups = useMemo(() => byCourseBox(roster.data ?? [], (s) => s, (courses.data ?? []).map((c) => c.code)), [roster.data, courses.data]);
+  const [openBox, setOpenBox] = useState<{ course: string; box: string } | null>(null);
+  const courseName = (code: string) => courses.data?.find((c) => c.code === code)?.name;
 
   return (
     <>
@@ -87,7 +106,34 @@ export function Students() {
         <div className="sm:w-[270px]"><Segmented value={status} onChange={setStatus} options={[['active', 'Active'], ['inactive', 'Inactive'], ['all', 'All']]} /></div>
       </div>
 
-      {list.isLoading ? <Spinner /> : list.error ? <Alert>{errorText(list.error)}</Alert> : !total ? (
+      {boxed ? (
+        roster.isLoading ? <Spinner /> : roster.error ? <Alert>{errorText(roster.error)}</Alert> : !groups.length ? (
+          <Card><Empty icon={<GraduationCap className="size-6" />} title={course || year ? 'No one matches' : 'No students yet'}>
+            {course || year ? 'Try another course or year.' : 'Import the registrar’s list (Excel or CSV) to get started.'}
+          </Empty></Card>
+        ) : (
+          <div className="space-y-4">
+            {groups.map((g) => (
+              <Card key={g.course}>
+                <div className="mb-3">
+                  <h2 className="font-display font-bold text-[18px]">{courseLabel(g.course)}</h2>
+                  <p className="text-[13px] text-muted">{courseName(g.course) ? `${courseName(g.course)} · ` : ''}{g.count.toLocaleString('en-PH')} student{g.count === 1 ? '' : 's'}</p>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                  {g.boxes.map((b) => (
+                    <button key={b.box} type="button" onClick={() => setOpenBox({ course: g.course, box: b.box })}
+                      aria-label={`${boxTitle(g.course, b.box)}: ${b.rows.length} students`}
+                      className="text-left rounded-[14px] border border-line bg-surface2 hover:bg-primary-soft hover:border-primary/40 p-3 cursor-pointer transition">
+                      <span className="flex items-center gap-1 font-display font-extrabold text-[17px]">{boxLabel(b.box)}<ChevronRight className="size-4 ml-auto text-muted" aria-hidden /></span>
+                      <span className="block text-[12.5px] text-muted mt-0.5">{b.rows.length} student{b.rows.length === 1 ? '' : 's'}</span>
+                    </button>
+                  ))}
+                </div>
+              </Card>
+            ))}
+          </div>
+        )
+      ) : list.isLoading ? <Spinner /> : list.error ? <Alert>{errorText(list.error)}</Alert> : !total ? (
         <Card><Empty icon={<GraduationCap className="size-6" />} title={term || course || year ? 'No one matches' : 'No students yet'}>
           {term || course || year ? 'Try another name, Student ID or filter.' : 'Import the registrar’s list (Excel or CSV) to get started.'}
         </Empty></Card>
@@ -122,6 +168,7 @@ export function Students() {
           )}
         </Card>
       )}
+      {openBox && <BoxSheet {...openBox} status={status} onEdit={setEdit} onClose={() => setOpenBox(null)} />}
       {edit && <EditSheet key={edit.id} s={edit} courses={courses.data ?? []} onClose={() => setEdit(null)} />}
       {adding && <AddStudentSheet onClose={() => setAdding(false)} />}
       {importing && <ImportSheet courses={(courses.data ?? []).map((c) => c.code)} onClose={() => setImporting(false)} />}
@@ -129,8 +176,50 @@ export function Students() {
   );
 }
 
+/** The students in one course + section box (tapped on the Students page). */
+function BoxSheet({ course, box, status, onEdit, onClose }:
+  { course: string; box: string; status: 'active' | 'inactive' | 'all'; onEdit: (s: Student) => void; onClose: () => void }) {
+  const rows = useQuery({
+    queryKey: ['students', 'box', course, box, status],
+    queryFn: () => fetchAll((from, to) => {
+      let qy = supabase.from('students').select('*');
+      qy = course === NO_COURSE ? qy.is('course', null) : qy.eq('course', course);
+      if (box === '~') qy = qy.is('year_level', null);
+      else {
+        qy = qy.eq('year_level', Number(box[0]));
+        qy = box.length > 1 ? qy.eq('section', box.slice(1)) : qy.is('section', null);
+      }
+      if (status !== 'all') qy = qy.eq('is_active', status === 'active');
+      return qy.order('full_name').order('id').range(from, to);
+    }),
+  });
+  return (
+    <Sheet open onClose={onClose} title={boxTitle(course, box)}>
+      {rows.isLoading ? <Spinner /> : rows.error ? <Alert>{errorText(rows.error)}</Alert> : (
+        <>
+          <p className="text-[14px] text-muted mb-2">{rows.data!.length} student{rows.data!.length === 1 ? '' : 's'}</p>
+          <ul className="divide-y divide-line -mx-5 border-t border-line">
+            {rows.data!.map((s) => (
+              <li key={s.id} className="px-5 py-3 flex items-center gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold truncate flex items-center gap-2"><span className="truncate">{s.full_name}</span>{!s.is_active && <Chip tone="muted">Inactive</Chip>}</p>
+                  <p className="text-[13px] text-muted truncate money">{s.student_no}</p>
+                </div>
+                <button onClick={() => { onEdit(s); onClose(); }} aria-label={`Edit ${s.full_name}`} title="Edit"
+                  className="size-11 -mr-2 grid place-items-center rounded-full text-muted hover:bg-surface2 hover:text-ink cursor-pointer shrink-0">
+                  <Pencil className="size-[18px]" aria-hidden />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </Sheet>
+  );
+}
+
 /** SAS adds ONE student (late enrollee). Same server checks as the import (import_students with one row): Student ID
- *  cleaned + unique, course from the list, year 1–4, section A–D; joins SSG + their course orgs automatically. If the ID is already
+ *  cleaned + unique, course from the list, year 1–4, section A–E; joins SSG + their course orgs automatically. If the ID is already
  *  on the list, its name/course/year are updated instead. `initial` pre-fills from a sign-up request (Approvals). */
 export function AddStudentSheet({ onClose, onAdded, initial }: { onClose: () => void; onAdded?: () => void; initial?: { student_no?: string | null; full_name?: string | null } }) {
   const qc = useQueryClient();
@@ -338,7 +427,7 @@ export function ImportSheet({ courses, onClose, mode = 'sas' }: { courses: strin
         )}
         <div className="rounded-[16px] bg-surface2 p-4 text-[14px]">
           <p className="font-semibold mb-1">1. Download the template</p>
-          <p className="text-muted mb-3">Columns: Student ID, Full name, Course, Year level, Section (A–D). {club ? 'A class list with the same column titles works too.' : 'A registrar file with the same column titles works too.'}</p>
+          <p className="text-muted mb-3">Columns: Student ID, Full name, Course, Year level, Section (A–E). {club ? 'A class list with the same column titles works too.' : 'A registrar file with the same column titles works too.'}</p>
           <div className="grid grid-cols-2 gap-2 sm:max-w-xs">
             <Button variant="ghost" className="h-11 px-3 text-[14px] bg-surface" onClick={() => void downloadTemplate('xlsx', courses, mode)}><FileSpreadsheet className="size-4" aria-hidden />Excel</Button>
             <Button variant="ghost" className="h-11 px-3 text-[14px] bg-surface" onClick={() => void downloadTemplate('csv', courses, mode)}><FileSpreadsheet className="size-4" aria-hidden />CSV</Button>

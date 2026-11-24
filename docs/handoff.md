@@ -185,3 +185,10 @@ Each website deploy copies the newest release. So a new release also reaches the
 2. GitHub → ramosneil/E-CFunds → Settings → Secrets and variables → Actions → New repository secret →
    name `VERCEL_DEPLOY_HOOK`, value = that URL → Add secret. (Keep the URL private; anyone with it can redeploy the site.)
 Without it nothing breaks: after a release the website keeps the previous APK until the next push to main (Claude redeploys).
+
+## Phone check — section boxes, Hide and Clear (2026-11-25)
+1. As the Sports Club treasurer: Members shows course cards (BSIT …) with section boxes; tap 3A to see its list.
+2. Home: tap **Hide** on Recent activity (it folds), then **Show**. Tap × on one request (it leaves your Home only;
+   it's still on the Requests page). **Clear all** → **Show cleared items** brings them back.
+3. Note: the Dashboard's **Full backup** is gone (your choice). There is no data download in the app now; on the free
+   Supabase plan that may mean no backup copy at all. The weekly automatic backup is still on the improvements list.

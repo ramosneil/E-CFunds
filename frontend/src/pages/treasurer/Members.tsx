@@ -12,7 +12,7 @@ import { ExportMenu, exportsLib } from '../../components/ExportMenu';
 import { confirmAsk, promptAsk } from '../../lib/confirm';
 import { toast } from '../../lib/toast';
 import { fetchAll } from '../../lib/fetchAll';
-import { SECTIONS, YEARS, yearSection } from '../../lib/roster';
+import { SECTIONS, YEARS, boxLabel, boxOf, boxTitle, byCourseBox, courseLabel, courseOf } from '../../lib/roster';
 import { ImportSheet, useCourses } from '../admin/Students';
 
 export function Members() {
@@ -99,28 +99,10 @@ export function Members() {
       .sort((a, b) => (a.student?.full_name ?? '').localeCompare(b.student?.full_name ?? ''));
   }, [members.data, q, show]);
 
-  // Grouped by year + section (1A, 1B … 4D), then year only, then "No year / section".
-  const groups = useMemo(() => {
-    const by = new Map<string, typeof rows>();
-    for (const m of rows) {
-      const k = yearSection(m.student?.year_level, m.student?.section) || '~';
-      by.set(k, [...(by.get(k) ?? []), m]);
-    }
-    const label = (k: string) => (k === '~' ? 'No year / section' : /^\d$/.test(k) ? `Year ${k} · no section` : k);
-    return [...by.entries()].sort(([a], [b]) => (a === '~' ? 1 : b === '~' ? -1 : a.localeCompare(b)))
-      .map(([key, list]) => ({ key, label: label(key), rows: list }));
-  }, [rows]);
-
-  // Year level → its section groups, for the tiles (Neil, 2026-11-19: tap a section to see its list).
-  const years = useMemo(() => {
-    const by = new Map<number, typeof groups>();
-    for (const g of groups) {
-      const y = g.key === '~' ? 0 : Number(g.key[0]);
-      by.set(y, [...(by.get(y) ?? []), g]);
-    }
-    return [...by.entries()].sort(([a], [b]) => (a === 0 ? 1 : b === 0 ? -1 : a - b));
-  }, [groups]);
-  const yearName = (y: number) => (y === 0 ? 'No year level' : `${y}${y === 1 ? 'st' : y === 2 ? 'nd' : y === 3 ? 'rd' : 'th'} year`);
+  // Course → section boxes (Neil, 2026-11-25: BSIT 1A … 4E, BSBA OM, BSBA FM, BEED; tap a box to see its list).
+  const courseGroups = useMemo(() => byCourseBox(rows, (m) => m.student, (courses.data ?? []).map((c) => c.code)), [rows, courses.data]);
+  // The same boxes as one flat list (used while searching, and for the pop-up), keyed "course|box".
+  const groups = useMemo(() => courseGroups.flatMap((g) => g.boxes.map((b) => ({ key: `${g.course}|${b.box}`, label: boxTitle(g.course, b.box), rows: b.rows }))), [courseGroups]);
 
   // Print-ready PDF of everyone, one year level, or one section (always the full list, whatever the filter).
   async function exportPdf(scope: string, pick: (m: NonNullable<typeof members.data>[number]) => boolean, key: string) {
@@ -140,7 +122,7 @@ export function Members() {
       });
     } catch (x) { setErr(errorText(x)); } finally { setPdfBusy(null); }
   }
-  const keyOf = (m: NonNullable<typeof members.data>[number]) => yearSection(m.student?.year_level, m.student?.section) || '~';
+  const keyOf = (m: NonNullable<typeof members.data>[number]) => `${courseOf(m.student)}|${boxOf(m.student)}`;
 
   async function pay(id: number) {
     setBusy(id); setErr('');
@@ -256,29 +238,30 @@ export function Members() {
       ) : (
         q.trim() === '' ? (
         <div className="space-y-4">
-          {years.map(([y, list]) => {
-            const n = list.reduce((t, g) => t + g.rows.length, 0), np = list.reduce((t, g) => t + g.rows.filter((m) => m.is_paid).length, 0);
+          {courseGroups.map((cg) => {
+            const np = cg.boxes.reduce((t, b) => t + b.rows.filter((m) => m.is_paid).length, 0);
             return (
-              <Card key={y}>
+              <Card key={cg.course}>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="min-w-0 flex-1">
-                    <h2 className="font-display font-bold text-[18px]">{yearName(y)}</h2>
-                    <p className="text-[13px] text-muted">{n} member{n === 1 ? '' : 's'} · {np} paid</p>
+                    <h2 className="font-display font-bold text-[18px]">{courseLabel(cg.course)}</h2>
+                    <p className="text-[13px] text-muted">{cg.count} member{cg.count === 1 ? '' : 's'} · {np} paid</p>
                   </div>
-                  <Button variant="soft" className="h-11 px-3 text-[14px]" busy={pdfBusy === `y${y}`}
-                    onClick={() => exportPdf(yearName(y), (m) => (m.student?.year_level ?? 0) === y, `y${y}`)}>
+                  <Button variant="soft" className="h-11 px-3 text-[14px]" busy={pdfBusy === `c${cg.course}`} aria-label={`PDF of ${courseLabel(cg.course)} members`}
+                    onClick={() => exportPdf(courseLabel(cg.course), (m) => courseOf(m.student) === cg.course, `c${cg.course}`)}>
                     <FileDown className="size-4" aria-hidden /><span className="hidden sm:inline">PDF</span>
                   </Button>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                  {list.map((g) => {
-                    const gp = g.rows.filter((m) => m.is_paid).length;
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                  {cg.boxes.map((b) => {
+                    const gp = b.rows.filter((m) => m.is_paid).length;
                     return (
-                      <button key={g.key} type="button" onClick={() => setOpenGroup(g.key)}
+                      <button key={b.box} type="button" onClick={() => setOpenGroup(`${cg.course}|${b.box}`)}
+                        aria-label={`${boxTitle(cg.course, b.box)}: ${b.rows.length} members, ${gp} paid`}
                         className="text-left rounded-[14px] border border-line bg-surface2 hover:bg-primary-soft hover:border-primary/40 p-3 cursor-pointer transition">
-                        <span className="flex items-center gap-1 font-display font-extrabold text-[17px]">{g.key === '~' ? 'No section' : /^\d$/.test(g.key) ? `${g.key} · no section` : g.key}<ChevronRight className="size-4 ml-auto text-muted" aria-hidden /></span>
-                        <span className="block text-[12.5px] text-muted mt-0.5">{g.rows.length} · {gp} paid</span>
-                        <span className="block h-1.5 mt-2 rounded-full bg-line overflow-hidden"><span className="block h-full bg-ok" style={{ width: `${g.rows.length ? (gp / g.rows.length) * 100 : 0}%` }} /></span>
+                        <span className="flex items-center gap-1 font-display font-extrabold text-[17px]">{boxLabel(b.box)}<ChevronRight className="size-4 ml-auto text-muted" aria-hidden /></span>
+                        <span className="block text-[12.5px] text-muted mt-0.5">{b.rows.length} · {gp} paid</span>
+                        <span className="block h-1.5 mt-2 rounded-full bg-line overflow-hidden"><span className="block h-full bg-ok" style={{ width: `${b.rows.length ? (gp / b.rows.length) * 100 : 0}%` }} /></span>
                       </button>
                     );
                   })}
@@ -307,7 +290,8 @@ export function Members() {
       )}
       {openGroup && (() => {
         const g = groups.find((x) => x.key === openGroup);
-        const label = openGroup === '~' ? 'No year / section' : /^\d$/.test(openGroup) ? `Year ${openGroup} · no section` : `Section ${openGroup}`;
+        const [oc, ob] = openGroup.split('|');
+        const label = boxTitle(oc, ob);
         return (
           <Sheet open onClose={() => setOpenGroup(null)} title={`${label} · ${entity?.short_name ?? ''}`}>
             <div className="flex items-center gap-3 mb-3">

@@ -3,6 +3,7 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 type E = Database['public']['Enums'];
+export type ClearedList = 'home_requests' | 'home_activity' | 'activity_log';
 
 export type Database = {
   __InternalSupabase: { PostgrestVersion: '14.18' };
@@ -35,6 +36,13 @@ export type Database = {
       audit_log: {
         Row: { id: number; table_name: string; action: string; row_pk: string | null; before_row: Json | null; after_row: Json | null; actor: string | null; at: string };
         Insert: never; Update: never; Relationships: [];
+      };
+      // Migration 46: what each person cleared from their own lists ('*' = everything up to cleared_at).
+      cleared_items: {
+        Row: { user_id: string; list: ClearedList; item_id: string; cleared_at: string };
+        Insert: { user_id?: string; list: ClearedList; item_id: string; cleared_at?: string };
+        Update: { cleared_at?: string };
+        Relationships: [];
       };
       accredited_entries: {
         Row: {
@@ -186,6 +194,11 @@ export type Database = {
       };
     };
     Views: {
+      // Migration 46: the audit log minus what the signed-in person cleared.
+      audit_log_visible: {
+        Row: { id: number; table_name: string; action: string; row_pk: string | null; before_row: Json | null; after_row: Json | null; actor: string | null; at: string };
+        Relationships: [];
+      };
       budget_status: {
         Row: BudgetRow & { released: number; spent: number; pending_release: number; is_overdue: boolean; returned: number; remaining: number };
         Relationships: [];

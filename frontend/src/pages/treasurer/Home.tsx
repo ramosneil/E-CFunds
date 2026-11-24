@@ -1,12 +1,17 @@
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronRight, Landmark, Receipt, Signature, Wallet } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { useCurrentYear, useEntities, useEntityFinance, useEntityReport, useRequests, useSemesters } from '../../lib/data';
 import { FinancePanel } from '../../components/finance/FinancePanel';
-import { supabase } from '../../lib/supabase';
-import { peso } from '../../lib/format';
-import { Card, DuesBar, EntityLogo, Greeting, HeroCard, SectionTitle, Spinner, Stat } from '../../components/ui';
+import { errorText, supabase } from '../../lib/supabase';
+import { kindLabel, peso } from '../../lib/format';
+import type { Row } from '../../lib/database.types';
+import { useCleared } from '../../lib/cleared';
+import { confirmAsk } from '../../lib/confirm';
+import { toast } from '../../lib/toast';
+import { ClearAllButton, ClearButton, DuesBar, EntityLogo, FoldCard, Greeting, HeroCard, Spinner, Stat } from '../../components/ui';
 import { NoYear, RequestRow } from '../../components/common';
 import { LatestLine, LedgerList, useLedger } from '../admin/EntityDetail';
 import { ExportMenu, exportsLib } from '../../components/ExportMenu';
@@ -79,15 +84,8 @@ export function TreasurerHome() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 mt-4 items-start">
-            <Card>
-              <SectionTitle action={<Link to="/requests" className="text-primary text-[14px] font-semibold flex items-center">All<ChevronRight className="size-4" /></Link>}>Requests</SectionTitle>
-              {requests.data?.length ? <div className="divide-y divide-line">{requests.data.slice(0, 5).map((q) => <RequestRow key={q.id} r={q} />)}</div>
-                : <p className="text-muted text-[14px] py-4">No requests yet.</p>}
-            </Card>
-            <Card>
-              <SectionTitle>Recent activity</SectionTitle>
-              {ledger.isLoading ? <Spinner /> : <LedgerList entries={(ledger.data ?? []).slice(0, 8)} />}
-            </Card>
+            <HomeRequests requests={requests.data ?? []} />
+            <HomeActivity entries={ledger.data ?? []} loading={ledger.isLoading} />
           </div>
           <div className="mt-4">
             <FinancePanel finance={finance.data} loading={finance.isLoading} title="Your report — what students see"
@@ -96,6 +94,63 @@ export function TreasurerHome() {
         </>
       )}
     </>
+  );
+}
+
+// Requests and Recent activity: fold with Hide, clear one (×) or all from MY list (Neil, 2026-11-25). Clearing only
+// hides them here — the requests page, reports and the ledger keep everything (lib/cleared.ts).
+function useClearActions(list: 'home_requests' | 'home_activity', what: string) {
+  const c = useCleared(list);
+  const [busy, setBusy] = useState<number | 'all' | 'restore' | null>(null);
+  const run = async (k: typeof busy, f: () => Promise<void>) => {
+    setBusy(k);
+    try { await f(); } catch (x) { toast({ title: 'Couldn’t update the list', body: errorText(x), tone: 'warn' }); } finally { setBusy(null); }
+  };
+  return {
+    c, busy,
+    one: (id: number) => run(id, () => c.clearOne(id)),
+    all: async () => {
+      if (!(await confirmAsk({ title: `Clear all ${what}?`, confirm: 'Clear all', tone: 'bad',
+        body: `They are only hidden from this list on your Home. The records stay in ${what === 'requests' ? 'Requests' : 'the ledger'}, the reports and the Financial Report. New ones still show here.` }))) return;
+      await run('all', c.clearAll);
+    },
+    restore: () => run('restore', c.restore),
+  };
+}
+
+function AllCleared({ onRestore, busy }: { onRestore: () => void; busy: boolean }) {
+  return (
+    <p className="text-muted text-[14px] py-4 flex flex-wrap items-center gap-x-1">
+      All cleared.
+      <button type="button" onClick={onRestore} disabled={busy} className="h-11 font-semibold text-primary hover:underline cursor-pointer disabled:opacity-50">Show cleared items</button>
+    </p>
+  );
+}
+
+function HomeRequests({ requests }: { requests: Row<'fund_requests'>[] }) {
+  const a = useClearActions('home_requests', 'requests');
+  const shown = requests.filter((q) => !a.c.isCleared(q.id, q.filed_at)).slice(0, 5);
+  return (
+    <FoldCard id="home-requests" title="Requests" actions={<>
+      {shown.length > 0 && <ClearAllButton busy={a.busy === 'all'} onClick={a.all} />}
+      <Link to="/requests" className="h-11 px-2 text-primary text-[14px] font-semibold flex items-center">All<ChevronRight className="size-4" /></Link>
+    </>}>
+      {shown.length ? <div className="divide-y divide-line">{shown.map((q) => <RequestRow key={q.id} r={q}
+        action={<ClearButton label={`this ${kindLabel[q.kind]?.toLowerCase() ?? 'request'}`} busy={a.busy === q.id} onClick={() => a.one(q.id)} />} />)}</div>
+        : requests.length && a.c.any ? <AllCleared onRestore={a.restore} busy={a.busy === 'restore'} />
+        : <p className="text-muted text-[14px] py-4">No requests yet.</p>}
+    </FoldCard>
+  );
+}
+
+function HomeActivity({ entries, loading }: { entries: Row<'ledger_entries'>[]; loading: boolean }) {
+  const a = useClearActions('home_activity', 'activity');
+  const shown = entries.filter((e) => !a.c.isCleared(e.id, e.created_at)).slice(0, 8);
+  return (
+    <FoldCard id="home-activity" title="Recent activity" actions={shown.length > 0 && <ClearAllButton busy={a.busy === 'all'} onClick={a.all} />}>
+      {loading ? <Spinner /> : <LedgerList entries={shown} onClear={(e) => a.one(e.id)} clearing={typeof a.busy === 'number' ? a.busy : null}
+        empty={entries.length && a.c.any ? <AllCleared onRestore={a.restore} busy={a.busy === 'restore'} /> : undefined} />}
+    </FoldCard>
   );
 }
 

@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, CheckCircle2, HandCoins, Scale, XCircle } from 'lucide-react';
@@ -7,7 +7,7 @@ import { useCurrentYear, useEntities, useEntityFinance, useEntityReport } from '
 import { FinancePanel } from '../../components/finance/FinancePanel';
 import { supabase, errorText } from '../../lib/supabase';
 import { date, kindLabel, peso } from '../../lib/format';
-import { Alert, Button, Card, DuesBar, EntityLogo, Field, HeroCard, Input, Select, Sheet, Spinner, Stat } from '../../components/ui';
+import { Alert, Button, Card, ClearButton, DuesBar, EntityLogo, Field, HeroCard, Input, Select, Sheet, Spinner, Stat } from '../../components/ui';
 import { BudgetCard, isOpen, releaseLeft, useBudgets } from '../../components/budgets';
 import { IfApproved, NoYear, Segmented } from '../../components/common';
 import { confirmAsk, promptAsk } from '../../lib/confirm';
@@ -58,8 +58,11 @@ export function LatestLine({ e, org }: { e?: { kind: string; amount: number; dir
   );
 }
 
-export function LedgerList({ entries, onCorrect }: { entries: LedgerRow[]; onCorrect?: (e: LedgerRow) => void }) {
-  if (!entries.length) return <p className="text-muted text-[14px] py-6 text-center">No money movements yet this school year.</p>;
+export function LedgerList({ entries, onCorrect, onClear, clearing, empty }: {
+  entries: LedgerRow[]; onCorrect?: (e: LedgerRow) => void;
+  onClear?: (e: LedgerRow) => void; clearing?: number | null; empty?: ReactNode;   // treasurer Home: clear from my list
+}) {
+  if (!entries.length) return <>{empty ?? <p className="text-muted text-[14px] py-6 text-center">No money movements yet this school year.</p>}</>;
   const reversed = new Set(entries.map((e) => e.reverses_id).filter(Boolean));
   return (
     <ul className="divide-y divide-line">
@@ -79,6 +82,7 @@ export function LedgerList({ entries, onCorrect }: { entries: LedgerRow[]; onCor
               <button onClick={() => onCorrect(e)} aria-label={`Correct this ${kindLabel[e.kind]?.toLowerCase() ?? 'entry'}`}
                 className="h-11 px-3 shrink-0 rounded-[12px] border border-line text-[13px] font-semibold hover:bg-surface2 cursor-pointer">Correct…</button>
             )}
+            {onClear && <ClearButton label={kindLabel[e.kind]?.toLowerCase() ?? 'this entry'} busy={clearing === e.id} onClick={() => onClear(e)} />}
           </li>
         );
       })}

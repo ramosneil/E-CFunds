@@ -67,9 +67,7 @@ export function AdminDashboard() {
       <Greeting name={profile?.full_name} />
       <PageHeader title="Dashboard" sub={`All organizations and clubs · ${year.data.label}`}
         action={<ExportMenu options={[
-          { label: 'School summary', kind: 'pdf', run: async () => (await exportsLib()).schoolSummary('pdf', year.data!) },
-          { label: 'School summary', kind: 'csv', run: async () => (await exportsLib()).schoolSummary('csv', year.data!) },
-          { label: 'Full backup (all data)', kind: 'xlsx', run: async () => (await import('../../lib/export/backup')).fullBackup() },
+          { label: 'School summary', kind: 'pdf', run: async () => (await exportsLib()).schoolSummary(year.data!) },
         ]} />} />
 
       {/* Phone: total → waiting for you → numbers → orgs. Desktop: total | waiting, then numbers and the full-width table. */}

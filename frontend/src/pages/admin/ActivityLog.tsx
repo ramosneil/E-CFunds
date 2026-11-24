@@ -2,10 +2,13 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, History } from 'lucide-react';
 import { useEntities } from '../../lib/data';
-import { supabase } from '../../lib/supabase';
+import { errorText, supabase } from '../../lib/supabase';
 import { describe, thingLabel, type AuditRow } from '../../lib/activity';
 import { peso } from '../../lib/format';
-import { Button, Card, Empty, Input, PageHeader, Select, Spinner } from '../../components/ui';
+import { useCleared } from '../../lib/cleared';
+import { confirmAsk } from '../../lib/confirm';
+import { toast } from '../../lib/toast';
+import { Button, Card, ClearAllButton, ClearButton, Empty, FoldCard, Input, PageHeader, Select, Spinner } from '../../components/ui';
 
 const PAGE = 50;
 const when = new Intl.DateTimeFormat('en-PH', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Manila' });
@@ -75,7 +78,7 @@ export function ActivityLog() {
   const log = useQuery({
     queryKey: ['audit', table, action, from, to, person, page],
     queryFn: async () => {
-      let q = supabase.from('audit_log').select('*', { count: 'exact' }).order('at', { ascending: false }).range(page * PAGE, page * PAGE + PAGE - 1);
+      let q = supabase.from('audit_log_visible').select('*', { count: 'exact' }).order('at', { ascending: false }).range(page * PAGE, page * PAGE + PAGE - 1);
       if (table) q = q.eq('table_name', table);
       if (action) q = q.eq('action', action);
       if (person) q = q.eq('actor', person);
@@ -95,9 +98,25 @@ export function ActivityLog() {
   const reset = () => setPage(0);
   const total = log.data?.count ?? 0;
 
+  // Clear from MY list (Neil, 2026-11-25): only hides rows for this SAS account (audit_log_visible); the log itself
+  // is never changed. "Show cleared" brings them all back.
+  const cleared = useCleared('activity_log');
+  const [busy, setBusy] = useState<number | 'all' | 'restore' | null>(null);
+  const run = async (k: typeof busy, f: () => Promise<void>) => {
+    setBusy(k);
+    try { await f(); } catch (x) { toast({ title: 'Couldn’t update the list', body: errorText(x), tone: 'warn' }); } finally { setBusy(null); }
+  };
+  const clearOne = (id: number) => run(id, () => cleared.clearOne(id));
+  const clearAll = async () => {
+    if (!(await confirmAsk({ title: 'Clear the whole list?', confirm: 'Clear all', tone: 'bad',
+      body: 'Every change up to now is hidden from your Activity log. Nothing is deleted: the record stays complete, and “Show cleared” brings it back. New changes still appear.' }))) return;
+    await run('all', cleared.clearAll); reset();
+  };
+  const restore = () => run('restore', cleared.restore);
+
   return (
     <>
-      <PageHeader title="Activity log" sub="Every change in E-CFunds, newest first. Recorded automatically — nobody can edit it." />
+      <PageHeader title="Activity log" sub="Every change in E-CFunds, newest first. Recorded automatically — clearing only hides items from your list; nobody can edit the log." />
       <Card className="mb-4">
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
           <Select aria-label="What changed" value={table} onChange={(e) => { setTable(e.target.value); reset(); }}>
@@ -116,22 +135,33 @@ export function ActivityLog() {
           <Input type="date" aria-label="To date" value={to} onChange={(e) => { setTo(e.target.value); reset(); }} />
         </div>
       </Card>
-      {log.isLoading ? <Spinner /> : !log.data?.rows.length ? (
-        <Card><Empty icon={<History className="size-6" />} title="Nothing found">Try fewer filters.</Empty></Card>
+      <FoldCard id="activity-log" flush title={total ? `Changes · ${total.toLocaleString('en-PH')}` : 'Changes'}
+        actions={<>
+          {cleared.any && <button type="button" onClick={restore} disabled={busy === 'restore'}
+            className="h-11 px-2.5 rounded-[12px] text-[13.5px] font-semibold text-primary hover:bg-primary-soft cursor-pointer disabled:opacity-50">Show cleared</button>}
+          {total > 0 && <ClearAllButton busy={busy === 'all'} onClick={clearAll} />}
+        </>}>
+      {log.isLoading ? <div className="pb-4"><Spinner /></div> : !log.data?.rows.length ? (
+        <Empty icon={<History className="size-6" />} title={cleared.any && !table && !action && !person && !from && !to ? 'All cleared' : 'Nothing found'}>
+          {cleared.any ? 'Cleared changes are only hidden from your list. Tap “Show cleared” to see them again.' : 'Try fewer filters.'}
+        </Empty>
       ) : (
-        <Card className="p-0">
-          <ul className="divide-y divide-line">
+        <>
+          <ul className="divide-y divide-line border-t border-line">
             {log.data.rows.map((r) => (
               <li key={r.id}>
-                <button onClick={() => setOpen(open === r.id ? null : r.id)} aria-expanded={open === r.id}
-                  className="w-full text-left px-4 sm:px-5 py-3 flex items-start gap-3 hover:bg-surface2/60 cursor-pointer">
-                  <span className={`mt-1.5 size-2 rounded-full shrink-0 ${r.action === 'delete' ? 'bg-bad' : r.action === 'insert' ? 'bg-ok' : 'bg-primary'}`} aria-hidden />
-                  <span className="min-w-0 flex-1">
-                    <span className="block font-semibold text-[14px]">{describe(r, names)}</span>
-                    <span className="block text-[12.5px] text-muted">{names.person(r.actor)} · {when.format(new Date(r.at))}</span>
-                  </span>
-                  <ChevronDown className={`size-4 text-muted shrink-0 mt-1 transition ${open === r.id ? 'rotate-180' : ''}`} aria-hidden />
-                </button>
+                <div className="flex items-start pr-4 sm:pr-5">
+                  <button onClick={() => setOpen(open === r.id ? null : r.id)} aria-expanded={open === r.id}
+                    className="min-w-0 flex-1 text-left pl-4 sm:pl-5 pr-2 py-3 flex items-start gap-3 hover:bg-surface2/60 cursor-pointer">
+                    <span className={`mt-1.5 size-2 rounded-full shrink-0 ${r.action === 'delete' ? 'bg-bad' : r.action === 'insert' ? 'bg-ok' : 'bg-primary'}`} aria-hidden />
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold text-[14px]">{describe(r, names)}</span>
+                      <span className="block text-[12.5px] text-muted">{names.person(r.actor)} · {when.format(new Date(r.at))}</span>
+                    </span>
+                    <ChevronDown className={`size-4 text-muted shrink-0 mt-1 transition ${open === r.id ? 'rotate-180' : ''}`} aria-hidden />
+                  </button>
+                  <span className="pt-1"><ClearButton label="this change" busy={busy === r.id} onClick={() => clearOne(r.id)} /></span>
+                </div>
                 {open === r.id && <Changes r={r} names={names} />}
               </li>
             ))}
@@ -143,8 +173,9 @@ export function ActivityLog() {
               <Button variant="soft" className="h-11 px-4 text-[14px]" disabled={(page + 1) * PAGE >= total} onClick={() => setPage((p) => p + 1)}>Older</Button>
             </span>
           </div>
-        </Card>
+        </>
       )}
+      </FoldCard>
     </>
   );
 }

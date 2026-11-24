@@ -21,10 +21,44 @@ const ALIASES: Record<Key, string[]> = {
 const squash = (s: string) => s.toLowerCase().replace(/[\s._\-/#&]+/g, '');
 export const normCourse = (s: string) => s.trim().replace(/\s+/g, ' ').toUpperCase();
 export const YEARS = ['1', '2', '3', '4'] as const;
-export const SECTIONS = ['A', 'B', 'C', 'D'] as const;
+export const SECTIONS = ['A', 'B', 'C', 'D', 'E'] as const;   // A–E since migration 46 (Neil: 1A … 4E)
 /** "1A", "Year 2", or "" — how a group/student is labelled everywhere. */
 export const yearSection = (year: number | string | null | undefined, section: string | null | undefined) =>
   year ? `${year}${section ?? ''}` : '';
+
+// Section boxes per course (Neil, 2026-11-25: BSIT 1A … 4E, then BSBA OM, BSBA FM, BEED). Only sections that have
+// students are shown. Students without a course / year / section get their own box at the end.
+type Who = { course?: string | null; year_level?: number | null; section?: string | null } | null | undefined;
+export const NO_COURSE = '~';
+export const courseOf = (s: Who) => s?.course || NO_COURSE;
+/** Box key inside a course: "3A", "3" (year, no section) or "~" (no year). */
+export const boxOf = (s: Who) => yearSection(s?.year_level, s?.section) || '~';
+export const boxLabel = (box: string) => (box === '~' ? 'No year' : /^\d$/.test(box) ? `${box} · no section` : box);
+export const courseLabel = (course: string) => (course === NO_COURSE ? 'No course' : course);
+/** Full name of a box, e.g. "BSIT 3A", "BSIT · Year 3, no section", "No course · No year". */
+export const boxTitle = (course: string, box: string) =>
+  `${courseLabel(course)}${box === '~' ? ' · No year' : /^\d$/.test(box) ? ` · Year ${box}, no section` : ` ${box}`}`;
+
+/** Group anything with a student into course → box, courses in the courses table's order. */
+export function byCourseBox<T>(items: T[], who: (x: T) => Who, courseOrder: string[]) {
+  const by = new Map<string, Map<string, T[]>>();
+  for (const x of items) {
+    const c = courseOf(who(x)), b = boxOf(who(x));
+    if (!by.has(c)) by.set(c, new Map());
+    const m = by.get(c)!;
+    m.set(b, [...(m.get(b) ?? []), x]);
+  }
+  const rank = (c: string) => (c === NO_COURSE ? 1e6 : courseOrder.indexOf(c) === -1 ? 1e5 : courseOrder.indexOf(c));
+  const boxRank = (b: string) => (b === '~' ? 'z' : b.length === 1 ? `${b}~` : b);   // 3A … 3E, then "3 · no section"
+  return [...by.entries()]
+    .sort(([a], [b]) => rank(a) - rank(b) || a.localeCompare(b))
+    .map(([course, boxes]) => ({
+      course,
+      // plain code-point order ("~" after letters), not localeCompare (which puts "~" first)
+      boxes: [...boxes.entries()].sort(([a], [b]) => (boxRank(a) < boxRank(b) ? -1 : boxRank(a) > boxRank(b) ? 1 : 0)).map(([box, rows]) => ({ box, rows })),
+      count: [...boxes.values()].reduce((t, r) => t + r.length, 0),
+    }));
+}
 
 /** Minimal RFC 4180 reader (quotes, "" escapes, CRLF), comma or semicolon separated. */
 function parseCsv(text: string): string[][] {
@@ -92,7 +126,7 @@ export async function parseRoster(file: File, courses: string[], opts: { nameOpt
     if (!name && !opts.nameOptional) err('Full name is missing'); else if (name.length > 120) err('Full name is too long');
     if (course && !valid.has(course)) err(`Unknown course “${raw.course}”. Use one of: ${courses.join(', ')}`);
     if (year && !/^[1-4]$/.test(year)) err(`Year level “${raw.year}” — use 1 to 4`);
-    if (section && !/^[A-D]$/.test(section)) err(`Section “${raw.sec || section}” — use A, B, C or D`);
+    if (section && !/^[A-E]$/.test(section)) err(`Section “${raw.sec || section}” — use A to E`);
     rows.push({ line, student_no: no, full_name: name, course, year_level: year, section });
   }
   return { rows, errors, missing: [] };

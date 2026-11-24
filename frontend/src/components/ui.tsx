@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react';
-import { Loader2, Moon, Sun, X } from 'lucide-react';
+import { ChevronDown, Loader2, Moon, Sun, X } from 'lucide-react';
 import { peso, pct } from '../lib/format';
 import { logoUrl } from '../lib/supabase';
 import { getTheme, isDark, setTheme } from '../lib/theme';
@@ -33,6 +33,57 @@ export function SectionTitle({ children, action }: { children: ReactNode; action
     <div className="flex items-center justify-between gap-3 mb-3">
       <h2 className="font-display text-[17px] font-bold">{children}</h2>{action}
     </div>
+  );
+}
+
+/** A card that folds down to its title (Neil, 2026-11-25: "Hide" on Home lists and the Activity log). The choice is
+ *  remembered on this device. `flush` = the body has no padding (full-width lists); `actions` show only when open. */
+export function FoldCard({ id, title, actions, flush, className, children }:
+  { id: string; title: ReactNode; actions?: ReactNode; flush?: boolean; className?: string; children: ReactNode }) {
+  const key = `fold:${id}`;
+  const [folded, setFolded] = useState(() => { try { return localStorage.getItem(key) === '1'; } catch { return false; } });
+  const toggle = () => {
+    const v = !folded;
+    setFolded(v);
+    try { if (v) localStorage.setItem(key, '1'); else localStorage.removeItem(key); } catch { /* private mode: this visit only */ }
+  };
+  // Title + Hide always share the first line; on phones the actions (Clear all, All …) get their own line below.
+  const pad = flush ? 'px-4 sm:px-5' : '';
+  return (
+    <section className={cx('lux-card bg-surface border border-line rounded-[20px]', flush ? 'py-2' : 'p-5 pt-3', className)}>
+      <div className={cx('flex items-center gap-x-2', pad, folded && !flush && '-mb-2')}>
+        <h2 className="font-display text-[17px] font-bold mr-auto min-w-0 truncate">{title}</h2>
+        {!folded && actions && <div className="hidden sm:flex items-center gap-x-1">{actions}</div>}
+        <button type="button" onClick={toggle} aria-expanded={!folded}
+          className="h-11 -mr-2 px-2.5 shrink-0 inline-flex items-center gap-1 rounded-[12px] text-[13.5px] font-semibold text-muted hover:text-ink hover:bg-surface2 cursor-pointer">
+          {folded ? 'Show' : 'Hide'}
+          <ChevronDown className={cx('size-4 transition', folded ? '' : 'rotate-180')} aria-hidden />
+        </button>
+      </div>
+      {!folded && actions && <div className={cx('sm:hidden flex flex-wrap items-center gap-x-1 -ml-2.5 -mt-1', flush && 'px-4')}>{actions}</div>}
+      {!folded && <div className={cx(flush ? 'mt-1' : 'mt-1')}>{children}</div>}
+    </section>
+  );
+}
+
+/** The small "×" that clears one item from the viewer's own list (the record itself stays). */
+export function ClearButton({ label, onClick, busy }: { label: string; onClick: () => void; busy?: boolean }) {
+  return (
+    <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClick(); }} disabled={busy}
+      aria-label={`Clear ${label} from my list`} title="Clear from my list"
+      className="size-11 -mr-2 shrink-0 grid place-items-center rounded-full text-muted hover:text-bad hover:bg-bad-soft cursor-pointer disabled:opacity-50">
+      {busy ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <X className="size-[18px]" aria-hidden />}
+    </button>
+  );
+}
+
+/** "Clear all" for a FoldCard's actions slot. */
+export function ClearAllButton({ onClick, busy }: { onClick: () => void; busy?: boolean }) {
+  return (
+    <button type="button" onClick={onClick} disabled={busy}
+      className="h-11 px-2.5 inline-flex items-center gap-1.5 rounded-[12px] text-[13.5px] font-semibold text-muted hover:text-bad hover:bg-bad-soft cursor-pointer disabled:opacity-50">
+      {busy && <Loader2 className="size-4 animate-spin" aria-hidden />}Clear all
+    </button>
   );
 }
 
