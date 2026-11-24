@@ -29,7 +29,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   2026-11-17: `docs/audit-2026-11-17.md` (all 7 lapses fixed; only SAS edits students; lists page past 1,000 rows).
 - **2026-11-19/20 batch live:** resolution requests + liquidation, notification delete + exact links, report signatories,
   member tiles + PDF. Checked with sample data + live SAS view; Neil's phone test of resolution → liquidation pending.
-- Android: latest APK **v1.1.1 = build 10**; `frontend/ota.json` minNativeBuild = 10.
+- Android: latest APK **v1.1.2 = build 12** (new coin icon + splash, 2026-11-24); `frontend/ota.json` minNativeBuild = 10.
 - **Confirmed on Neil's phone:** push (app open / closed / signed out), self-update, Back, full screen, liquidation files.
 - **Notifications confirmed 2026-11-14:** Android phone (background AND swiped away) + Chrome on Neil's PC (site
   closed). iPhone Home Screen app not tested yet. When the push function says `sent: N` but nothing shows, it's the
