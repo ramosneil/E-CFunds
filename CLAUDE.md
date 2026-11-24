@@ -22,29 +22,26 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Docker: `deploy/Dockerfile` + `compose.yaml` → Docker Hub `ramosneil/e-cfunds:latest` + `1.0.<run>` on every push
   to main (`.github/workflows/docker.yml`, secret DOCKERHUB_TOKEN; `docs/docker.md`). Diagrams: `docs/diagrams/`.
 
-## Status (updated 2026-11-20)
+## Status (updated 2026-11-25)
 - **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
   student on the roster. Test data was wiped before launch.
 - Database: **47 migrations** live (last `20261125120000_finance_activities`). pg_cron on (2 jobs). Full system check
   2026-11-17: `docs/audit-2026-11-17.md` (all 7 lapses fixed; only SAS edits students; lists page past 1,000 rows).
-- **2026-11-19/20 batch live:** resolution requests + liquidation, notification delete + exact links, report signatories,
-  member tiles + PDF. Checked with sample data + live SAS view; Neil's phone test of resolution → liquidation pending.
+- **2026-11-25 live + confirmed on Neil's phone:** Insights dashboards (+ Present), Students/Members course → section
+  boxes (A–E), Hide + clear on Home/Activity log, landing page first when signed out, OMSU seal on every PDF, APK from
+  `e-cfunds-app.vercel.app`. Pending phone check: the app's new landing page (sign out → reopen).
 - Android: latest APK **v1.1.2 = build 12** (new coin icon + splash, 2026-11-24); `frontend/ota.json` minNativeBuild = 10.
 - **Confirmed on Neil's phone:** push (app open / closed / signed out), self-update, Back, full screen, liquidation files.
-- **Notifications confirmed 2026-11-14:** Android phone (background AND swiped away) + Chrome on Neil's PC (site
-  closed). iPhone Home Screen app not tested yet. When the push function says `sent: N` but nothing shows, it's the
-  device: **Windows** → Settings → System → Notifications → Google Chrome (was off on Neil's PC); **Android** →
-  Settings → Apps → E-CFunds → Notifications (allow, pop-up) + Battery (background activity, auto launch) —
-  Oppo/Realme force-stop swiped apps without it. My account's phone card falls back to the push permission (3 s).
+- **Push confirmed** (Android open/closed, Chrome on PC). `sent: N` but nothing shows = the device: Windows → Notifications
+  → Chrome; Android → Apps → E-CFunds → Notifications + Battery (background, auto launch; Oppo/Realme kill swiped apps).
 - **Safe test push** (connector, one SQL): insert a `notifications` row with `read_at = now()`, then
   `net.http_post(private.push_config.url, {id}, x-push-secret)`; read `net._http_response` (`{"sent":N}`), delete the row.
 - **Web address stays `e-cfunds.vercel.app`** (school subdomain + Resend cancelled by Neil, 2026-11-14). **Email
   goes through Neil's Gmail (custom SMTP, 2026-11-15)** → templates editable; Reset password = 6-digit code
   (`docs/email-templates/reset-password.html`, `{{ .Token }}`); email limit 30/h.
 - Claude in Chrome on Neil's PC (signed in as SAS admin): never sign in for him; ask before sending/deleting/changing;
-  never decide security prompts (2FA); long `=`/`;` values are filtered — use Copy + clipboard, never disguise text.
-- Vercel has **2FA** (Neil's phone): new sign-ins need his code; never ask for recovery codes.
-- Open (handoff): phone test of resolution → liquidation; accredited list all expired. Next: design pass. Unseen: iPhone.
+  never decide security prompts (Vercel 2FA; never ask for recovery codes); never disguise filtered text.
+- Open (handoff): SSG governor/auditor names on School year; weekly auto-backup (Full backup removed); iPhone untested.
 
 ## Memberships & fees (migrations 15–17, 24)
 - **Organizations are mandatory by course** (tables `courses`, `course_orgs`; SAS can change them):
@@ -74,7 +71,8 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - **Student**: own dues + every org's totals + "where the money goes" (charts + SAS-approved expenses: date,
   purpose, category, amount). Never: other students' names, receipts, the "receipt checked by SAS" mark (staff only),
   remit/release lines, the ledger. Rule + categories: `docs/business-rules.md` "Transparency".
-- Signed out: new device → Welcome page (`/`, `pages/auth/Welcome.tsx`; also `/welcome`), signed in here before → Sign in. Sign in ⇄ Create account toggle. Self-register → SAS approves (students must match a roster Student ID). Email/password, Google (web + app), or
+- Signed out → landing page first on every device, web AND app (`/`, `pages/auth/Welcome.tsx`; app hides the APK section).
+  Sign in ⇄ Create account toggle. Self-register → SAS approves (students must match a roster Student ID). Email/password, Google (web + app), or
   Student ID + password (`student-login`, lockout 5 tries / 15 min). First admin via `private.bootstrap_admins`.
 - Passwords: 8+ chars with upper, lower, number, symbol (meter + checklist, eye icon) — also set in Supabase Auth.
   Terms: checkbox on sign-up / Google's first screen → `profiles.terms_accepted_at`.
@@ -83,17 +81,18 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Admin: dashboard (waiting-for-you near top, accounts to approve, per-org list on phones / table on computers),
   approvals (confirm before Approve; Reject asks a reason), orgs & logos (treasurer shown per card), accredited list +
   history, school year/semesters, messages + Announcement.
-- Treasurer: home (fund, actions, dues this semester → Members "To collect"), members (year cards → section tiles →
-  pop-up list; PDF all / year / section; ⋮ = undo payment), requests (Remit + Resolution request; Liquidate).
-- Student: my dues (labelled by semester), reports. Everyone: My account (sign out lives here, with a confirm),
+- Treasurer: home (fund, actions, Requests + Recent activity with Hide / × clear / Clear all — per person, `cleared_items`,
+  `src/lib/cleared.ts`, `FoldCard`), members (course cards → section boxes 1A…4E → pop-up list; PDF per course / box;
+  ⋮ = undo payment), requests (Remit + Resolution request; Liquidate). SAS Students page: same course → section boxes.
+- Student: my dues (labelled by semester), Insights. Everyone: My account (sign out lives here, with a confirm),
   "Ask E-CFunds" assistant (Gemini via `chat`, RLS-scoped) — ✨ in the phone top bar, floating button on computers.
-- **Where the money goes** (migration 27): `src/components/finance/FinancePanel.tsx` (hand-built SVG per the dataviz
-  skill; tokens `--chart-in` blue / `--chart-out` orange, validated light+dark; tooltip + "Show as table") fed by
-  `get_entity_finance` / `get_school_finance` (`useEntityFinance` / `useSchoolFinance`). Shown on `/reports/:id`
-  (students + treasurers), student Home + SAS Dashboard (school-wide), treasurer Home, SAS org detail, PDF report.
-  Expenses need a category (form + Approvals, SAS may change it).
-- Exports: org report PDF (charts, OMSU letterhead, Inter font for ₱) + CSVs, school summary (PDF only), members,
-  accredited. Full backup + school-summary CSV removed from the Dashboard (Neil, 2026-11-25).
+- **Insights** (`/insights?org=<id|school>`, `src/pages/Insights.tsx`, all roles; `/reports` redirects): headline numbers,
+  fund balance trend, money in/out, cash vs saved, categories; org: Budget vs actual (`activities`, migration 47) +
+  expenses; school: compare orgs. **Present** = full-screen slides (`.force-dark`). Charts in `src/components/finance/`
+  (hand-built SVG per the dataviz skill; validated tokens `--chart-in/out/cash/saved`; tooltip + table view) fed by
+  `get_entity_finance` / `get_school_finance`. Home/Dashboard/org page show `InsightsCard`. Expenses need a category.
+- Exports: org report PDF (OMSU seal `public/brand/omsu-seal.png` on every letterhead) + CSVs, school summary (PDF only),
+  members, accredited. Full backup + school-summary CSV removed (Neil, 2026-11-25).
 - **Session 7 features** (rules: `docs/business-rules.md` "Functionality batch"; DB: `docs/database.md` 28–33):
   - SAS: Approvals → Accounts disable/enable · org page Corrections (Correct… = `reverse_entry`, adjustment) + Close
     school year checklist (cash ₱0, no pending, budgets liquidated → disables the treasurer) · **Activity log** page
@@ -105,7 +104,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   - **Financial Report (SAS form, Folio PDF)**: `get_financial_report` + `src/lib/export/financialReport.ts` +
     `FinancialReportSheet.tsx` (treasurer Home, SAS org page); expense item lines (`ItemRows.tsx`); signatories +
     `report_settings` (School year page). Rules: business-rules "Financial Report".
-  - **Sections A–D, year 1–4** (migration 37): Members grouped 1A…4D; Add member shows all fields, fills from the
+  - **Sections A–E** (37, E in 46), year 1–4: grouped by course → 1A…4E (`byCourseBox` in roster.ts); Add member fills from the
     list; clubs **Import** (`ImportSheet mode="club"` → `import_members`). Rules: business-rules "Sections".
   - **App:** "Update ready — pull down" (`src/lib/autoUpdate.ts`), pull-to-refresh, Android Back on Home → "Log out?",
     5 min unused → signed out (Android only; `AutoLogout.tsx`, shared heartbeat). Sign-out keeps push registered.
@@ -170,7 +169,8 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   then raise `frontend/ota.json` minNativeBuild to its build number → old apps show "A new version of the app is ready".
 - **Types:** `src/lib/database.types.ts` is hand-trimmed — add new tables/columns/RPCs there.
 - **Web deploy:** merge/push to `main` → Vercel builds production (and the OTA package) automatically.
-- **Android release:** push tag `vX.Y.Z` → signed APK + GitHub Release (tags with `-` = pre-release). Needs GitHub
+- **Android release:** push tag `vX.Y.Z` → signed APK + GitHub Release (tags with `-` = pre-release), then secret
+  VERCEL_DEPLOY_HOOK redeploys the site so `fetch-apk.mjs` serves the new APK (service worker never catches .apk). Needs GitHub
   secrets: 4 × ANDROID_* (signing; key only in `Documents\E-CFunds-signing` on Neil's PC — lose it = no updates)
   and GOOGLE_SERVICES_JSON (Firebase; release builds fail without it). Push code requires build ≥ 9
   (`PUSH_MIN_BUILD` in `src/lib/push.ts`).
