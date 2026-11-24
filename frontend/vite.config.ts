@@ -45,6 +45,8 @@ export default defineConfig({
         // The PDF tools and report fonts are only needed for exports, which need a connection anyway.
         globIgnores: ['**/jspdf*', '**/html2canvas*', '**/purify*', '**/index.es-*', '**/fonts/**', '**/brand/**'],
         navigateFallback: '/index.html',
+        // The APK and update files are real downloads, never the app page (a caught APK link opened the home page).
+        navigateFallbackDenylist: [/\.apk$/, /^\/ota\//],
         cleanupOutdatedCaches: true,
         importScripts: ['push-sw.js'],   // Web Push: show notifications + open the right page on tap (public/push-sw.js)
         runtimeCaching: [

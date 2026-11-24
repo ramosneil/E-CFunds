@@ -3,8 +3,10 @@ import { isNative } from '../lib/native';
 
 /** Always the newest signed APK: every version tag publishes a GitHub Release (E-CFunds.apk). */
 // Served by our own website (fast in PH), not GitHub (~20 KB/s): scripts/fetch-apk.mjs copies the latest release
-// into the site on each Vercel deploy. Absolute so the Android app's Update button works too.
-export const APK_URL = 'https://e-cfunds.vercel.app/E-CFunds.apk';
+// into the site on each Vercel deploy. Given out on the download-only address e-cfunds-app.vercel.app (same Vercel
+// project): on e-cfunds.vercel.app the offline helper (service worker) left by earlier visits answered the link with
+// the home page (Neil, 2026-11-25). Every other path on that address redirects to the main site (vercel.json).
+export const APK_URL = 'https://e-cfunds-app.vercel.app/E-CFunds.apk';
 
 const onAndroidBrowser = () => !isNative && /Android/i.test(navigator.userAgent);
 

@@ -4,6 +4,14 @@
   "installCommand": "cd frontend && npm ci",
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
+  "redirects": [
+    {
+      "source": "/((?!E-CFunds[.]apk$).*)",
+      "has": [{ "type": "host", "value": "e-cfunds-app.vercel.app" }],
+      "destination": "https://e-cfunds.vercel.app/$1",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/E-CFunds.apk",
