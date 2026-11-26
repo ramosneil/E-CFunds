@@ -21,22 +21,20 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Docker: `deploy/Dockerfile` + `compose.yaml` → Docker Hub `ramosneil/e-cfunds:latest` + `1.0.<run>` on every push
   to main (`.github/workflows/docker.yml`, secret DOCKERHUB_TOKEN; `docs/docker.md`). Diagrams: `docs/diagrams/`.
 
-## Status (updated 2026-11-25)
-- **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
-  student on the roster. Test data was wiped before launch.
+## Status (updated 2026-11-26)
+- **Launched, in real use** (Neil = SAS admin, real treasurers + students; test data wiped before launch).
 - Database: **50 migrations** live (last `20261126150000_request_course`). pg_cron on (2 jobs). Full system check
   2026-11-17: `docs/audit-2026-11-17.md` (all 7 lapses fixed; only SAS edits students; lists page past 1,000 rows).
 - **2026-11-25 live + confirmed on Neil's phone:** Insights dashboards (+ Present), Students/Members course → section
   boxes (A–E), Hide + clear on Home/Activity log, landing page first when signed out, OMSU seal on every PDF, APK from
-  `e-cfunds-app.vercel.app`. Pending phone check: the app's new landing page (sign out → reopen).
+  `e-cfunds-app.vercel.app`. **2026-11-26 (confirmed):** sign-up request = Student ID + Course + Year + Section for
+  students AND treasurers (48–50), taken orgs hidden; Approvals compares with the list. Pending: app landing check.
 - Android: latest APK **v1.1.2 = build 12** (new coin icon + splash, 2026-11-24); `frontend/ota.json` minNativeBuild = 10.
-- **Confirmed on Neil's phone:** push (app open / closed / signed out), self-update, Back, full screen, liquidation files.
-- **Push confirmed** (Android open/closed, Chrome on PC). `sent: N` but nothing shows = the device: Windows → Notifications
-  → Chrome; Android → Apps → E-CFunds → Notifications + Battery (background, auto launch; Oppo/Realme kill swiped apps).
+- **Confirmed on Neil's phone:** push (open/closed/signed out; Chrome on PC), self-update, Back, full screen. `sent: N` but
+  nothing shows = device settings (Windows → Notifications → Chrome; Android → E-CFunds → Notifications + Battery).
 - **Safe test push** (connector, one SQL): insert a `notifications` row with `read_at = now()`, then
   `net.http_post(private.push_config.url, {id}, x-push-secret)`; read `net._http_response` (`{"sent":N}`), delete the row.
-- **Web address stays `e-cfunds.vercel.app`** (school subdomain + Resend cancelled by Neil, 2026-11-14). **Email
-  goes through Neil's Gmail (custom SMTP, 2026-11-15)** → templates editable; Reset password = 6-digit code
+- **Web address stays `e-cfunds.vercel.app`.** Email via Neil's Gmail (custom SMTP); Reset password = 6-digit code
   (`docs/email-templates/reset-password.html`, `{{ .Token }}`); email limit 30/h.
 - Claude in Chrome on Neil's PC (signed in as SAS admin): never sign in for him; ask before sending/deleting/changing;
   never decide security prompts (Vercel 2FA; never ask for recovery codes); never disguise filtered text.
@@ -71,8 +69,10 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   purpose, category, amount). Never: other students' names, receipts, the "receipt checked by SAS" mark (staff only),
   remit/release lines, the ledger. Rule + categories: `docs/business-rules.md` "Transparency".
 - Signed out → landing page first on every device, web AND app (`/`, `pages/auth/Welcome.tsx`; app hides the APK section).
-  Sign in ⇄ Create account toggle. Self-register → SAS approves. Students AND treasurers give a Student ID (treasurers': must be
-  on the list; orgs with an approved treasurer aren't offered — `entities_with_treasurer`). Both pick Course + Year + Section (49–50); Approvals shows typed vs list, flags differences. Email/password, Google (web + app), or
+  Sign in ⇄ Create account toggle. Self-register → "Tell SAS who you are" (`Pending.tsx`, `set_my_request`): Student ID
+  (treasurers: must be on the list), Course, Year, Section — required for both; treasurers can't pick an org that already
+  has an approved treasurer (`entities_with_treasurer`). Approvals: "They wrote" vs "List says"; year/section mismatch →
+  "Change the list" button; course mismatch → fix on Students page (moves memberships). Email/password, Google, or
   Student ID + password (`student-login`, lockout 5 tries / 15 min). First admin via `private.bootstrap_admins`.
 - Passwords: 8+ chars with upper, lower, number, symbol (meter + checklist, eye icon) — also set in Supabase Auth.
   Terms: checkbox on sign-up / Google's first screen → `profiles.terms_accepted_at`.
