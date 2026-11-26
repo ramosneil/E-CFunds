@@ -368,9 +368,11 @@ footer { font-size: 13px; color: var(--muted); }
       <line class="ln" x1="80" y1="84" x2="80" y2="200" marker-end="url(#a5)"/><text class="lb" x="86" y="190">sign-in</text>
       <path class="ln" d="M590,38 V18 H178 V200" marker-end="url(#a5)"/><text class="lb" x="230" y="32" text-anchor="middle">account approvals</text>
       <line class="ln" x1="340" y1="84" x2="300" y2="200" marker-end="url(#a5)"/><text class="lb" x="304" y="190">payments</text>
-      <line class="ln" x1="380" y1="84" x2="452" y2="200" marker-end="url(#a5)"/><text class="lb" x="456" y="190">requests</text>
-      <line class="ln" x1="420" y1="84" x2="632" y2="200" marker-end="url(#a5)"/><text class="lb" x="636" y="190">liquidation</text>
-      <line class="ln" x1="600" y1="84" x2="508" y2="200" marker-end="url(#a5)"/><text class="lb" x="514" y="178">decision</text>
+      <line class="ln" x1="380" y1="84" x2="452" y2="200" marker-end="url(#a5)"/><text class="lb" x="424" y="168" text-anchor="end">requests</text>
+      <!-- Treasurer → 4.0 and SAS → 3.0 have to cross (Treasurer is left of SAS, 3.0 left of 4.0): drawn at right angles,
+           with a small hop where the liquidation line passes over, and the labels kept off every line. -->
+      <path class="ln" d="M430,84 V150 H499 A6,6 0 0 1 511,150 H665 V200" marker-end="url(#a5)"/><text class="lb" x="600" y="143" text-anchor="middle">liquidation</text>
+      <path class="ln" d="M590,84 V120 H505 V200" marker-end="url(#a5)"/><text class="lb" x="512" y="190">decision</text>
       <line class="ln" x1="660" y1="84" x2="700" y2="200" marker-end="url(#a5)"/><text class="lb" x="704" y="178">decision</text>
       <line class="ln" x1="845" y1="200" x2="845" y2="84" marker-end="url(#a5)"/><text class="lb" x="851" y="130">payload</text>
       <line class="ln" x1="1015" y1="200" x2="1015" y2="84" marker-end="url(#a5)"/><text class="lb" x="1021" y="130">reports</text>
