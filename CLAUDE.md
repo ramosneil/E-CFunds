@@ -22,7 +22,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 
 ## Status (updated 2026-11-26)
 - **Launched, in real use** (Neil = SAS admin, real treasurers + students; test data wiped before launch).
-- Database: **50 migrations** live (last `20261126150000_request_course`). pg_cron on (2 jobs). Full system check
+- Database: **51 migrations** live (last `20261126180000_insights_liquidation_sent`). pg_cron on (2 jobs). Full system check
   2026-11-17: `docs/audit-2026-11-17.md` (all 7 lapses fixed; only SAS edits students; lists page past 1,000 rows).
 - **2026-11-25 live + confirmed on Neil's phone:** Insights dashboards (+ Present), Students/Members course → section
   boxes (A–E), Hide + clear on Home/Activity log, landing page first when signed out, OMSU seal on every PDF, APK from

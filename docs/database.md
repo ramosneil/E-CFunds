@@ -232,3 +232,7 @@ prevents two approvals racing past a limit.
 ## Course on requests (migration 50 `request_course`, 2026-11-26)
 - `profiles.requested_course` (→ `courses.code`). `set_my_request` gained `p_course` (required, must be a course;
   "bsba  om" saved as "BSBA OM"; dropped + recreated, same grants). Rehearsed: missing/unknown course refused; anon refused.
+
+## Insights: sent liquidations (migration 51 `insights_liquidation_sent`, 2026-11-26)
+- `private.finance_json`: an activity whose liquidation was sent (`liquidation_status = 'submitted'`) now has state
+  `liquidation_sent` ("Liquidation sent" on Insights); migration 47 had tested for 'pending'. Only that test changed.
