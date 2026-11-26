@@ -10,7 +10,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Repo: `ramosneil/E-CFunds` — **PUBLIC** (Neil's choice): everything committed is world-readable.
   Local copy on Neil's PC: `C:\xampp\htdocs\E-CFunds`. Dev: `cd frontend` → `npm run dev` → http://localhost:3000.
 - **Layout (2026-11-20):** `frontend/` = app (`src/`, `public/`, `android/`, scripts; `src/…` below = `frontend/src/…`) ·
-  `backend/` = `supabase/` (migrations, functions, tests) + scripts · `deploy/` = Dockerfile + nginx. One root `.env`.
+  `backend/` = `supabase/` (migrations, functions, tests) + scripts. One root `.env`. (Docker removed 2026-11-26.)
 - Supabase: project `e-cfunds` (ref `nvmlawpojydnouzqilaf`, Singapore, Free plan). Edge Functions `chat`,
   `student-login`, `push`. Keep-alive: `.github/workflows/keep-alive.yml` every 3 days.
 - Android app: Capacitor 8 (`frontend/android/`, app id `ph.edu.omsc.ecfunds` — permanent). Built + signed on GitHub
@@ -18,8 +18,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 - Firebase project `E-CFunds` (push only). Docs: `docs/plan.md` (phases) · `docs/business-rules.md` (rules) · `docs/database.md` (tables, functions,
   migrations, notification events) · `docs/design-system.md` · `docs/handoff.md` (things only Neil can do) ·
   `docs/sessions.md` (what each session did) · `docs/working-rules.md` (Neil's rules in full).
-- Docker: `deploy/Dockerfile` + `compose.yaml` → Docker Hub `ramosneil/e-cfunds:latest` + `1.0.<run>` on every push
-  to main (`.github/workflows/docker.yml`, secret DOCKERHUB_TOKEN; `docs/docker.md`). Diagrams: `docs/diagrams/`.
+- Diagrams + Tech Stack / System Diagram PDFs: `docs/diagrams/`, `docs/*.html` → `docs/*.pdf`.
 
 ## Status (updated 2026-11-26)
 - **Launched, in real use** (Neil = SAS admin, real treasurers + students; test data wiped before launch).

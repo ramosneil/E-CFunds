@@ -117,7 +117,7 @@ footer { margin-top: 18px; font-size: 13px; color: var(--muted); }
   <header class="top">
     <span class="eyebrow">OMSC Mamburao · Office of Student Affairs and Services</span>
     <h1>E-CFunds system architecture</h1>
-    <p class="lede">How the student organization fund monitoring system is built: who uses it, the three ways to open it,
+    <p class="lede">How the student organization fund monitoring system is built: who uses it, the two ways to open it (website and Android app),
       the Supabase backend that holds every peso, and the outside services it relies on. Accurate as of November 17, 2026.</p>
     <div class="legend">
       <span><i style="background:var(--surface2);border:1px solid var(--line)"></i>People and apps</span>
@@ -147,8 +147,6 @@ footer { margin-top: 18px; font-size: 13px; color: var(--muted); }
         <ul><li>React, Vite, Tailwind, React Query</li><li>Hosted on Vercel</li><li>Installable, works offline (service worker)</li><li>Browser push notifications</li></ul></div>
       <div class="box"><h3>Android app</h3><p class="sub mono">Capacitor 8 · APK</p>
         <ul><li>Same code inside a native shell</li><li>Updates itself silently (OTA bundle)</li><li>Phone notifications (Firebase)</li><li>Back = "Log out?", 5-min auto logout</li></ul></div>
-      <div class="box"><h3>Docker image</h3><p class="sub mono">ramosneil/e-cfunds</p>
-        <ul><li>Website served by nginx</li><li>Non-root, about 86 MB</li><li>Rebuilt on every change</li><li>Same live data as the website</li></ul></div>
     </div>
   </div>
 
@@ -197,7 +195,7 @@ footer { margin-top: 18px; font-size: 13px; color: var(--muted); }
     <div class="head"><span class="eyebrow">How updates ship</span><span class="sub mono">GitHub ramosneil/E-CFunds · branch main</span></div>
     <div class="row">
       <div class="box"><h3>Vercel</h3><p class="sub">Builds the website on each push, and the update bundle the Android app downloads (<span class="mono">/ota/manifest.json</span>).</p></div>
-      <div class="box"><h3>GitHub Actions</h3><ul><li>Android APK build</li><li>Docker image → Docker Hub (<span class="mono">latest</span>, <span class="mono">1.0.N</span>)</li><li>Keep-alive ping every 3 days</li></ul></div>
+      <div class="box"><h3>GitHub Actions</h3><ul><li>Android APK build</li><li>APK published on the website</li><li>Keep-alive ping every 3 days</li></ul></div>
       <div class="box"><h3>Supabase migrations</h3><p class="sub">Database changes are rehearsed, then applied as numbered migrations (<span class="mono">supabase/migrations</span>).</p></div>
     </div>
   </div>

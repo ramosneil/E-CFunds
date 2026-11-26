@@ -4,8 +4,7 @@ Fund monitoring system for the OMSU Mamburao Office of Student Affairs and Servi
 and clubs' dues, remittances, resolution requests, liquidations and transparent financial reports.
 
 - **Live site:** https://e-cfunds.vercel.app
-- **Android app:** https://github.com/ramosneil/E-CFunds/releases/latest/download/E-CFunds.apk
-- **Docker image:** `docker pull ramosneil/e-cfunds:latest` ([guide](docs/docker.md))
+- **Android app:** https://e-cfunds-app.vercel.app/E-CFunds.apk (built and signed on GitHub)
 
 ## Roles
 - **SAS Admin:** oversees all orgs and clubs, approves accounts, remittances, resolution requests and liquidations.
@@ -34,14 +33,9 @@ E-CFunds/
 │   │   └── tests/            Role-by-role security and money-workflow tests
 │   └── scripts/              Database checks and one-time upload scripts
 │
-├── deploy/                   How the website is packaged
-│   ├── Dockerfile            Builds frontend/ and serves it with nginx
-│   └── docker/               nginx routing and security headers (same as vercel.json)
-│
 ├── docs/                     Business rules, database, diagrams, handoff, session notes
-├── .github/workflows/        Android APK build, Docker Hub image, Supabase keep-alive
+├── .github/workflows/        Android APK build, Supabase keep-alive
 ├── vercel.json               Live site build (from frontend/) + headers
-├── compose.yaml              docker compose up --build → http://localhost:8080
 └── .env.example              Copy to .env (one file at the root, used by frontend and backend scripts)
 ```
 
@@ -52,9 +46,8 @@ cd frontend
 npm ci
 npm run dev                   # http://localhost:3000
 ```
-Or with Docker from the project root: `docker compose up --build` → http://localhost:8080
 
 ## Documentation
-- [Business rules](docs/business-rules.md) · [Database](docs/database.md) · [Docker](docs/docker.md)
+- [Business rules](docs/business-rules.md) · [Database](docs/database.md)
 - [System diagrams](docs/E-CFunds-System-Diagrams.pdf) · [Technology stack](docs/E-CFunds-Technology-Stack.pdf)
 - [Things only the owner can do](docs/handoff.md) · [Session notes](docs/sessions.md)

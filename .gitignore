@@ -41,5 +41,6 @@ Thumbs.db
 .vercel/
 *.tsbuildinfo
 
-# Docker image export (send to teacher; too big for git)
+
+# Local release files (not for git)
 release/

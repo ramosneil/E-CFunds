@@ -371,3 +371,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - **2026-11-26 course on sign-up** (Neil): students and treasurers also pick their Course; Approvals flags a course that
   differs from the student list (fix on the Students page, since it moves org memberships).
 - 2026-11-26: Neil confirmed on his phone: Course required on sign-up; Approvals shows and flags it (test account rejected).
+- **2026-11-26 Docker removed** (Neil): Dockerfile, nginx config, compose.yaml, .dockerignore, docker.yml workflow and docs/docker.md deleted; README, CLAUDE.md, architecture/tech-stack/system-diagrams pages, SVGs, draw.io files and both PDFs updated (two clients: website + Android app). Docker Hub repo, its token and the DOCKERHUB_TOKEN secret: Neil deletes (handoff).

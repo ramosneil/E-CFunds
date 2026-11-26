@@ -108,7 +108,7 @@ footer { font-size: 13px; color: var(--muted); }
   <span class="eyebrow">OMSC Mamburao · Office of Student Affairs and Services</span>
   <h1>E-CFunds system diagrams</h1>
   <p class="lede">Every diagram is drawn from the actual E-CFunds code and database as of November 17, 2026: the React app,
-    the Android app, the Docker image, the Supabase database (39 migrations) and its server functions.</p>
+    the Android app, the Supabase database and its server functions.</p>
   <nav class="toc" aria-label="Diagrams">
     <a href="#architecture">1 · System architecture</a>
     <a href="#conceptual">2 · Conceptual</a>
@@ -122,11 +122,11 @@ footer { font-size: 13px; color: var(--muted); }
 <!-- ================================================================ 1. SYSTEM ARCHITECTURE -->
 <section class="fig" id="architecture">
   <h2>1. System architecture</h2>
-  <p class="intro">The physical pieces and how they connect: three clients built from one codebase, the Supabase backend, the outside services, and how updates are delivered.</p>
+  <p class="intro">The physical pieces and how they connect: two clients built from one codebase, the Supabase backend, the outside services, and how updates are delivered.</p>
   <figure>
     <span class="hint">Swipe sideways to see the whole diagram.</span>
     <div class="scroll">
-    <svg class="dg" viewBox="0 0 1000 610" style="min-width:880px" role="img" aria-label="System architecture: users open the website, Docker image or Android app; all three talk to the Supabase backend over HTTPS and WebSocket; Supabase calls Firebase, Web Push, Gemini, Gmail and Google sign-in; GitHub ships updates through Vercel and GitHub Actions.">
+    <svg class="dg" viewBox="0 0 1000 610" style="min-width:880px" role="img" aria-label="System architecture: users open the website or the Android app; both talk to the Supabase backend over HTTPS and WebSocket; Supabase calls Firebase, Web Push, Gemini, Gmail and Google sign-in; GitHub ships updates through Vercel and GitHub Actions.">
       <defs>
         <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
         <marker id="a1w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#FFFFFF"/></marker>
@@ -147,14 +147,10 @@ footer { font-size: 13px; color: var(--muted); }
       <text class="t" x="300" y="100" text-anchor="middle">Website (PWA)</text>
       <text class="s" x="300" y="119" text-anchor="middle">Vercel · installable · offline</text>
       <text class="s" x="300" y="136" text-anchor="middle">browser notifications</text>
-      <rect class="bx" x="205" y="165" width="190" height="72" rx="10"/>
-      <text class="t" x="300" y="187" text-anchor="middle">Docker image</text>
-      <text class="s" x="300" y="206" text-anchor="middle">nginx · ramosneil/e-cfunds</text>
-      <text class="s" x="300" y="223" text-anchor="middle">same live data</text>
-      <rect class="bx" x="205" y="252" width="190" height="72" rx="10"/>
-      <text class="t" x="300" y="274" text-anchor="middle">Android app</text>
-      <text class="s" x="300" y="293" text-anchor="middle">Capacitor 8 · updates itself</text>
-      <text class="s" x="300" y="310" text-anchor="middle">phone notifications</text>
+      <rect class="bx" x="205" y="200" width="190" height="72" rx="10"/>
+      <text class="t" x="300" y="222" text-anchor="middle">Android app</text>
+      <text class="s" x="300" y="241" text-anchor="middle">Capacitor 8 · updates itself</text>
+      <text class="s" x="300" y="258" text-anchor="middle">phone notifications</text>
       <!-- client to backend -->
       <line class="ln" x1="410" y1="112" x2="470" y2="112" marker-start="url(#a1)" marker-end="url(#a1)"/>
       <text class="lb" x="440" y="104" text-anchor="middle">HTTPS</text>
@@ -197,24 +193,21 @@ footer { font-size: 13px; color: var(--muted); }
       <text class="lb" x="823" y="275" text-anchor="middle">Auth</text>
       <text class="lb" x="823" y="335" text-anchor="middle">Auth</text>
       <!-- FCM to phone -->
-      <path class="ln dash" d="M980,103 H994 V478 H300 V326" marker-end="url(#a1)"/>
+      <path class="ln dash" d="M980,103 H994 V478 H300 V274" marker-end="url(#a1)"/>
       <text class="lb" x="640" y="473" text-anchor="middle">notification reaches the phone, even when the app is closed or signed out</text>
       <!-- delivery -->
       <line x1="10" y1="496" x2="990" y2="496" stroke="var(--line)" stroke-dasharray="4 4"/>
       <text class="gl" x="20" y="516">HOW UPDATES SHIP</text>
       <rect class="bx" x="20" y="528" width="170" height="46" rx="10"/><text class="t" x="105" y="547" text-anchor="middle">GitHub repo</text><text class="s" x="105" y="564" text-anchor="middle">ramosneil/E-CFunds</text>
       <rect class="bx" x="260" y="528" width="210" height="46" rx="10"/><text class="t" x="365" y="547" text-anchor="middle">Vercel</text><text class="s" x="365" y="564" text-anchor="middle">website + app update bundle</text>
-      <rect class="bx" x="540" y="528" width="200" height="46" rx="10"/><text class="t" x="640" y="547" text-anchor="middle">GitHub Actions</text><text class="s" x="640" y="564" text-anchor="middle">Android APK · Docker build</text>
-      <rect class="bx" x="810" y="528" width="180" height="46" rx="10"/><text class="t" x="900" y="547" text-anchor="middle">Docker Hub</text><text class="s" x="900" y="564" text-anchor="middle">latest · 1.0.N</text>
+      <rect class="bx" x="540" y="528" width="200" height="46" rx="10"/><text class="t" x="640" y="547" text-anchor="middle">GitHub Actions</text><text class="s" x="640" y="564" text-anchor="middle">Android APK · keep-alive</text>
       <line class="ln" x1="190" y1="551" x2="260" y2="551" marker-end="url(#a1)"/>
       <text class="lb" x="225" y="543" text-anchor="middle">push</text>
       <path class="ln" d="M105,574 V596 H640 V574" marker-end="url(#a1)"/>
       <text class="lb" x="500" y="592" text-anchor="middle">push to main</text>
-      <line class="ln" x1="740" y1="551" x2="810" y2="551" marker-end="url(#a1)"/>
-      <text class="lb" x="775" y="543" text-anchor="middle">image</text>
     </svg>
     </div>
-    <figcaption><b>Figure 1.</b> All three clients run the same React 19 + TypeScript code and talk only to Supabase. Every money rule runs inside PostgreSQL, so no client can skip it.
+    <figcaption><b>Figure 1.</b> Both clients run the same React 19 + TypeScript code and talk only to Supabase. Every money rule runs inside PostgreSQL, so no client can skip it.
       Supabase reaches outside services server-to-server: the <span class="mono">push</span> function calls Firebase and Web Push, <span class="mono">chat</span> calls Gemini, and Auth uses Gmail and Google.</figcaption>
   </figure>
 </section>

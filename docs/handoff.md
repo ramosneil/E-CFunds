@@ -198,3 +198,13 @@ Without it nothing breaks: after a release the website keeps the previous APK un
 2. Switch the picker to **Whole school** → Compare orgs and clubs; tap one to open its dashboard.
 3. Tap **Present** → swipe through the 7 slides → × to close.
 4. As a student (if you have the account): Home shows the Insights card; Insights works the same (no receipt marks).
+
+## Docker removed (2026-11-26) — 3 things only Neil can do
+The Docker files and the GitHub workflow that published the image are gone from the project. What's left outside it:
+1. **Docker Hub** → sign in at hub.docker.com → Repositories → **ramosneil/e-cfunds** → Settings → **Delete repository**
+   (type the name to confirm). This removes the old published images.
+2. **Docker Hub access token** → your avatar → Account settings → Personal access tokens → find the one made for
+   E-CFunds (GitHub) → **Delete**/Revoke.
+3. **GitHub secret** → github.com/ramosneil/E-CFunds → Settings → Secrets and variables → Actions → **DOCKERHUB_TOKEN**
+   → Remove.
+Nothing in the live site or the app depends on these, so the order doesn't matter.
