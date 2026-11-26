@@ -199,7 +199,7 @@ Without it nothing breaks: after a release the website keeps the previous APK un
 3. Tap **Present** → swipe through the 7 slides → × to close.
 4. As a student (if you have the account): Home shows the Insights card; Insights works the same (no receipt marks).
 
-## Docker removed (2026-11-26) — 3 things only Neil can do
+## Docker removed (2026-11-26) — DONE 2026-11-26: Neil deleted the Docker Hub repo, the token and DOCKERHUB_TOKEN (secret list checked)
 The Docker files and the GitHub workflow that published the image are gone from the project. What's left outside it:
 1. **Docker Hub** → sign in at hub.docker.com → Repositories → **ramosneil/e-cfunds** → Settings → **Delete repository**
    (type the name to confirm). This removes the old published images.
