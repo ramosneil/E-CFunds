@@ -17,3 +17,8 @@ The plain `.drawio` files hold each diagram as a picture; the `-editable.drawio`
 shapes (click any box or arrow to move, recolor or retype it). Fonts show as Helvetica in draw.io.
 
 Each SVG is self-contained (white background, styles inlined), so it also works in Word (Insert → Pictures) and browsers.
+
+**Icons (2026-11-27):** the Technology Stack and Layered architecture diagrams use product logos from
+[Simple Icons](https://simpleicons.org) 16.36.0 (CC0; the logos stay trademarks of their owners and only name the
+tools E-CFunds uses) and line icons from [Lucide](https://lucide.dev) (ISC), the app's own icon set. They are
+embedded in the SVGs; in the editable draw.io files each icon is an image shape you can move or delete.
