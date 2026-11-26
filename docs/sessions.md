@@ -370,3 +370,4 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - 2026-11-26: Neil tested sign-up on his phone: taken clubs hidden, Student ID check, Year/Section required, Approvals mismatch flag — all work (test account rejected).
 - **2026-11-26 course on sign-up** (Neil): students and treasurers also pick their Course; Approvals flags a course that
   differs from the student list (fix on the Students page, since it moves org memberships).
+- 2026-11-26: Neil confirmed on his phone: Course required on sign-up; Approvals shows and flags it (test account rejected).
