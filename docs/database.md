@@ -228,3 +228,7 @@ prevents two approvals racing past a limit.
 - `profiles.requested_year_level` (1–4), `requested_section` (A–E). `set_my_request` gained `p_year_level`,
   `p_section` (required; dropped + recreated, grants: authenticated + service_role, not anon). Rehearsed: missing year,
   section F and year 5 refused; student and treasurer requests saved with year/section; anon refused.
+
+## Course on requests (migration 50 `request_course`, 2026-11-26)
+- `profiles.requested_course` (→ `courses.code`). `set_my_request` gained `p_course` (required, must be a course;
+  "bsba  om" saved as "BSBA OM"; dropped + recreated, same grants). Rehearsed: missing/unknown course refused; anon refused.

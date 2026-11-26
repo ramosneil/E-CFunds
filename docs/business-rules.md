@@ -385,3 +385,6 @@ None. Both §10 questions were answered in session 3 and moved to §8.
 - **Year and Section** (migration 49): students and treasurers must choose their year level (1–4) and section (A–E)
   when they ask for an account. Approvals shows "They wrote" next to "List says"; if they differ it's flagged and SAS
   can tap "Change the list to 3B" (asks first). A request never changes the student list by itself.
+- **Course** (migration 50): the sign-up form also asks for the course (from the courses list: BSIT, BEED, BSBA OM,
+  BSBA FM). Approvals shows it in "They wrote"; a different course on the student list is flagged, and SAS changes it
+  on the Students page (not from Approvals, because changing course also moves the student's org memberships).

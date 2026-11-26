@@ -3,6 +3,19 @@ import { useQuery } from '@tanstack/react-query';
 import { Clock, GraduationCap, ShieldX, Wallet } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { SECTIONS, YEARS } from '../../lib/roster';
+
+/** The course list (BSIT, BEED, BSBA OM, BSBA FM — SAS keeps it). */
+function useCourseList() {
+  return useQuery({
+    queryKey: ['courses'],
+    staleTime: 10 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('courses').select('code, name').order('sort');
+      if (error) throw error;
+      return data;
+    },
+  });
+}
 import { useEntities } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
 import { Alert, Button, Field, Input, Select } from '../../components/ui';
@@ -50,7 +63,7 @@ export function Pending() {
         <Row k="You asked to be" v={asked === 'treasurer' ? 'Treasurer' : 'Student'} />
         {asked === 'treasurer' && <Row k="Organization / club" v={org?.name ?? '—'} />}
         <Row k="Student ID" v={profile.requested_student_no ?? '—'} />
-        <Row k="Year and section" v={profile.requested_year_level ? `Year ${profile.requested_year_level} · Section ${profile.requested_section ?? '—'}` : '—'} />
+        <Row k="Course, year and section" v={profile.requested_year_level ? `${profile.requested_course ?? '—'} · Year ${profile.requested_year_level} · Section ${profile.requested_section ?? '—'}` : '—'} />
       </dl>
       <div className="mt-5 grid grid-cols-2 gap-3">
         <Button variant="ghost" onClick={() => setEditing(true)}>Change details</Button>
@@ -67,7 +80,7 @@ function Row({ k, v }: { k: string; v: string }) {
 
 function RequestForm({ initial, onDone, onCancel }: {
   initial: { requested_role: string | null; requested_entity_id: number | null; requested_student_no: string | null; full_name: string | null;
-    requested_year_level?: number | null; requested_section?: string | null };
+    requested_year_level?: number | null; requested_section?: string | null; requested_course?: string | null };
   onDone: () => void; onCancel?: () => void;
 }) {
   const entities = useEntities();
@@ -77,6 +90,8 @@ function RequestForm({ initial, onDone, onCancel }: {
   const [name, setName] = useState(initial.full_name ?? '');
   const [year, setYear] = useState(initial.requested_year_level ? String(initial.requested_year_level) : '');
   const [section, setSection] = useState(initial.requested_section ?? '');
+  const [course, setCourse] = useState(initial.requested_course ?? '');
+  const courses = useCourseList();
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const { signOut, profile } = useAuth();
@@ -86,7 +101,7 @@ function RequestForm({ initial, onDone, onCancel }: {
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (needsTerms && !agree) { setErr('Please agree to the Terms and Privacy Notice.'); return; }
-    if (!year || !section) { setErr('Choose your year level and section.'); return; }
+    if (!course || !year || !section) { setErr('Choose your course, year level and section.'); return; }
     setBusy(true); setErr('');
     if (needsTerms) {
       const t = await supabase.rpc('accept_terms');
@@ -97,7 +112,7 @@ function RequestForm({ initial, onDone, onCancel }: {
       p_entity_id: role === 'treasurer' ? Number(entityId) || undefined : undefined,
       p_student_no: studentNo.trim(),   // treasurers are students too (Neil, 2026-11-26)
       p_full_name: name.trim() || undefined,
-      p_year_level: Number(year), p_section: section,   // required for both (Neil, 2026-11-26)
+      p_course: course, p_year_level: Number(year), p_section: section,   // required for both (Neil, 2026-11-26)
     });
     setBusy(false);
     if (error) setErr(errorText(error)); else onDone();
@@ -142,6 +157,12 @@ function RequestForm({ initial, onDone, onCancel }: {
         )}
         <Field label="Student ID" hint={role === 'treasurer' ? 'Treasurers are students too. It must be on the student list SAS keeps.' : "Must match the ID on your org's roster."}>
           <Input required value={studentNo} onChange={(e) => setStudentNo(e.target.value)} placeholder="e.g. 24-1-03178" className="money" autoCapitalize="characters" />
+        </Field>
+        <Field label="Course">
+          <Select required value={course} onChange={(e) => setCourse(e.target.value)}>
+            <option value="">Choose your course</option>
+            {courses.data?.map((c) => <option key={c.code} value={c.code}>{c.code} · {c.name}</option>)}
+          </Select>
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Year level">

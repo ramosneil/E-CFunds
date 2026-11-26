@@ -24,7 +24,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
 ## Status (updated 2026-11-25)
 - **Launched, in real use.** Real accounts: Neil (SAS admin), a Sports Club treasurer, a student; one real BSIT
   student on the roster. Test data was wiped before launch.
-- Database: **49 migrations** live (last `20261126120000_request_year_section`). pg_cron on (2 jobs). Full system check
+- Database: **50 migrations** live (last `20261126150000_request_course`). pg_cron on (2 jobs). Full system check
   2026-11-17: `docs/audit-2026-11-17.md` (all 7 lapses fixed; only SAS edits students; lists page past 1,000 rows).
 - **2026-11-25 live + confirmed on Neil's phone:** Insights dashboards (+ Present), Students/Members course → section
   boxes (A–E), Hide + clear on Home/Activity log, landing page first when signed out, OMSU seal on every PDF, APK from
@@ -72,7 +72,7 @@ and clubs' dues, remittances, releases and expenses. Rebuild of an old PHP/MySQL
   remit/release lines, the ledger. Rule + categories: `docs/business-rules.md` "Transparency".
 - Signed out → landing page first on every device, web AND app (`/`, `pages/auth/Welcome.tsx`; app hides the APK section).
   Sign in ⇄ Create account toggle. Self-register → SAS approves. Students AND treasurers give a Student ID (treasurers': must be
-  on the list; orgs with an approved treasurer aren't offered — `entities_with_treasurer`). Both type Year + Section (49); Approvals shows typed vs list, flags differences. Email/password, Google (web + app), or
+  on the list; orgs with an approved treasurer aren't offered — `entities_with_treasurer`). Both pick Course + Year + Section (49–50); Approvals shows typed vs list, flags differences. Email/password, Google (web + app), or
   Student ID + password (`student-login`, lockout 5 tries / 15 min). First admin via `private.bootstrap_admins`.
 - Passwords: 8+ chars with upper, lower, number, symbol (meter + checklist, eye icon) — also set in Supabase Auth.
   Terms: checkbox on sign-up / Google's first screen → `profiles.terms_accepted_at`.

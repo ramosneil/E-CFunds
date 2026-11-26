@@ -147,7 +147,7 @@ export type Database = {
         Row: {
           created_at: string; email: string | null; entity_id: number | null; full_name: string | null; id: string;
           requested_entity_id: number | null; requested_role: E['app_role'] | null; requested_student_no: string | null;
-          requested_year_level: number | null; requested_section: string | null;   // migration 49
+          requested_year_level: number | null; requested_section: string | null; requested_course: string | null;   // migrations 49–50
           review_remarks: string | null; reviewed_at: string | null; reviewed_by: string | null; role: E['app_role'] | null;
           status: E['account_status']; student_id: number | null; terms_accepted_at: string | null;
         };
@@ -274,7 +274,7 @@ export type Database = {
       student_login_lookup: { Args: { p_student_no: string }; Returns: { email: string | null; locked_until: string | null }[] };
       student_login_record: { Args: { p_student_no: string; p_ok: boolean }; Returns: undefined };
       set_my_request: {
-        Args: { p_role: E['app_role']; p_entity_id?: number; p_student_no?: string; p_full_name?: string; p_year_level?: number; p_section?: string };
+        Args: { p_role: E['app_role']; p_entity_id?: number; p_student_no?: string; p_full_name?: string; p_year_level?: number; p_section?: string; p_course?: string };
         Returns: undefined;
       };
       /** Migration 48: ids of orgs/clubs that already have an approved treasurer (sign-up list hides them). */
