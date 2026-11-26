@@ -375,3 +375,10 @@ None. Both §10 questions were answered in session 3 and moved to §8.
   signed in; returning devices opened Sign in). Signed-in users still open their Home. A link that needs sign-in
   (e.g. a tapped notification) still goes to Sign in on a known device and lands there after signing in.
 - The app shows the full landing page too, without the "Get the Android app" section.
+
+## Account requests (Neil, 2026-11-26; migration 48)
+- Asking to be a **treasurer**: orgs/clubs that already have an approved (active) treasurer aren't listed, and the
+  server refuses them too. If two people ask for the same free org, SAS approves one (a second can't be approved).
+- **Treasurers give their Student ID** (treasurers are students); it must be on SAS's student list at request time.
+  Students' IDs are still checked when SAS approves (SAS can add a late enrollee from the card).
+- **Approvals** shows, for both, the Student ID, the name on the list and **course · year · section**.

@@ -217,3 +217,9 @@ prevents two approvals racing past a limit.
   spent, returned via `budget_moved`; liquidated budgets count spent ≥ released − returned; state liquidated / open /
   overdue). Only titles, dates and amounts — no files, names or remarks. Rehearsed: every other key identical for all
   orgs and school-wide; a student can read it; no receipt marks for students.
+
+## Treasurer requests (migration 48 `treasurer_requests`, 2026-11-26)
+- `public.entities_with_treasurer()` (authenticated, security definer): ids of orgs/clubs with an approved treasurer.
+- `private.set_my_request` now: Student ID required for both roles and stored cleaned (`norm_student_no`); treasurer:
+  org must not have an approved treasurer, Student ID must be on `students`. Rehearsed (rolled back): taken org
+  refused, unknown ID refused, missing ID refused, valid request saved, anon can't call the list.

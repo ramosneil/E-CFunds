@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Clock, GraduationCap, ShieldX, Wallet } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
 import { useEntities } from '../../lib/data';
@@ -47,7 +48,7 @@ export function Pending() {
         <Row k="Name" v={profile.full_name || '—'} />
         <Row k="You asked to be" v={asked === 'treasurer' ? 'Treasurer' : 'Student'} />
         {asked === 'treasurer' && <Row k="Organization / club" v={org?.name ?? '—'} />}
-        {asked === 'student' && <Row k="Student ID" v={profile.requested_student_no ?? '—'} />}
+        <Row k="Student ID" v={profile.requested_student_no ?? '—'} />
       </dl>
       <div className="mt-5 grid grid-cols-2 gap-3">
         <Button variant="ghost" onClick={() => setEditing(true)}>Change details</Button>
@@ -88,14 +89,24 @@ function RequestForm({ initial, onDone, onCancel }: {
     const { error } = await supabase.rpc('set_my_request', {
       p_role: role,
       p_entity_id: role === 'treasurer' ? Number(entityId) || undefined : undefined,
-      p_student_no: role === 'student' ? studentNo.trim() : undefined,
+      p_student_no: studentNo.trim(),   // treasurers are students too (Neil, 2026-11-26)
       p_full_name: name.trim() || undefined,
     });
     setBusy(false);
     if (error) setErr(errorText(error)); else onDone();
   }
 
-  const active = (entities.data ?? []).filter((e) => e.is_active);
+  // Orgs/clubs that already have an approved treasurer aren't offered (the server refuses them too, migration 48).
+  const taken = useQuery({
+    queryKey: ['entities-with-treasurer'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('entities_with_treasurer');
+      if (error) throw error;
+      return new Set((data ?? []).map(Number));
+    },
+  });
+  const active = (entities.data ?? []).filter((e) => e.is_active && !taken.data?.has(e.id));
+  const orgs = active.filter((e) => e.category === 'organization'), clubs = active.filter((e) => e.category === 'club');
   return (
     <AuthLayout title="Tell SAS who you are" sub="This goes to the Office of Student Affairs for approval.">
       <form onSubmit={submit} className="space-y-5">
@@ -113,17 +124,18 @@ function RequestForm({ initial, onDone, onCancel }: {
           </div>
         </fieldset>
         <Field label="Full name"><Input required value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" /></Field>
-        {role === 'treasurer' ? (
-          <Field label="Organization or club">
-            <Select required value={entityId} onChange={(e) => setEntityId(e.target.value)}>
-              <option value="">Choose one</option>
-              <optgroup label="Organizations">{active.filter((e) => e.category === 'organization').map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}</optgroup>
-              <optgroup label="Clubs">{active.filter((e) => e.category === 'club').map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}</optgroup>
+        {role === 'treasurer' && (
+          <Field label="Organization or club" hint="Orgs and clubs that already have a treasurer aren't listed. If yours changed treasurer, ask SAS.">
+            <Select required value={entityId} onChange={(e) => setEntityId(e.target.value)} disabled={taken.isLoading}>
+              <option value="">{taken.isLoading ? 'Loading…' : orgs.length + clubs.length ? 'Choose one' : 'Every org and club already has a treasurer'}</option>
+              {orgs.length > 0 && <optgroup label="Organizations">{orgs.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}</optgroup>}
+              {clubs.length > 0 && <optgroup label="Clubs">{clubs.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}</optgroup>}
             </Select>
           </Field>
-        ) : (
-          <Field label="Student ID" hint="Must match the ID on your org's roster."><Input required value={studentNo} onChange={(e) => setStudentNo(e.target.value)} placeholder="e.g. 2024-0317" /></Field>
         )}
+        <Field label="Student ID" hint={role === 'treasurer' ? 'Treasurers are students too. It must be on the student list SAS keeps.' : "Must match the ID on your org's roster."}>
+          <Input required value={studentNo} onChange={(e) => setStudentNo(e.target.value)} placeholder="e.g. 24-1-03178" className="money" autoCapitalize="characters" />
+        </Field>
         {needsTerms && <TermsCheckbox checked={agree} onChange={setAgree} />}
         {err && <Alert>{err}</Alert>}
         <Button type="submit" busy={busy} disabled={needsTerms && !agree} className="w-full h-[54px]">Send to SAS</Button>

@@ -439,6 +439,15 @@ function AccountCard({ p }: { p: Row<'profiles'> }) {
   const [remarks, setRemarks] = useState('');
   const [busy, setBusy] = useState<'yes' | 'no' | null>(null);
   const [err, setErr] = useState('');
+  const taken = useQuery({
+    queryKey: ['entities-with-treasurer'],
+    enabled: role === 'treasurer',
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('entities_with_treasurer');
+      if (error) throw error;
+      return new Set((data ?? []).map(Number));
+    },
+  });
   const match = useQuery({
     queryKey: ['student-by-no', p.requested_student_no],
     enabled: !!p.requested_student_no,
@@ -485,16 +494,23 @@ function AccountCard({ p }: { p: Row<'profiles'> }) {
           <Field label="Organization / club">
             <Select value={entityId} onChange={(e) => setEntityId(e.target.value)}>
               <option value="">Choose one</option>
-              {entities.data?.filter((e) => e.is_active).map((e) => <option key={e.id} value={e.id}>{e.short_name}</option>)}
+              {entities.data?.filter((e) => e.is_active).map((e) => (
+                <option key={e.id} value={e.id} disabled={taken.data?.has(e.id)}>{e.short_name}{taken.data?.has(e.id) ? ' — has a treasurer' : ''}</option>
+              ))}
             </Select>
           </Field>
         )}
-        {role === 'student' && (
-          <div className="rounded-[12px] bg-surface2 p-3 text-[14px] self-end">
-            <p className="text-muted text-[13px]">Student ID {p.requested_student_no ?? '—'}</p>
-            {match.isLoading ? 'Checking roster…' : match.data
-              ? <p className="font-semibold text-ok">On roster: {match.data.full_name}</p>
-              : <p className="font-semibold text-bad">Not on any roster yet</p>}
+        {role !== 'admin' && (
+          // Who this is on the student list (treasurers are students too, Neil 2026-11-26): name, course, year, section.
+          <div className={`rounded-[12px] bg-surface2 p-3 text-[14px] ${role === 'treasurer' ? 'sm:col-span-2' : 'self-end'}`}>
+            <p className="text-muted text-[13px] money">Student ID {p.requested_student_no ?? '—'}</p>
+            {!p.requested_student_no ? <p className="font-semibold text-muted">No Student ID given</p>
+              : match.isLoading ? 'Checking roster…' : match.data ? <>
+                <p className="font-semibold text-ok">On the student list: {match.data.full_name}</p>
+                <p className="text-[13.5px] mt-0.5">
+                  {match.data.course ?? 'No course'} · {match.data.year_level ? `Year ${match.data.year_level}` : 'No year'}{match.data.section ? ` · Section ${match.data.section}` : match.data.year_level ? ' · no section' : ''}
+                </p>
+              </> : <p className="font-semibold text-bad">Not on any roster yet</p>}
           </div>
         )}
       </div>

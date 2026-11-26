@@ -276,6 +276,8 @@ export type Database = {
         Args: { p_role: E['app_role']; p_entity_id?: number; p_student_no?: string; p_full_name?: string };
         Returns: undefined;
       };
+      /** Migration 48: ids of orgs/clubs that already have an approved treasurer (sign-up list hides them). */
+      entities_with_treasurer: { Args: Record<string, never>; Returns: number[] };
       set_entity_dues: { Args: { p_amount: number; p_entity_id: number; p_period: E['dues_period'] }; Returns: undefined };
       undo_payment: { Args: { p_membership_id: number; p_reason: string }; Returns: number };
     };

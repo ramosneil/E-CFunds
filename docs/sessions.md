@@ -363,3 +363,5 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
 - **2026-11-25 landing first** (Neil): signed-out users always see the landing page first (web + app); the app's short
   one-screen welcome was replaced by the full landing page (minus the app-download section). Checked: a device marked
   "signed in before" now opens the landing page.
+- **2026-11-26 account requests** (Neil): sign-up hides orgs/clubs that already have a treasurer; treasurers must give
+  a Student ID on the student list; Approvals shows course · year · section (students and treasurers). Migration 48.
