@@ -365,3 +365,5 @@ Newest last. Each session adds one entry at the end: what was done, decisions, w
   "signed in before" now opens the landing page.
 - **2026-11-26 account requests** (Neil): sign-up hides orgs/clubs that already have a treasurer; treasurers must give
   a Student ID on the student list; Approvals shows course · year · section (students and treasurers). Migration 48.
+- **2026-11-26 year/section on sign-up** (Neil): students and treasurers pick Year + Section on "Tell SAS who you
+  are"; Approvals shows what they wrote vs the student list and flags differences (button to update the list).

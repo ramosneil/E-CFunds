@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useFocusFromParam } from '../../lib/focus';
 import { useSearchParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileText, Inbox, Paperclip, Search, UserCheck } from 'lucide-react';
+import { AlertTriangle, FileText, Inbox, Paperclip, Search, UserCheck } from 'lucide-react';
 import { fileLabel, openPrivateFile } from '../../lib/files';
 import { useCurrentYear, useEntities, useEntityReport, useRequests } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
@@ -473,6 +473,19 @@ function AccountCard({ p }: { p: Row<'profiles'> }) {
   }
 
   const studentBlocked = role === 'student' && !match.data;
+  const typed = !!p.requested_year_level && !!p.requested_section;
+  const differs = typed && !!match.data && (match.data.year_level !== p.requested_year_level || (match.data.section ?? '') !== p.requested_section);
+  const [fixing, setFixing] = useState(false);
+  async function applyTyped() {
+    if (!match.data) return;
+    if (!(await confirmAsk({ title: `Change ${match.data.full_name} to ${p.requested_year_level}${p.requested_section}?`, confirm: 'Change the list', tone: 'primary',
+      body: `The student list says ${match.data.year_level ? `${match.data.year_level}${match.data.section ?? ''}` : 'no year'}. This updates it to what they wrote (Year ${p.requested_year_level}, Section ${p.requested_section}).` }))) return;
+    setFixing(true); setErr('');
+    const { error } = await supabase.from('students').update({ year_level: p.requested_year_level, section: p.requested_section }).eq('id', match.data.id);
+    setFixing(false);
+    if (error) { setErr(errorText(error)); return; }
+    void match.refetch(); void qc.invalidateQueries({ queryKey: ['students'] });
+  }
   const [addingStudent, setAddingStudent] = useState(false);
   return (
     <Card>
@@ -504,12 +517,23 @@ function AccountCard({ p }: { p: Row<'profiles'> }) {
           // Who this is on the student list (treasurers are students too, Neil 2026-11-26): name, course, year, section.
           <div className={`rounded-[12px] bg-surface2 p-3 text-[14px] ${role === 'treasurer' ? 'sm:col-span-2' : 'self-end'}`}>
             <p className="text-muted text-[13px] money">Student ID {p.requested_student_no ?? '—'}</p>
+            {/* What they typed at sign-up (migration 49), then what the student list says; differences flagged. */}
+            <p className="text-[13.5px] mt-0.5">They wrote: <b>{typed ? `Year ${p.requested_year_level} · Section ${p.requested_section}` : '— (asked before year/section were required)'}</b></p>
             {!p.requested_student_no ? <p className="font-semibold text-muted">No Student ID given</p>
               : match.isLoading ? 'Checking roster…' : match.data ? <>
-                <p className="font-semibold text-ok">On the student list: {match.data.full_name}</p>
+                <p className="font-semibold text-ok mt-1">On the student list: {match.data.full_name}</p>
                 <p className="text-[13.5px] mt-0.5">
-                  {match.data.course ?? 'No course'} · {match.data.year_level ? `Year ${match.data.year_level}` : 'No year'}{match.data.section ? ` · Section ${match.data.section}` : match.data.year_level ? ' · no section' : ''}
+                  List says: {match.data.course ?? 'No course'} · {match.data.year_level ? `Year ${match.data.year_level}` : 'No year'}{match.data.section ? ` · Section ${match.data.section}` : match.data.year_level ? ' · no section' : ''}
                 </p>
+                {differs && (
+                  <div className="mt-2 rounded-[10px] bg-warn-soft text-warn px-3 py-2 text-[13px] flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <span className="inline-flex items-center gap-1.5 font-semibold"><AlertTriangle className="size-4" aria-hidden />Doesn’t match the student list</span>
+                    <button type="button" onClick={applyTyped} disabled={fixing}
+                      className="h-9 px-3 rounded-[10px] bg-surface text-ink border border-line font-semibold cursor-pointer disabled:opacity-50">
+                      {fixing ? 'Saving…' : `Change the list to ${p.requested_year_level}${p.requested_section}`}
+                    </button>
+                  </div>
+                )}
               </> : <p className="font-semibold text-bad">Not on any roster yet</p>}
           </div>
         )}

@@ -223,3 +223,8 @@ prevents two approvals racing past a limit.
 - `private.set_my_request` now: Student ID required for both roles and stored cleaned (`norm_student_no`); treasurer:
   org must not have an approved treasurer, Student ID must be on `students`. Rehearsed (rolled back): taken org
   refused, unknown ID refused, missing ID refused, valid request saved, anon can't call the list.
+
+## Year/section on requests (migration 49 `request_year_section`, 2026-11-26)
+- `profiles.requested_year_level` (1–4), `requested_section` (A–E). `set_my_request` gained `p_year_level`,
+  `p_section` (required; dropped + recreated, grants: authenticated + service_role, not anon). Rehearsed: missing year,
+  section F and year 5 refused; student and treasurer requests saved with year/section; anon refused.

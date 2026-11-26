@@ -382,3 +382,6 @@ None. Both §10 questions were answered in session 3 and moved to §8.
 - **Treasurers give their Student ID** (treasurers are students); it must be on SAS's student list at request time.
   Students' IDs are still checked when SAS approves (SAS can add a late enrollee from the card).
 - **Approvals** shows, for both, the Student ID, the name on the list and **course · year · section**.
+- **Year and Section** (migration 49): students and treasurers must choose their year level (1–4) and section (A–E)
+  when they ask for an account. Approvals shows "They wrote" next to "List says"; if they differ it's flagged and SAS
+  can tap "Change the list to 3B" (asks first). A request never changes the student list by itself.

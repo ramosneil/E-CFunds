@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Clock, GraduationCap, ShieldX, Wallet } from 'lucide-react';
 import { useAuth } from '../../lib/auth';
+import { SECTIONS, YEARS } from '../../lib/roster';
 import { useEntities } from '../../lib/data';
 import { supabase, errorText } from '../../lib/supabase';
 import { Alert, Button, Field, Input, Select } from '../../components/ui';
@@ -49,6 +50,7 @@ export function Pending() {
         <Row k="You asked to be" v={asked === 'treasurer' ? 'Treasurer' : 'Student'} />
         {asked === 'treasurer' && <Row k="Organization / club" v={org?.name ?? '—'} />}
         <Row k="Student ID" v={profile.requested_student_no ?? '—'} />
+        <Row k="Year and section" v={profile.requested_year_level ? `Year ${profile.requested_year_level} · Section ${profile.requested_section ?? '—'}` : '—'} />
       </dl>
       <div className="mt-5 grid grid-cols-2 gap-3">
         <Button variant="ghost" onClick={() => setEditing(true)}>Change details</Button>
@@ -64,7 +66,8 @@ function Row({ k, v }: { k: string; v: string }) {
 }
 
 function RequestForm({ initial, onDone, onCancel }: {
-  initial: { requested_role: string | null; requested_entity_id: number | null; requested_student_no: string | null; full_name: string | null };
+  initial: { requested_role: string | null; requested_entity_id: number | null; requested_student_no: string | null; full_name: string | null;
+    requested_year_level?: number | null; requested_section?: string | null };
   onDone: () => void; onCancel?: () => void;
 }) {
   const entities = useEntities();
@@ -72,6 +75,8 @@ function RequestForm({ initial, onDone, onCancel }: {
   const [entityId, setEntityId] = useState(initial.requested_entity_id ? String(initial.requested_entity_id) : '');
   const [studentNo, setStudentNo] = useState(initial.requested_student_no ?? '');
   const [name, setName] = useState(initial.full_name ?? '');
+  const [year, setYear] = useState(initial.requested_year_level ? String(initial.requested_year_level) : '');
+  const [section, setSection] = useState(initial.requested_section ?? '');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const { signOut, profile } = useAuth();
@@ -81,6 +86,7 @@ function RequestForm({ initial, onDone, onCancel }: {
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (needsTerms && !agree) { setErr('Please agree to the Terms and Privacy Notice.'); return; }
+    if (!year || !section) { setErr('Choose your year level and section.'); return; }
     setBusy(true); setErr('');
     if (needsTerms) {
       const t = await supabase.rpc('accept_terms');
@@ -91,6 +97,7 @@ function RequestForm({ initial, onDone, onCancel }: {
       p_entity_id: role === 'treasurer' ? Number(entityId) || undefined : undefined,
       p_student_no: studentNo.trim(),   // treasurers are students too (Neil, 2026-11-26)
       p_full_name: name.trim() || undefined,
+      p_year_level: Number(year), p_section: section,   // required for both (Neil, 2026-11-26)
     });
     setBusy(false);
     if (error) setErr(errorText(error)); else onDone();
@@ -136,6 +143,20 @@ function RequestForm({ initial, onDone, onCancel }: {
         <Field label="Student ID" hint={role === 'treasurer' ? 'Treasurers are students too. It must be on the student list SAS keeps.' : "Must match the ID on your org's roster."}>
           <Input required value={studentNo} onChange={(e) => setStudentNo(e.target.value)} placeholder="e.g. 24-1-03178" className="money" autoCapitalize="characters" />
         </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Year level">
+            <Select required value={year} onChange={(e) => setYear(e.target.value)}>
+              <option value="">Choose</option>
+              {YEARS.map((y) => <option key={y} value={y}>{y === '1' ? '1st' : y === '2' ? '2nd' : y === '3' ? '3rd' : '4th'} year</option>)}
+            </Select>
+          </Field>
+          <Field label="Section">
+            <Select required value={section} onChange={(e) => setSection(e.target.value)}>
+              <option value="">Choose</option>
+              {SECTIONS.map((x) => <option key={x} value={x}>Section {x}</option>)}
+            </Select>
+          </Field>
+        </div>
         {needsTerms && <TermsCheckbox checked={agree} onChange={setAgree} />}
         {err && <Alert>{err}</Alert>}
         <Button type="submit" busy={busy} disabled={needsTerms && !agree} className="w-full h-[54px]">Send to SAS</Button>
