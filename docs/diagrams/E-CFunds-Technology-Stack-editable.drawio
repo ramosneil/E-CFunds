@@ -1,5 +1,5 @@
 <mxfile host="app.diagrams.net" type="device">
-  <diagram name="Technology Stack" id="a2cf9812ba1341988dd2">
+  <diagram name="Technology Stack" id="759c55eb58a74fb29a1d">
     <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1060" pageHeight="770" background="#FFFFFF" math="0" shadow="0">
       <root>
         <mxCell id="0"/>
@@ -87,7 +87,7 @@
         <mxCell id="c81" value="database → push" style="text;html=1;whiteSpace=nowrap;spacing=0;spacingLeft=0;spacingRight=0;verticalAlign=middle;align=center;fontFamily=Helvetica;fontSize=10.5;fontColor=#C9D4F7;fontStyle=0;" vertex="1" parent="1"><mxGeometry x="535.8" y="413.4" width="100.5" height="15.8" as="geometry"/></mxCell>
         <mxCell id="c82" value="" style="rounded=1;absoluteArcSize=1;arcSize=16;whiteSpace=wrap;html=1;fillColor=#FFFFFF;fillOpacity=12;strokeColor=#FFFFFF;strokeWidth=1.0;strokeOpacity=30;" vertex="1" parent="1"><mxGeometry x="660.0" y="394.0" width="132.0" height="38.0" as="geometry"/></mxCell>
         <mxCell id="c83" value="SQL migrations" style="text;html=1;whiteSpace=nowrap;spacing=0;spacingLeft=0;spacingRight=0;verticalAlign=middle;align=center;fontFamily=Helvetica;fontSize=12.5;fontColor=#FFFFFF;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="670.5" y="397.2" width="111.0" height="18.8" as="geometry"/></mxCell>
-        <mxCell id="c84" value="39 versions" style="text;html=1;whiteSpace=nowrap;spacing=0;spacingLeft=0;spacingRight=0;verticalAlign=middle;align=center;fontFamily=Helvetica;fontSize=10.5;fontColor=#C9D4F7;fontStyle=0;" vertex="1" parent="1"><mxGeometry x="688.4" y="413.4" width="75.3" height="15.8" as="geometry"/></mxCell>
+        <mxCell id="c84" value="50 versions" style="text;html=1;whiteSpace=nowrap;spacing=0;spacingLeft=0;spacingRight=0;verticalAlign=middle;align=center;fontFamily=Helvetica;fontSize=10.5;fontColor=#C9D4F7;fontStyle=0;" vertex="1" parent="1"><mxGeometry x="688.4" y="413.4" width="75.3" height="15.8" as="geometry"/></mxCell>
         <mxCell id="c85" value="" style="rounded=1;absoluteArcSize=1;arcSize=28;whiteSpace=wrap;html=1;fillColor=#F3EDFC;strokeColor=#7A4BC2;strokeWidth=1.2;" vertex="1" parent="1"><mxGeometry x="50.0" y="474.0" width="900.0" height="66.0" as="geometry"/></mxCell>
         <mxCell id="c86" value="Services" style="text;html=1;whiteSpace=nowrap;spacing=0;spacingLeft=0;spacingRight=0;verticalAlign=middle;align=left;fontFamily=Helvetica;fontSize=14.0;fontColor=#0D1530;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="70.0" y="488.6" width="73.2" height="21.0" as="geometry"/></mxCell>
         <mxCell id="c87" value="outside providers" style="text;html=1;whiteSpace=nowrap;spacing=0;spacingLeft=0;spacingRight=0;verticalAlign=middle;align=left;fontFamily=Helvetica;fontSize=11.5;fontColor=#56607E;fontStyle=0;" vertex="1" parent="1"><mxGeometry x="70.0" y="510.4" width="123.3" height="17.2" as="geometry"/></mxCell>

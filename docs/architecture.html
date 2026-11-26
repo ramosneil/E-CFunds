@@ -115,10 +115,10 @@ footer { margin-top: 18px; font-size: 13px; color: var(--muted); }
 <body>
 <div class="wrap">
   <header class="top">
-    <span class="eyebrow">OMSC Mamburao · Office of Student Affairs and Services</span>
+    <span class="eyebrow">OMSU Mamburao · Office of Student Affairs and Services</span>
     <h1>E-CFunds system architecture</h1>
     <p class="lede">How the student organization fund monitoring system is built: who uses it, the two ways to open it (website and Android app),
-      the Supabase backend that holds every peso, and the outside services it relies on. Accurate as of November 17, 2026.</p>
+      the Supabase backend that holds every peso, and the outside services it relies on. Accurate as of November 26, 2026.</p>
     <div class="legend">
       <span><i style="background:var(--surface2);border:1px solid var(--line)"></i>People and apps</span>
       <span><i style="background:var(--hero)"></i>Backend (Supabase)</span>
@@ -132,8 +132,8 @@ footer { margin-top: 18px; font-size: 13px; color: var(--muted); }
     <div class="head"><span class="eyebrow">Who uses it</span><span class="sub mono">3 roles, enforced by the database</span></div>
     <div class="row">
       <div class="box"><h3>Students</h3><p class="sub">See their dues and receipts, and where each org and club's money went.</p></div>
-      <div class="box"><h3>Treasurers</h3><p class="sub">One per org or club: members, payments, remittances, releases, expenses, budgets, liquidation.</p></div>
-      <div class="box"><h3>SAS Admin</h3><p class="sub">Approves accounts, requests, budgets and liquidations; school year, students, reports.</p></div>
+      <div class="box"><h3>Treasurers</h3><p class="sub">One per org or club: members, payments, remittances, resolution requests, liquidation, Insights.</p></div>
+      <div class="box"><h3>SAS Admin</h3><p class="sub">Approves accounts, remittances, resolutions and liquidations; school year, students, Insights.</p></div>
     </div>
   </div>
 
@@ -157,18 +157,18 @@ footer { margin-top: 18px; font-size: 13px; color: var(--muted); }
     <div class="head"><span class="eyebrow">Backend · Supabase</span><span class="note mono">project nvmlawpojydnouzqilaf</span></div>
     <div class="row">
       <div class="box db"><h3>PostgreSQL database</h3>
-        <p class="sub">39 migrations. Every rule about money lives here, so no app can skip it.</p>
+        <p class="sub">50 migrations. Every rule about money lives here, so no app can skip it.</p>
         <div class="cols">
           <div><span class="tag">Data</span>
-            <ul><li>school years, semesters, courses</li><li>orgs & clubs, students, memberships</li><li>ledger (append-only), receipts</li><li>requests, budgets, liquidation</li><li>messages, notifications, audit log</li></ul></div>
+            <ul><li>school years, semesters, courses</li><li>orgs & clubs, students, memberships</li><li>ledger (append-only), receipts</li><li>requests (remittance, resolution), liquidation items</li><li>messages, notifications, audit log</li></ul></div>
           <div><span class="tag">Rules</span>
             <ul><li>Row Level Security on every table</li><li>Actions are functions (record payment, approve request…)</li><li>Two pockets: cash on hand, saved with SAS</li><li>Ledger can't be edited or deleted</li></ul></div>
           <div><span class="tag">Automatic jobs</span>
-            <ul><li><span class="mono">pg_cron</span>: weekly dues reminders (Mon), daily budget reminders</li><li><span class="mono">pg_net</span>: every new notification calls the push function</li><li>"live tick" on money tables → screens refresh</li></ul></div>
+            <ul><li><span class="mono">pg_cron</span>: weekly dues reminders (Mon), daily reminders</li><li><span class="mono">pg_net</span>: every new notification calls the push function</li><li>"live tick" on money tables → screens refresh</li></ul></div>
         </div>
       </div>
       <div class="box"><h3>Auth</h3><ul><li>Email + password, Google</li><li>Student ID sign-in</li><li>6-digit reset code by email</li><li>SAS approves each account</li></ul></div>
-      <div class="box"><h3>Storage</h3><ul><li><span class="mono">logos</span>: public</li><li><span class="mono">receipts</span>: private, per org folder (expense receipts, liquidation files)</li></ul></div>
+      <div class="box"><h3>Storage</h3><ul><li><span class="mono">logos</span>: public</li><li><span class="mono">receipts</span>: private, per org folder (signed resolutions, liquidation files)</li></ul></div>
       <div class="box"><h3>Realtime</h3><ul><li>Fund cards and lists update in about 2 s</li><li>Messages and notifications live</li></ul></div>
       <div class="box"><h3>Edge Functions</h3><ul><li><span class="mono">push</span>: sends phone and browser notifications</li><li><span class="mono">chat</span>: "Ask E-CFunds" assistant</li><li><span class="mono">student-login</span>: Student ID → session</li></ul></div>
     </div>
@@ -214,18 +214,18 @@ footer { margin-top: 18px; font-size: 13px; color: var(--muted); }
       </div>
       <div class="flow"><h3>Money moves through SAS</h3>
         <ol>
-          <li><span>Treasurer files a <b>remittance</b>, <b>release</b> or <b>expense</b> (expenses need a receipt photo).</span></li>
+          <li><span>Treasurer files a <b>remittance</b> (cash → savings) or a <b>resolution request</b> with the signed resolution file.</span></li>
           <li><span>SAS sees it under Approvals and gets a notification.</span></li>
-          <li><span>SAS approves: the database checks the pockets and writes the ledger entry.<small>Cash on hand and saved with SAS change together.</small></span></li>
+          <li><span>SAS approves (for a resolution, SAS types the amount written in it): the database checks the pockets and writes the ledger entry.<small>Cash on hand and saved with SAS change together.</small></span></li>
           <li><span>The treasurer is notified; the "Waiting for SAS" note clears.</span></li>
         </ol>
       </div>
-      <div class="flow"><h3>Activity budget and liquidation</h3>
+      <div class="flow"><h3>Liquidating an activity</h3>
         <ol>
-          <li><span>Treasurer files a budget with items; SAS approves it.</span></li>
-          <li><span>Releases and expenses are tagged to the budget; it shows Released, Spent, Remaining.</span></li>
-          <li><span>Within 15 days after the activity, the treasurer liquidates with a report and up to 10 files.</span></li>
-          <li><span>SAS approves: unspent cash goes back to savings with SAS automatically.</span></li>
+          <li><span>After the activity, the treasurer taps <b>Liquidate</b> on the approved resolution.</span></li>
+          <li><span>They type the activity name and each receipt item; the amount spent adds itself up.</span></li>
+          <li><span>They attach up to 10 files (receipts, photos); SAS reviews it in Approvals.</span></li>
+          <li><span>SAS approves: the spending is recorded and the unspent money goes back to savings automatically. It shows in Budget vs actual on Insights.</span></li>
         </ol>
       </div>
     </div>
@@ -237,14 +237,14 @@ footer { margin-top: 18px; font-size: 13px; color: var(--muted); }
     <div class="seclist">
       <div class="sec"><b>Rules in the database</b><span>Row Level Security and checked functions: a treasurer can only touch their own org.</span></div>
       <div class="sec"><b>Ledger is append-only</b><span>Mistakes are fixed with a correction entry, never by editing or deleting.</span></div>
-      <div class="sec"><b>Audit log</b><span>Every change to money, accounts and budgets is recorded with who and when.</span></div>
+      <div class="sec"><b>Audit log</b><span>Every change to money, accounts and requests is recorded with who and when.</span></div>
       <div class="sec"><b>Secrets stay on the server</b><span>Apps only hold the public key; service keys live in Supabase and GitHub secrets.</span></div>
       <div class="sec"><b>Private files</b><span>Receipts and liquidation files open through short-lived links, only for that org and SAS.</span></div>
       <div class="sec"><b>Session safety</b><span>App logs out after 5 minutes away; sign-in tries are limited.</span></div>
     </div>
   </section>
 
-  <footer>E-CFunds · Occidental Mindoro State College, Mamburao Campus · Prepared November 17, 2026.</footer>
+  <footer>E-CFunds · Occidental Mindoro State University, Mamburao Campus · Updated November 26, 2026.</footer>
 </div>
 
 </body>

@@ -98,7 +98,7 @@ svg.dg { display: block; width: 100%; height: auto; color: var(--arrow); font-fa
   </div>
 
   <article id="paper">
-    <p class="intro">This section presents the technology stack used to build E-CFunds, the student organization fund monitoring system of Occidental Mindoro State College – Mamburao Campus.
+    <p class="intro">This section presents the technology stack used to build E-CFunds, the student organization fund monitoring system of Occidental Mindoro State University – Mamburao Campus.
       It shows the tools that make up each part of the system, from the screens that students, treasurers and the SAS office use, to the database that keeps every peso on record.
       For each technology, it explains what it is, why the team chose it, and how it helps the system work.</p>
 
@@ -142,7 +142,7 @@ svg.dg { display: block; width: 100%; height: auto; color: var(--arrow); font-fa
           <rect class="chipb" x="200" y="314" width="132" height="38" rx="8"/><text class="ctw" x="266" y="331" text-anchor="middle">Edge Functions</text><text class="csw" x="266" y="345" text-anchor="middle">Deno · TypeScript</text>
           <rect class="chipb" x="340" y="314" width="132" height="38" rx="8"/><text class="ctw" x="406" y="331" text-anchor="middle">pg_cron</text><text class="csw" x="406" y="345" text-anchor="middle">scheduled reminders</text>
           <rect class="chipb" x="480" y="314" width="132" height="38" rx="8"/><text class="ctw" x="546" y="331" text-anchor="middle">pg_net</text><text class="csw" x="546" y="345" text-anchor="middle">database → push</text>
-          <rect class="chipb" x="620" y="314" width="132" height="38" rx="8"/><text class="ctw" x="686" y="331" text-anchor="middle">SQL migrations</text><text class="csw" x="686" y="345" text-anchor="middle">39 versions</text>
+          <rect class="chipb" x="620" y="314" width="132" height="38" rx="8"/><text class="ctw" x="686" y="331" text-anchor="middle">SQL migrations</text><text class="csw" x="686" y="345" text-anchor="middle">50 versions</text>
         </g>
         <!-- 4 external -->
         <rect class="row-ex" x="10" y="394" width="900" height="66" rx="14"/>
@@ -221,13 +221,13 @@ svg.dg { display: block; width: 100%; height: auto; color: var(--arrow); font-fa
         It helps by letting students sign in with their Student ID and reset a forgotten password with a 6-digit code, while SAS approves each new account.</p></div>
       <div class="tech"><h3>Supabase Storage</h3>
         <p>Storage keeps uploaded files. We chose it because it follows the same access rules as the database.
-        It helps E-CFunds keep expense receipts and liquidation files private, so only that organization's treasurer and SAS can open them.</p></div>
+        It helps E-CFunds keep signed resolutions and liquidation files private, so only that organization's treasurer and SAS can open them.</p></div>
       <div class="tech"><h3>Supabase Realtime</h3>
         <p>Realtime sends changes to open screens through a live connection. We chose it because fund monitoring must show current numbers.
         It helps the fund cards, lists and messages update within about two seconds of any transaction, without refreshing the page.</p></div>
       <div class="tech"><h3>Edge Functions, pg_cron and pg_net</h3>
         <p>Edge Functions are small server programs written in TypeScript; pg_cron runs scheduled jobs and pg_net lets the database call those functions. We chose them to keep secret keys on the server and to automate tasks.
-        They help E-CFunds send push notifications, answer questions in the assistant, sign students in by Student ID, and send weekly dues and daily budget reminders automatically.</p></div>
+        They help E-CFunds send push notifications, answer questions in the assistant, sign students in by Student ID, and send weekly dues and daily reminders automatically.</p></div>
     </div>
 
     <div class="group">
